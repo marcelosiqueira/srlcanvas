@@ -1,0 +1,39 @@
+{
+  "name": "srl-canvas-monorepo",
+  "private": true,
+  "version": "0.2.0",
+  "type": "module",
+  "packageManager": "pnpm@9.15.4",
+  "scripts": {
+    "dev": "pnpm --filter @srl/web dev",
+    "dev:web": "pnpm --filter @srl/web dev",
+    "dev:api": "pnpm --filter @srl/api dev",
+    "dev:all": "concurrently \"pnpm dev:web\" \"pnpm dev:api\"",
+    "build": "pnpm -r --if-present build",
+    "build:web": "pnpm --filter @srl/web build",
+    "build:api": "pnpm --filter @srl/api build",
+    "lint": "pnpm -r --if-present lint",
+    "lint:fix": "pnpm -r --if-present lint:fix",
+    "test": "pnpm -r --if-present test",
+    "test:e2e": "pnpm --filter @srl/web test:e2e",
+    "check": "pnpm lint && pnpm test && pnpm build",
+    "format": "prettier . --write",
+    "format:check": "prettier . --check",
+    "prepare": "husky || true"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
+    "prettier": "^3.8.1"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx,cjs,mjs}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,css,html,yml,yaml}": [
+      "prettier --write"
+    ]
+  }
+}
