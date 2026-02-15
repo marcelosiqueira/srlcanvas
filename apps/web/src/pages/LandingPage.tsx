@@ -19,7 +19,8 @@ const SRL_DOWNLOADS = [
   }
 ] as const;
 
-const SEO_TITLE = "SRL Canvas | Diagnostico de Maturidade para Startups";
+const SEO_TITLE =
+  "SRL Canvas | Ferramenta Visual para Diagnóstico e Orientação Estratégica de Startups";
 const SEO_DESCRIPTION =
   "Facilite a aplicacao do SRL Canvas com 12 blocos, evidencias, grafico radar e scorecard comparavel para startups.";
 
@@ -137,7 +138,7 @@ export function LandingPage() {
       <main className="relative mx-auto flex w-full max-w-6xl flex-col gap-10 px-4 pt-12 pb-12 md:pt-20">
         <section className="max-w-3xl">
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary">
-            Diagnostico de maturidade para startups
+            Ferramenta Visual para Diagnóstico e Orientação Estratégica de Startups
           </p>
           <h1 className="mt-3 text-4xl font-bold tracking-tight text-text-light-primary dark:text-text-dark-primary md:text-6xl">
             Avalie os 12 blocos do SRL Canvas com evidencias e score comparavel.
