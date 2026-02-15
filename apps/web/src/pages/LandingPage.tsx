@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthProvider";
 import { AboutSrlCanvasModal } from "../components/AboutSrlCanvasModal";
@@ -19,15 +19,89 @@ const SRL_DOWNLOADS = [
   }
 ] as const;
 
+const SEO_TITLE = "SRL Canvas | Diagnostico de Maturidade para Startups";
+const SEO_DESCRIPTION =
+  "Facilite a aplicacao do SRL Canvas com 12 blocos, evidencias, grafico radar e scorecard comparavel para startups.";
+
+const upsertMetaTag = (selector: string, attrs: Record<string, string>, content: string) => {
+  let node = document.head.querySelector<HTMLMetaElement>(selector);
+  if (!node) {
+    node = document.createElement("meta");
+    for (const [key, value] of Object.entries(attrs)) {
+      node.setAttribute(key, value);
+    }
+    document.head.appendChild(node);
+  }
+  node.setAttribute("content", content);
+};
+
 export function LandingPage() {
   const { user, loading, isEnabled } = useAuth();
   const { darkMode, toggleDarkMode } = useCanvasStore();
   const [isAboutOpen, setIsAboutOpen] = useState(false);
 
+  useEffect(() => {
+    const previousTitle = document.title;
+    document.title = SEO_TITLE;
+
+    const canonicalUrl = `${window.location.origin}/`;
+    let canonical = document.head.querySelector<HTMLLinkElement>('link[rel="canonical"]');
+    if (!canonical) {
+      canonical = document.createElement("link");
+      canonical.setAttribute("rel", "canonical");
+      document.head.appendChild(canonical);
+    }
+    canonical.setAttribute("href", canonicalUrl);
+
+    upsertMetaTag('meta[name="description"]', { name: "description" }, SEO_DESCRIPTION);
+    upsertMetaTag('meta[name="robots"]', { name: "robots" }, "index, follow");
+    upsertMetaTag('meta[property="og:title"]', { property: "og:title" }, SEO_TITLE);
+    upsertMetaTag(
+      'meta[property="og:description"]',
+      { property: "og:description" },
+      SEO_DESCRIPTION
+    );
+    upsertMetaTag('meta[property="og:url"]', { property: "og:url" }, canonicalUrl);
+    upsertMetaTag('meta[name="twitter:title"]', { name: "twitter:title" }, SEO_TITLE);
+    upsertMetaTag(
+      'meta[name="twitter:description"]',
+      { name: "twitter:description" },
+      SEO_DESCRIPTION
+    );
+
+    const existingJsonLd = document.getElementById("srl-canvas-jsonld");
+    if (existingJsonLd) {
+      existingJsonLd.remove();
+    }
+
+    const jsonLd = document.createElement("script");
+    jsonLd.type = "application/ld+json";
+    jsonLd.id = "srl-canvas-jsonld";
+    jsonLd.text = JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      name: "SRL Canvas",
+      description: SEO_DESCRIPTION,
+      applicationCategory: "BusinessApplication",
+      operatingSystem: "Web",
+      inLanguage: "pt-BR",
+      url: canonicalUrl
+    });
+    document.head.appendChild(jsonLd);
+
+    return () => {
+      document.title = previousTitle;
+      const scriptNode = document.getElementById("srl-canvas-jsonld");
+      scriptNode?.remove();
+    };
+  }, []);
+
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background-light dark:bg-background-dark">
-        <p className="text-sm text-text-light-secondary dark:text-text-dark-secondary">Carregando...</p>
+        <p className="text-sm text-text-light-secondary dark:text-text-dark-secondary">
+          Carregando...
+        </p>
       </div>
     );
   }
@@ -69,8 +143,9 @@ export function LandingPage() {
             Avalie os 12 blocos do SRL Canvas com evidencias e score comparavel.
           </h1>
           <p className="mt-5 max-w-2xl text-base text-text-light-secondary dark:text-text-dark-secondary md:text-lg">
-            Esta plataforma foi criada para facilitar a aplicacao do SRL Canvas na pratica: organize a
-            avaliacao, visualize desequilibrios no radar e gere um scorecard com consistencia metodologica.
+            Esta plataforma foi criada para facilitar a aplicacao do SRL Canvas na pratica: organize
+            a avaliacao, visualize desequilibrios no radar e gere um scorecard com consistencia
+            metodologica.
           </p>
 
           <div className="mt-8 flex flex-wrap gap-3">
@@ -92,7 +167,8 @@ export function LandingPage() {
 
           {!isEnabled && (
             <p className="mt-4 text-xs text-text-light-secondary dark:text-text-dark-secondary">
-              Modo local ativo. Configure o Supabase para habilitar autenticacao e persistencia remota.
+              Modo local ativo. Configure o Supabase para habilitar autenticacao e persistencia
+              remota.
             </p>
           )}
         </section>
@@ -103,7 +179,8 @@ export function LandingPage() {
               Escala guiada
             </h2>
             <p className="mt-2 text-sm text-text-light-secondary dark:text-text-dark-secondary">
-              Aplique notas de 1 a 9 com registro de evidencia por bloco para sustentar cada avaliacao.
+              Aplique notas de 1 a 9 com registro de evidencia por bloco para sustentar cada
+              avaliacao.
             </p>
           </article>
           <article className="rounded-2xl border border-zinc-200/80 bg-card-light p-5 dark:border-zinc-800/80 dark:bg-card-dark">
@@ -129,8 +206,9 @@ export function LandingPage() {
             Sobre o Projeto
           </h2>
           <p className="mt-2 text-sm text-text-light-secondary dark:text-text-dark-secondary">
-            O nome oficial da ferramenta e <strong>SRL Canvas (Startup Readiness Level Canvas)</strong>.
-            Aqui voce encontra o contexto, proposito e publico-alvo do framework.
+            O nome oficial da ferramenta e{" "}
+            <strong>SRL Canvas (Startup Readiness Level Canvas)</strong>. Aqui voce encontra o
+            contexto, proposito e publico-alvo do framework.
           </p>
           <button
             type="button"
@@ -146,9 +224,9 @@ export function LandingPage() {
             Material de Apoio (Uso Offline)
           </h3>
           <p className="mt-2 text-sm text-text-light-secondary dark:text-text-dark-secondary">
-            Nao e obrigatorio usar esta plataforma para aplicar o SRL Canvas. O metodo foi desenhado para
-            ser simples e agil: voce pode baixar o guia de aplicacao, o modelo do SRL Canvas e o grafico
-            radar para preenchimento manual.
+            Nao e obrigatorio usar esta plataforma para aplicar o SRL Canvas. O metodo foi desenhado
+            para ser simples e agil: voce pode baixar o guia de aplicacao, o modelo do SRL Canvas e
+            o grafico radar para preenchimento manual.
           </p>
           <div className="mt-3 flex flex-wrap gap-2">
             {SRL_DOWNLOADS.map((item) => (

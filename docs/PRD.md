@@ -51,6 +51,7 @@ Fundadores e avaliadores tendem a superestimar maturidade por opiniao. Falta uma
 - Responsividade: uso em mobile e desktop.
 - Confiabilidade: formulas consistentes e estaveis.
 - Usabilidade: fluxo intuitivo com baixa curva de aprendizado.
+- SEO: landing publica com metadados essenciais (title, description, Open Graph, robots e sitemap).
 
 ## 8. Regras de Negocio
 
