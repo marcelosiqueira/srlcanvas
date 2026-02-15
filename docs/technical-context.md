@@ -137,6 +137,11 @@ facilitando continuidade entre sessoes e justificativa tecnica para avaliacao ac
 - Decisao: adicionar secao `Historico e Comparativo Temporal` na dashboard para usuarios autenticados,
   com lista de avaliacoes remotas, comparacao da avaliacao mais recente contra uma avaliacao anterior
   selecionada (delta de total, scorecard, CV e blocos preenchidos) e acao `Ver Resultados` por item.
+  Ajuste de UX (2026-02-15): titulos exibem apenas startup (sem data no titulo), rotulo de
+  atualizacao usa formato `(Atualizado ...)`, e o seletor de comparacao oculta entradas equivalentes
+  (sem delta relevante) para evitar comparativos zerados por duplicidade.
+  Ajuste de UX (2026-02-15): adicionar texto explicativo no proprio bloco para orientar como ler o
+  comparativo e interpretar sinais de delta (incluindo leitura do CV).
 - Motivo: permitir leitura de evolucao entre aplicacoes sem exigir exportacao externa ou navegacao
   adicional, atendendo usuarios experientes e rastreabilidade academica.
 

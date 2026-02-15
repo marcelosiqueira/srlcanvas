@@ -1,6 +1,7 @@
 import { SRL_BLOCKS } from "../data/srlBlocks";
 import type { CanvasBlockState, CanvasMeta, ScoreMetrics } from "../types";
 import { normalizeCanvasDate } from "./canvasMeta";
+import { buildCanvasTitle } from "./canvasIdentity";
 import { calculateScoreMetrics } from "./score";
 
 export interface CanvasHistoryInput {
@@ -42,7 +43,15 @@ const toTimelineTimestamp = (metaDate: string, updatedAt: string): number => {
   const normalizedDate = normalizeCanvasDate(metaDate);
   const metaTimestamp = normalizedDate ? toTimestamp(`${normalizedDate}T00:00:00`) : null;
   const updatedTimestamp = toTimestamp(updatedAt);
-  return metaTimestamp ?? updatedTimestamp ?? 0;
+  return updatedTimestamp ?? metaTimestamp ?? 0;
+};
+
+const buildHistorySignature = (entry: CanvasHistoryEntry): string => {
+  const startup = entry.meta.startup.trim().toLowerCase();
+  const evaluator = entry.meta.evaluator.trim().toLowerCase();
+  const evaluatedAt = entry.evaluatedAt ?? "";
+  const scores = entry.scores.join(",");
+  return `${startup}|${evaluator}|${evaluatedAt}|${scores}`;
 };
 
 export function buildScoresFromBlocks(
@@ -61,13 +70,13 @@ export function countFilledBlocks(
 }
 
 export function buildCanvasHistoryEntries(canvases: CanvasHistoryInput[]): CanvasHistoryEntry[] {
-  return canvases
+  const ordered = canvases
     .map((canvas) => {
       const evaluatedAt = normalizeCanvasDate(canvas.meta.date);
       const scores = buildScoresFromBlocks(canvas.blocks);
       return {
         id: canvas.id,
-        title: canvas.title,
+        title: buildCanvasTitle(canvas.meta),
         meta: canvas.meta,
         updatedAt: canvas.updated_at,
         evaluatedAt,
@@ -78,6 +87,14 @@ export function buildCanvasHistoryEntries(canvases: CanvasHistoryInput[]): Canva
       };
     })
     .sort((a, b) => b.timelineTimestamp - a.timelineTimestamp);
+
+  const seenSignatures = new Set<string>();
+  return ordered.filter((entry) => {
+    const signature = buildHistorySignature(entry);
+    if (seenSignatures.has(signature)) return false;
+    seenSignatures.add(signature);
+    return true;
+  });
 }
 
 export function compareCanvasHistoryEntries(

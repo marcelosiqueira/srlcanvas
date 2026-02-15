@@ -94,6 +94,7 @@ export function CanvasPage() {
   const latestScoredBlocksRef = useRef(0);
   const latestHasContentRef = useRef(false);
   const lastSyncedFingerprintRef = useRef<string | null>(null);
+  const initialRemoteCreateInFlightRef = useRef(false);
   const startupInputRef = useRef<HTMLInputElement>(null);
 
   const scores = useMemo(() => SRL_BLOCKS.map((block) => blocks[block.id]?.score ?? 0), [blocks]);
@@ -174,10 +175,16 @@ export function CanvasPage() {
     if (!isEnabled || !userId) return;
     if (!hasMeaningfulCanvasData({ meta, blocks })) return;
     if (canvasFingerprint === lastSyncedFingerprintRef.current) return;
+    if (!remoteCanvasId && initialRemoteCreateInFlightRef.current) return;
 
     let isActive = true;
 
     const timer = window.setTimeout(() => {
+      const isCreatingRemoteRecord = !remoteCanvasId;
+      if (isCreatingRemoteRecord) {
+        initialRemoteCreateInFlightRef.current = true;
+      }
+      const requestFingerprint = canvasFingerprint;
       setRemoteSyncState("saving");
       setRemoteSyncError(null);
       void saveCanvas({
@@ -191,7 +198,7 @@ export function CanvasPage() {
           if (savedCanvas.id !== remoteCanvasId) {
             setRemoteCanvasId(savedCanvas.id);
           }
-          lastSyncedFingerprintRef.current = canvasFingerprint;
+          lastSyncedFingerprintRef.current = requestFingerprint;
           setRemoteSyncState("saved");
         })
         .catch((error) => {
@@ -200,6 +207,11 @@ export function CanvasPage() {
           setRemoteSyncError(
             error instanceof Error ? error.message : "Falha ao sincronizar com banco."
           );
+        })
+        .finally(() => {
+          if (isCreatingRemoteRecord) {
+            initialRemoteCreateInFlightRef.current = false;
+          }
         });
     }, 800);
 

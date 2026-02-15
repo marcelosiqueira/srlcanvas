@@ -58,7 +58,14 @@ export function DashboardPage() {
         const entries = buildCanvasHistoryEntries(canvases);
         setHistoryEntries(entries);
         setComparisonTargetId((currentTargetId) => {
-          const candidates = entries.slice(1);
+          const latestEntry = entries[0];
+          const candidates = latestEntry
+            ? entries
+                .slice(1)
+                .filter((entry) =>
+                  hasMeaningfulComparisonDelta(compareCanvasHistoryEntries(latestEntry, entry))
+                )
+            : [];
           if (!candidates.length) return null;
           if (currentTargetId && candidates.some((entry) => entry.id === currentTargetId)) {
             return currentTargetId;
@@ -85,9 +92,17 @@ export function DashboardPage() {
   ).length;
   const currentCanvasTitle = buildCanvasTitle(meta);
   const latestHistoryEntry = historyEntries[0] ?? null;
+  const comparisonCandidates = useMemo(() => {
+    if (!latestHistoryEntry) return [];
+    return historyEntries
+      .slice(1)
+      .filter((entry) =>
+        hasMeaningfulComparisonDelta(compareCanvasHistoryEntries(latestHistoryEntry, entry))
+      );
+  }, [historyEntries, latestHistoryEntry]);
   const comparisonTargetEntry = useMemo(
-    () => historyEntries.find((entry) => entry.id === comparisonTargetId) ?? null,
-    [comparisonTargetId, historyEntries]
+    () => comparisonCandidates.find((entry) => entry.id === comparisonTargetId) ?? null,
+    [comparisonCandidates, comparisonTargetId]
   );
   const temporalComparison =
     latestHistoryEntry && comparisonTargetEntry
@@ -115,6 +130,11 @@ export function DashboardPage() {
           <h2 className="mt-1 text-lg font-bold text-text-light-primary dark:text-text-dark-primary">
             {currentCanvasTitle}
           </h2>
+          {latestHistoryEntry && (
+            <p className="mt-1 text-xs text-text-light-secondary dark:text-text-dark-secondary">
+              (Atualizado {formatDateTime(latestHistoryEntry.updatedAt)})
+            </p>
+          )}
           <p className="mt-1 text-sm text-text-light-secondary dark:text-text-dark-secondary">
             Estagio: {maturityStageFromTotal(metrics.total)}
           </p>
@@ -235,6 +255,19 @@ export function DashboardPage() {
           <h3 className="text-sm font-semibold text-text-light-primary dark:text-text-dark-primary">
             Historico e Comparativo Temporal
           </h3>
+          <div className="mt-2 rounded-lg border border-zinc-200/80 bg-zinc-50 p-3 text-xs text-text-light-secondary dark:border-zinc-800/80 dark:bg-zinc-800/70 dark:text-text-dark-secondary">
+            <p className="font-semibold text-text-light-primary dark:text-text-dark-primary">
+              Como usar este comparativo
+            </p>
+            <p className="mt-1">
+              A avaliacao mais recente e a referencia. Em <strong>Comparar com</strong>, selecione
+              uma avaliacao anterior do seu historico para ver a evolucao.
+            </p>
+            <p className="mt-1">
+              Delta <strong>positivo</strong> em Total/Scorecard indica melhoria. Em CV, valores
+              <strong> negativos</strong> indicam maior equilibrio entre blocos.
+            </p>
+          </div>
 
           {!isEnabled && (
             <p className="mt-2 text-sm text-text-light-secondary dark:text-text-dark-secondary">
@@ -269,10 +302,8 @@ export function DashboardPage() {
                       Avaliacao mais recente
                     </p>
                     <p className="mt-1 text-sm font-semibold text-text-light-primary dark:text-text-dark-primary">
-                      {latestHistoryEntry?.title}
-                    </p>
-                    <p className="mt-1 text-xs text-text-light-secondary dark:text-text-dark-secondary">
-                      Atualizado em {formatDateTime(latestHistoryEntry?.updatedAt ?? "")}
+                      {latestHistoryEntry?.title} (Atualizado{" "}
+                      {formatDateTime(latestHistoryEntry?.updatedAt ?? "")})
                     </p>
                     <p className="mt-1 text-xs font-mono text-text-light-secondary dark:text-text-dark-secondary">
                       [{latestHistoryEntry?.metrics.total ?? 0} / 108] -{" "}
@@ -280,7 +311,7 @@ export function DashboardPage() {
                     </p>
                   </div>
 
-                  {historyEntries.length > 1 && (
+                  {comparisonCandidates.length > 0 && (
                     <div className="rounded-lg border border-zinc-200/80 bg-zinc-50 p-3 dark:border-zinc-800/80 dark:bg-zinc-800/70">
                       <label className="block text-xs font-medium text-text-light-secondary dark:text-text-dark-secondary">
                         Comparar com
@@ -289,9 +320,9 @@ export function DashboardPage() {
                           value={comparisonTargetId ?? ""}
                           onChange={(event) => setComparisonTargetId(event.target.value)}
                         >
-                          {historyEntries.slice(1).map((entry) => (
+                          {comparisonCandidates.map((entry) => (
                             <option key={entry.id} value={entry.id}>
-                              {entry.title} ({formatDateTime(entry.updatedAt)})
+                              {entry.title} (Atualizado {formatDateTime(entry.updatedAt)})
                             </option>
                           ))}
                         </select>
@@ -327,6 +358,11 @@ export function DashboardPage() {
                       )}
                     </div>
                   )}
+                  {historyEntries.length > 1 && comparisonCandidates.length === 0 && (
+                    <p className="text-xs text-text-light-secondary dark:text-text-dark-secondary">
+                      Nenhuma avaliacao anterior com diferenca de metricas para comparar.
+                    </p>
+                  )}
 
                   <div className="space-y-2">
                     {historyEntries.map((entry, index) => {
@@ -342,13 +378,10 @@ export function DashboardPage() {
                           <div className="flex items-start justify-between gap-2">
                             <div>
                               <p className="text-sm font-semibold text-text-light-primary dark:text-text-dark-primary">
-                                {entry.title}
+                                {entry.title} (Atualizado {formatDateTime(entry.updatedAt)})
                               </p>
                               <p className="text-xs text-text-light-secondary dark:text-text-dark-secondary">
                                 Estagio: {maturityStageFromTotal(entry.metrics.total)}
-                              </p>
-                              <p className="text-xs text-text-light-secondary dark:text-text-dark-secondary">
-                                Atualizado em {formatDateTime(entry.updatedAt)}
                               </p>
                             </div>
                             <button
@@ -405,6 +438,17 @@ function formatDateTime(value: string): string {
   const parsed = new Date(value);
   if (Number.isNaN(parsed.getTime())) return value;
   return parsed.toLocaleString("pt-BR");
+}
+
+function hasMeaningfulComparisonDelta(
+  comparison: ReturnType<typeof compareCanvasHistoryEntries>
+): boolean {
+  return (
+    comparison.totalDelta !== 0 ||
+    Math.abs(comparison.riskScoreDelta) > 0.0001 ||
+    Math.abs(comparison.cvDelta) > 0.0001 ||
+    comparison.filledBlocksDelta !== 0
+  );
 }
 
 function formatSignedNumber(value: number, fractionDigits: number): string {

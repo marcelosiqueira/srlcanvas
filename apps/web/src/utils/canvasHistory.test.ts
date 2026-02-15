@@ -28,7 +28,7 @@ const makeMetrics = (overrides: Partial<ScoreMetrics>): ScoreMetrics => ({
 });
 
 describe("canvasHistory utilities", () => {
-  it("builds history entries ordered by evaluation date", () => {
+  it("builds history entries ordered by latest update and fallback timeline", () => {
     const input: CanvasHistoryInput[] = [
       {
         id: "older",
@@ -58,6 +58,31 @@ describe("canvasHistory utilities", () => {
     expect(entries.map((entry) => entry.id)).toEqual(["fallback-updated", "newer", "older"]);
     expect(entries[1]?.metrics.total).toBe(36);
     expect(entries[1]?.filledBlocks).toBe(12);
+  });
+
+  it("deduplicates entries with the same startup/date/scores", () => {
+    const duplicatedBlocks = makeBlocks(12, 3);
+    const input: CanvasHistoryInput[] = [
+      {
+        id: "recent-duplicate",
+        title: "Unused title",
+        meta: { startup: "AGRODATA", evaluator: "Eva", date: "2026-02-12" },
+        blocks: duplicatedBlocks,
+        updated_at: "2026-02-15T14:02:41.000Z"
+      },
+      {
+        id: "older-duplicate",
+        title: "Unused title",
+        meta: { startup: "AGRODATA", evaluator: "Eva", date: "2026-02-12" },
+        blocks: duplicatedBlocks,
+        updated_at: "2026-02-14T13:57:27.000Z"
+      }
+    ];
+
+    const entries = buildCanvasHistoryEntries(input);
+
+    expect(entries).toHaveLength(1);
+    expect(entries[0]?.id).toBe("recent-duplicate");
   });
 
   it("compares two entries and returns metric deltas", () => {
