@@ -1,4 +1,4 @@
-import { RESEARCH_SURVEY_VERSION } from "../data/researchSurvey";
+import { RESEARCH_SURVEY_CONFIG } from "../config/researchSurveyConfig";
 import { RESEARCH_TCLE_VERSION } from "../data/researchConsent";
 import { supabase } from "../lib/supabase";
 
@@ -108,7 +108,7 @@ export async function acceptResearchConsent(
     user_id: input.userId,
     accepted: true,
     consent_version: RESEARCH_TCLE_VERSION,
-    survey_version: RESEARCH_SURVEY_VERSION,
+    survey_version: RESEARCH_SURVEY_CONFIG.activeVersion,
     metadata: {
       next_path: input.nextPath,
       accepted_at_client: new Date().toISOString(),

@@ -19,6 +19,7 @@ describe("useCanvasStore", () => {
       meta: makeInitialMeta(),
       blocks: makeInitialBlocks(),
       darkMode: false,
+      remoteCanvasId: null,
       storageScope: GUEST_CANVAS_SCOPE
     });
     await waitForPersist();

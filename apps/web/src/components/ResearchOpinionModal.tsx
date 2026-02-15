@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { useDialogA11y } from "../hooks/useDialogA11y";
 import { ResearchOpinionPanel } from "./ResearchOpinionPanel";
 
 interface ResearchOpinionModalProps {
@@ -8,6 +9,8 @@ interface ResearchOpinionModalProps {
 }
 
 export function ResearchOpinionModal({ isOpen, nextPath, onClose }: ResearchOpinionModalProps) {
+  const { dialogRef, initialFocusRef } = useDialogA11y<HTMLButtonElement>(isOpen);
+
   useEffect(() => {
     if (!isOpen) return;
 
@@ -26,11 +29,14 @@ export function ResearchOpinionModal({ isOpen, nextPath, onClose }: ResearchOpin
   return (
     <div
       className="fixed inset-0 z-50 flex items-end justify-center bg-black/45 p-4 sm:items-center"
-      role="dialog"
-      aria-modal="true"
       onClick={onClose}
     >
       <div
+        ref={dialogRef}
+        tabIndex={-1}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Formulario de opiniao"
         className="w-full max-w-3xl rounded-2xl border border-zinc-200/80 bg-background-light p-4 shadow-2xl dark:border-zinc-800/80 dark:bg-background-dark"
         onClick={(event) => event.stopPropagation()}
       >
@@ -39,6 +45,7 @@ export function ResearchOpinionModal({ isOpen, nextPath, onClose }: ResearchOpin
             Formulario de opiniao
           </h2>
           <button
+            ref={initialFocusRef}
             type="button"
             onClick={onClose}
             className="flex h-9 w-9 items-center justify-center rounded-lg text-text-light-secondary hover:bg-zinc-100 dark:text-text-dark-secondary dark:hover:bg-zinc-800"

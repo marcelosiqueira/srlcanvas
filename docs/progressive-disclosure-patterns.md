@@ -12,6 +12,30 @@ Padroes para organizar conteudo complexo sem sobrecarregar usuario ou IA.
 3. Camada 3 - Analise aprofundada:
    - radar, scorecard e exportacao.
 
+### 1.2 Canvas (Modo Avancado Opcional)
+
+1. Camada 1 - Fluxo padrao:
+   - lista de blocos e acao `Ver Resultados`.
+2. Camada 2 - Aceleradores para experientes:
+   - toggle `Modo avancado`.
+   - filtros (`Todos`, `Pendentes`, `Pontuados`) e acao `Proximo pendente`.
+   - ajustes rapidos de nota (`-1/+1`) sem abrir modal.
+3. Camada 3 - Atalhos de produtividade:
+   - tela: `N` (proximo pendente), `R` (resultados), `F` (alternar filtro).
+   - modal: `1..9` (nivel), `Ctrl/Cmd + Enter` (salvar).
+
+### 1.1 Survey Academica (Etapas)
+
+1. Camada 1 - Progresso:
+   - etapa atual (ex.: `Etapa 3 de 7`).
+   - barra de progresso percentual.
+2. Camada 2 - Bloco de perguntas da etapa:
+   - exibir apenas perguntas da etapa corrente.
+   - navegacao `Etapa anterior` / `Proxima etapa`.
+3. Camada 3 - Consolidacao:
+   - envio final e protocolo.
+   - mensagem de armazenamento (Supabase/local).
+
 ## 2. Camadas de Informacao (Documentacao)
 
 1. `SKILL.md`: regras operacionais e mapa rapido.

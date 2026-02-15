@@ -1,7 +1,8 @@
-import { type FormEvent, type ReactNode, useEffect, useMemo, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { type FormEvent, type ReactNode, useEffect, useMemo, useRef, useState } from "react";
+import { Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../auth/AuthProvider";
 import { AppHeader } from "../components/AppHeader";
+import { RESEARCH_SURVEY_CONFIG } from "../config/researchSurveyConfig";
 import { FooterNav } from "../components/FooterNav";
 import {
   ACCEPTABLE_TIME_OPTIONS,
@@ -27,12 +28,105 @@ import {
   type SaveResearchSurveyResult
 } from "../services/researchSurveyApi";
 import { getResearchConsentStatus } from "../services/researchConsentApi";
+import { createProductMetricsSessionId, trackProductMetricEvent } from "../services/productMetrics";
 import type { Likert5, ResearchSurveyFormValues, YesNoAnswer } from "../types/researchSurvey";
 
 const YES_NO_OPTIONS: Array<{ value: Exclude<YesNoAnswer, "">; label: string }> = [
   { value: "sim", label: "Sim" },
   { value: "nao", label: "Nao" }
 ];
+
+type SurveyStepKey =
+  | "triage"
+  | "profile"
+  | "dimensions_1_4"
+  | "dimensions_5_8"
+  | "dimensions_9_12"
+  | "scale_and_sus"
+  | "adoption_and_followup";
+
+type DimensionStepKey = "dimensions_1_4" | "dimensions_5_8" | "dimensions_9_12";
+
+interface SurveyStepDefinition {
+  key: SurveyStepKey;
+  title: string;
+  description: string;
+}
+
+const ELIGIBLE_SURVEY_STEPS: SurveyStepDefinition[] = [
+  {
+    key: "triage",
+    title: "Etapa 1 - Triagem",
+    description: "Confirme elegibilidade para a pesquisa."
+  },
+  {
+    key: "profile",
+    title: "Etapa 2 - Perfil",
+    description: "Contexto profissional e experiencia."
+  },
+  {
+    key: "dimensions_1_4",
+    title: "Etapa 3 - Blocos 1 a 4",
+    description: "Avalie clareza e relevancia dos primeiros blocos."
+  },
+  {
+    key: "dimensions_5_8",
+    title: "Etapa 4 - Blocos 5 a 8",
+    description: "Continue a avaliacao dos blocos intermediarios."
+  },
+  {
+    key: "dimensions_9_12",
+    title: "Etapa 5 - Blocos 9 a 12",
+    description: "Finalize a avaliacao das 12 dimensoes."
+  },
+  {
+    key: "scale_and_sus",
+    title: "Etapa 6 - Escala e Usabilidade",
+    description: "Percepcao da escala 1-9 e SUS."
+  },
+  {
+    key: "adoption_and_followup",
+    title: "Etapa 7 - Adocao e Follow-up",
+    description: "Contexto de uso, NPS e dados opcionais."
+  }
+];
+
+const TRIAGE_ONLY_SURVEY_STEPS: SurveyStepDefinition[] = [ELIGIBLE_SURVEY_STEPS[0]];
+
+const DIMENSION_STEP_CONFIG: Record<
+  DimensionStepKey,
+  {
+    title: string;
+    startQuestionNumber: number;
+    dimensions: ReadonlyArray<(typeof SURVEY_DIMENSIONS)[number]>;
+  }
+> = {
+  dimensions_1_4: {
+    title: "5. Avaliacao por dimensao (blocos 1-4)",
+    startQuestionNumber: 1,
+    dimensions: SURVEY_DIMENSIONS.slice(0, 4)
+  },
+  dimensions_5_8: {
+    title: "5. Avaliacao por dimensao (blocos 5-8)",
+    startQuestionNumber: 5,
+    dimensions: SURVEY_DIMENSIONS.slice(4, 8)
+  },
+  dimensions_9_12: {
+    title: "5. Avaliacao por dimensao (blocos 9-12)",
+    startQuestionNumber: 9,
+    dimensions: SURVEY_DIMENSIONS.slice(8, 12)
+  }
+};
+
+function isSurveyStepKey(value: string): value is SurveyStepKey {
+  return ELIGIBLE_SURVEY_STEPS.some((step) => step.key === value);
+}
+
+function isDimensionStepKey(stepKey: SurveyStepKey): stepKey is DimensionStepKey {
+  return (
+    stepKey === "dimensions_1_4" || stepKey === "dimensions_5_8" || stepKey === "dimensions_9_12"
+  );
+}
 
 function RadioGroup<T extends string | number>({
   legend,
@@ -122,6 +216,7 @@ export function ResearchSurveyPage() {
   const [searchParams] = useSearchParams();
   const { user } = useAuth();
   const nextPath = searchParams.get("next") || "/canvas";
+  const surveyEnabled = RESEARCH_SURVEY_CONFIG.enabled;
 
   const [values, setValues] = useState<ResearchSurveyFormValues>(() =>
     makeInitialResearchSurveyValues()
@@ -137,8 +232,39 @@ export function ResearchSurveyPage() {
   const [draftSavedAt, setDraftSavedAt] = useState<string | null>(null);
   const [startedAtIso, setStartedAtIso] = useState<string>(() => new Date().toISOString());
   const [completedDurationLabel, setCompletedDurationLabel] = useState<string | null>(null);
+  const [currentStepKey, setCurrentStepKey] = useState<SurveyStepKey>("triage");
+  const surveySessionIdRef = useRef<string>(createProductMetricsSessionId("survey"));
+  const surveyStartedTrackedRef = useRef(false);
+  const surveyCompletedTrackedRef = useRef(false);
+  const surveyAbandonedTrackedRef = useRef(false);
+  const latestStepKeyRef = useRef<SurveyStepKey>("triage");
+  const latestStepIndexRef = useRef(0);
+  const latestStepCountRef = useRef(1);
+  const lastStepMarkerRef = useRef<string | null>(null);
+
+  const isEligible =
+    values.age18OrMore === "sim" &&
+    values.actedInEcosystem12Months === "sim" &&
+    values.viewedSrlMaterial === "sim";
+
+  const hasScreeningAnswers =
+    values.age18OrMore !== "" &&
+    values.actedInEcosystem12Months !== "" &&
+    values.viewedSrlMaterial !== "";
+
+  const isIneligible = hasScreeningAnswers && !isEligible;
+
+  const surveySteps = useMemo(
+    () => (isIneligible ? TRIAGE_ONLY_SURVEY_STEPS : ELIGIBLE_SURVEY_STEPS),
+    [isIneligible]
+  );
 
   useEffect(() => {
+    if (!surveyEnabled) {
+      setIsDraftHydrated(true);
+      return;
+    }
+
     const draft = loadResearchSurveyDraft(user?.id ?? null);
 
     if (draft) {
@@ -147,24 +273,44 @@ export function ResearchSurveyPage() {
       if (draft.startedAtIso) {
         setStartedAtIso(draft.startedAtIso);
       }
+      if (draft.currentStepKey && isSurveyStepKey(draft.currentStepKey)) {
+        setCurrentStepKey(draft.currentStepKey);
+      }
     }
 
     setIsDraftHydrated(true);
-  }, [user?.id]);
+  }, [surveyEnabled, user?.id]);
 
   useEffect(() => {
-    if (!isDraftHydrated || result) return;
+    if (!surveyEnabled || !isDraftHydrated || result) return;
 
     saveResearchSurveyDraft({
       userId: user?.id ?? null,
       values,
       nextPath,
-      startedAtIso
+      startedAtIso,
+      currentStepKey
     });
     setDraftSavedAt(new Date().toISOString());
-  }, [isDraftHydrated, nextPath, result, startedAtIso, user?.id, values]);
+  }, [
+    currentStepKey,
+    isDraftHydrated,
+    nextPath,
+    result,
+    startedAtIso,
+    surveyEnabled,
+    user?.id,
+    values
+  ]);
 
   useEffect(() => {
+    if (!surveyEnabled) {
+      setConsentLoading(false);
+      setHasConsent(false);
+      setConsentError(null);
+      return;
+    }
+
     let alive = true;
 
     void getResearchConsentStatus(user?.id ?? null)
@@ -185,19 +331,24 @@ export function ResearchSurveyPage() {
     return () => {
       alive = false;
     };
-  }, [user?.id]);
+  }, [surveyEnabled, user?.id]);
 
-  const isEligible =
-    values.age18OrMore === "sim" &&
-    values.actedInEcosystem12Months === "sim" &&
-    values.viewedSrlMaterial === "sim";
+  useEffect(() => {
+    if (surveySteps.some((step) => step.key === currentStepKey)) return;
+    setCurrentStepKey(surveySteps[0]?.key ?? "triage");
+  }, [currentStepKey, surveySteps]);
 
-  const hasScreeningAnswers =
-    values.age18OrMore !== "" &&
-    values.actedInEcosystem12Months !== "" &&
-    values.viewedSrlMaterial !== "";
+  const currentStepIndex = Math.max(
+    0,
+    surveySteps.findIndex((step) => step.key === currentStepKey)
+  );
+  const currentStep = surveySteps[currentStepIndex] ?? surveySteps[0];
+  const isLastStep = currentStepIndex === surveySteps.length - 1;
+  const progressPercent = Math.round(((currentStepIndex + 1) / surveySteps.length) * 100);
 
-  const isIneligible = hasScreeningAnswers && !isEligible;
+  latestStepKeyRef.current = currentStepKey;
+  latestStepIndexRef.current = currentStepIndex;
+  latestStepCountRef.current = surveySteps.length;
 
   const likertHelp = useMemo(
     () =>
@@ -224,7 +375,21 @@ export function ResearchSurveyPage() {
     });
   };
 
-  const validateEligibleFields = (): string[] => {
+  const validateScreeningFields = (): string[] => {
+    const nextErrors: string[] = [];
+
+    if (values.age18OrMore === "") nextErrors.push("Responda se possui 18 anos ou mais.");
+    if (values.actedInEcosystem12Months === "") {
+      nextErrors.push("Responda se atua ou atuou no ecossistema nos ultimos 12 meses.");
+    }
+    if (values.viewedSrlMaterial === "") {
+      nextErrors.push("Confirme se visualizou o SRL Canvas e o guia breve de aplicacao.");
+    }
+
+    return nextErrors;
+  };
+
+  const validateProfileFields = (): string[] => {
     const nextErrors: string[] = [];
 
     if (!values.primaryRole) nextErrors.push("Selecione seu papel principal.");
@@ -240,7 +405,15 @@ export function ResearchSurveyPage() {
       nextErrors.push("Descreva o setor em 'Outro'.");
     }
 
-    for (const dimension of SURVEY_DIMENSIONS) {
+    return nextErrors;
+  };
+
+  const validateDimensionFields = (
+    dimensions: ReadonlyArray<(typeof SURVEY_DIMENSIONS)[number]>
+  ): string[] => {
+    const nextErrors: string[] = [];
+
+    for (const dimension of dimensions) {
       const answer = values.dimensionAnswers[dimension.key];
       for (const assertion of DIMENSION_ASSERTIONS) {
         if (answer.ratings[assertion.key] === null) {
@@ -249,6 +422,12 @@ export function ResearchSurveyPage() {
         }
       }
     }
+
+    return nextErrors;
+  };
+
+  const validateScaleAndSusFields = (): string[] => {
+    const nextErrors: string[] = [];
 
     if (values.scaleClarity === null) nextErrors.push("Responda a clareza da escala 1 a 9.");
     if (values.scaleUtility === null) nextErrors.push("Responda a utilidade da escala 1 a 9.");
@@ -267,6 +446,12 @@ export function ResearchSurveyPage() {
       }
     }
 
+    return nextErrors;
+  };
+
+  const validateAdoptionAndFollowupFields = (): string[] => {
+    const nextErrors: string[] = [];
+
     if (values.usageContexts.length === 0) {
       nextErrors.push("Selecione pelo menos um contexto de uso do SRL Canvas.");
     }
@@ -275,7 +460,6 @@ export function ResearchSurveyPage() {
     }
     if (values.npsScore === null) nextErrors.push("Informe a nota de recomendacao (NPS).");
     if (!values.acceptableTime) nextErrors.push("Selecione o tempo aceitavel de aplicacao.");
-
     if (values.acceptsInterview === "sim" && !values.preferredContact.trim()) {
       nextErrors.push("Informe contato preferido para follow-up.");
     }
@@ -283,31 +467,75 @@ export function ResearchSurveyPage() {
     return nextErrors;
   };
 
+  const validateStep = (stepKey: SurveyStepKey): string[] => {
+    switch (stepKey) {
+      case "triage":
+        return validateScreeningFields();
+      case "profile":
+        return isEligible ? validateProfileFields() : [];
+      case "dimensions_1_4":
+      case "dimensions_5_8":
+      case "dimensions_9_12":
+        return isEligible ? validateDimensionFields(DIMENSION_STEP_CONFIG[stepKey].dimensions) : [];
+      case "scale_and_sus":
+        return isEligible ? validateScaleAndSusFields() : [];
+      case "adoption_and_followup":
+        return isEligible ? validateAdoptionAndFollowupFields() : [];
+      default:
+        return [];
+    }
+  };
+
   const validate = (): string[] => {
     const nextErrors: string[] = [];
 
-    if (values.age18OrMore === "") nextErrors.push("Responda se possui 18 anos ou mais.");
-    if (values.actedInEcosystem12Months === "") {
-      nextErrors.push("Responda se atua ou atuou no ecossistema nos ultimos 12 meses.");
-    }
-    if (values.viewedSrlMaterial === "") {
-      nextErrors.push("Confirme se visualizou o SRL Canvas e o guia breve de aplicacao.");
-    }
+    nextErrors.push(...validateScreeningFields());
 
     if (isEligible) {
-      nextErrors.push(...validateEligibleFields());
+      nextErrors.push(...validateProfileFields());
+      nextErrors.push(...validateDimensionFields(DIMENSION_STEP_CONFIG.dimensions_1_4.dimensions));
+      nextErrors.push(...validateDimensionFields(DIMENSION_STEP_CONFIG.dimensions_5_8.dimensions));
+      nextErrors.push(...validateDimensionFields(DIMENSION_STEP_CONFIG.dimensions_9_12.dimensions));
+      nextErrors.push(...validateScaleAndSusFields());
+      nextErrors.push(...validateAdoptionAndFollowupFields());
     }
 
     return Array.from(new Set(nextErrors));
   };
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const goToPreviousStep = () => {
+    if (currentStepIndex === 0) return;
+    setSubmitError(null);
+    setErrors([]);
+    setCurrentStepKey(surveySteps[currentStepIndex - 1].key);
+    scrollToTop();
+  };
 
+  const goToNextStep = () => {
+    if (isLastStep) return;
+
+    const stepErrors = validateStep(currentStep.key);
+    if (stepErrors.length > 0) {
+      setErrors(Array.from(new Set(stepErrors)));
+      setSubmitError(null);
+      return;
+    }
+
+    setSubmitError(null);
+    setErrors([]);
+    setCurrentStepKey(surveySteps[currentStepIndex + 1].key);
+    scrollToTop();
+  };
+
+  const submitSurvey = async () => {
     const validationErrors = validate();
     if (validationErrors.length > 0) {
       setErrors(validationErrors);
       setSubmitError(null);
+      const firstInvalidStep = surveySteps.find((step) => validateStep(step.key).length > 0);
+      if (firstInvalidStep) {
+        setCurrentStepKey(firstInvalidStep.key);
+      }
       return;
     }
 
@@ -322,6 +550,15 @@ export function ResearchSurveyPage() {
         nextPath,
         startedAtIso
       });
+      const completionSeconds = getDurationInSeconds(startedAtIso);
+      trackProductMetricEvent("survey_completed", {
+        sessionId: surveySessionIdRef.current,
+        eligible: isEligible,
+        stepCount: surveySteps.length,
+        completionSeconds,
+        storage: saved.storage
+      });
+      surveyCompletedTrackedRef.current = true;
       setCompletedDurationLabel(formatDurationLabel(startedAtIso));
       clearResearchSurveyDraft(user?.id ?? null);
       setDraftSavedAt(null);
@@ -332,6 +569,72 @@ export function ResearchSurveyPage() {
       setIsSubmitting(false);
     }
   };
+
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    void submitSurvey();
+  };
+
+  const trackSurveyAbandonment = (reason: "responder_depois" | "route_exit" | "page_unload") => {
+    if (!surveyStartedTrackedRef.current) return;
+    if (surveyCompletedTrackedRef.current || surveyAbandonedTrackedRef.current) return;
+
+    trackProductMetricEvent("survey_step_abandoned", {
+      sessionId: surveySessionIdRef.current,
+      stepKey: latestStepKeyRef.current,
+      reason
+    });
+    surveyAbandonedTrackedRef.current = true;
+  };
+
+  const handleAnswerLater = () => {
+    trackSurveyAbandonment("responder_depois");
+    navigate(nextPath);
+  };
+
+  useEffect(() => {
+    if (!surveyEnabled) return;
+    if (consentLoading || !hasConsent) return;
+    if (!isDraftHydrated || result) return;
+    if (surveyStartedTrackedRef.current) return;
+
+    trackProductMetricEvent("survey_started", {
+      sessionId: surveySessionIdRef.current,
+      startedWithDraft: Boolean(draftSavedAt)
+    });
+    surveyStartedTrackedRef.current = true;
+  }, [consentLoading, draftSavedAt, hasConsent, isDraftHydrated, result, surveyEnabled]);
+
+  useEffect(() => {
+    if (!surveyStartedTrackedRef.current || result) return;
+
+    const marker = `${currentStepKey}:${currentStepIndex}:${surveySteps.length}`;
+    if (lastStepMarkerRef.current === marker) return;
+    lastStepMarkerRef.current = marker;
+
+    trackProductMetricEvent("survey_step_viewed", {
+      sessionId: surveySessionIdRef.current,
+      stepKey: currentStepKey,
+      stepIndex: currentStepIndex,
+      stepCount: surveySteps.length
+    });
+  }, [currentStepIndex, currentStepKey, result, surveySteps.length]);
+
+  useEffect(() => {
+    const onBeforeUnload = () => {
+      trackSurveyAbandonment("page_unload");
+    };
+
+    window.addEventListener("beforeunload", onBeforeUnload);
+    return () => {
+      window.removeEventListener("beforeunload", onBeforeUnload);
+      trackSurveyAbandonment("route_exit");
+    };
+  }, []);
+
+  if (!surveyEnabled) {
+    return <Navigate replace to={nextPath} />;
+  }
 
   if (consentLoading) {
     return (
@@ -428,6 +731,9 @@ export function ResearchSurveyPage() {
                   setDraftSavedAt(null);
                   setCompletedDurationLabel(null);
                   setStartedAtIso(new Date().toISOString());
+                  setCurrentStepKey("triage");
+                  setErrors([]);
+                  setSubmitError(null);
                 }}
                 className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-semibold text-text-light-secondary hover:bg-zinc-100 dark:border-zinc-700 dark:text-text-dark-secondary dark:hover:bg-zinc-800"
               >
@@ -459,213 +765,252 @@ export function ResearchSurveyPage() {
             cientificamente o SRL Canvas.
           </p>
           <p className="mt-1 text-sm text-text-light-secondary dark:text-text-dark-secondary">
-            As respostas ajudam a medir clareza, utilidade e impacto da ferramenta no ecossistema de
-            inovacao.
+            O questionario foi dividido em etapas curtas para facilitar a conclusao.
+          </p>
+          <p className="mt-1 text-xs text-text-light-secondary dark:text-text-dark-secondary">
+            Versao ativa do instrumento: <strong>{RESEARCH_SURVEY_CONFIG.activeVersion}</strong>
           </p>
         </section>
 
-        <SectionCard title="1. Triagem e elegibilidade">
-          <RadioGroup
-            legend="1.1 Voce possui 18 anos ou mais?"
-            name="age18"
-            value={values.age18OrMore}
-            options={YES_NO_OPTIONS}
-            onChange={(value) => setField("age18OrMore", value)}
-          />
-          <RadioGroup
-            legend="1.2 Voce atua ou atuou no ecossistema de inovacao/startups nos ultimos 12 meses?"
-            name="ecosystem12months"
-            value={values.actedInEcosystem12Months}
-            options={YES_NO_OPTIONS}
-            onChange={(value) => setField("actedInEcosystem12Months", value)}
-          />
-          <RadioGroup
-            legend="4. Antes de responder, voce visualizou o SRL Canvas e o guia breve de aplicacao?"
-            name="viewedMaterial"
-            value={values.viewedSrlMaterial}
-            options={YES_NO_OPTIONS}
-            onChange={(value) => setField("viewedSrlMaterial", value)}
-          />
-
-          {isIneligible && (
-            <p className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800 dark:border-amber-700/40 dark:bg-amber-900/20 dark:text-amber-300">
-              Pelas respostas de triagem, voce nao se enquadra no perfil de elegibilidade completa.
-              Se desejar, envie apenas a triagem e prossiga para o app.
+        <section className="rounded-xl border border-zinc-200/80 bg-card-light p-4 dark:border-zinc-800/80 dark:bg-card-dark">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <p className="text-xs font-semibold uppercase tracking-wide text-primary">
+              Etapa {currentStepIndex + 1} de {surveySteps.length}
             </p>
-          )}
-        </SectionCard>
+            <p className="text-xs text-text-light-secondary dark:text-text-dark-secondary">
+              {progressPercent}% concluido
+            </p>
+          </div>
+          <div
+            role="progressbar"
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={progressPercent}
+            className="mt-2 h-2 w-full overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-800"
+          >
+            <div
+              className="h-full rounded-full bg-primary transition-[width] duration-300"
+              style={{ width: `${progressPercent}%` }}
+            />
+          </div>
+          <h3 className="mt-3 text-sm font-semibold text-text-light-primary dark:text-text-dark-primary">
+            {currentStep.title}
+          </h3>
+          <p className="mt-1 text-xs text-text-light-secondary dark:text-text-dark-secondary">
+            {currentStep.description}
+          </p>
+        </section>
 
-        {isEligible && (
-          <>
-            <SectionCard title="3. Perfil do respondente">
-              <RadioGroup
-                legend="3.1 Qual o seu papel principal no ecossistema de inovacao?"
-                name="primaryRole"
-                value={values.primaryRole}
-                options={PROFILE_ROLE_OPTIONS.map((option) => ({
-                  value: option.value,
-                  label: option.label
-                }))}
-                onChange={(value) => setField("primaryRole", value)}
-              />
+        {currentStepKey === "triage" && (
+          <SectionCard title="1. Triagem e elegibilidade">
+            <RadioGroup
+              legend="1.1 Voce possui 18 anos ou mais?"
+              name="age18"
+              value={values.age18OrMore}
+              options={YES_NO_OPTIONS}
+              onChange={(value) => setField("age18OrMore", value)}
+            />
+            <RadioGroup
+              legend="1.2 Voce atua ou atuou no ecossistema de inovacao/startups nos ultimos 12 meses?"
+              name="ecosystem12months"
+              value={values.actedInEcosystem12Months}
+              options={YES_NO_OPTIONS}
+              onChange={(value) => setField("actedInEcosystem12Months", value)}
+            />
+            <RadioGroup
+              legend="1.3 Antes de responder, voce visualizou o SRL Canvas e o guia breve de aplicacao?"
+              name="viewedMaterial"
+              value={values.viewedSrlMaterial}
+              options={YES_NO_OPTIONS}
+              onChange={(value) => setField("viewedSrlMaterial", value)}
+            />
 
-              {values.primaryRole === "outro" && (
-                <label className="block">
-                  <span className="text-xs font-medium text-text-light-secondary dark:text-text-dark-secondary">
-                    Especifique seu papel
-                  </span>
-                  <input
-                    className="mt-1 block w-full rounded-md border-zinc-300 bg-zinc-50 p-2 text-sm text-text-light-primary shadow-sm focus:border-primary focus:ring-primary dark:border-zinc-700 dark:bg-zinc-800 dark:text-text-dark-primary"
-                    type="text"
-                    value={values.primaryRoleOther}
-                    onChange={(event) => setField("primaryRoleOther", event.target.value)}
-                  />
-                </label>
-              )}
+            {isIneligible && (
+              <p className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800 dark:border-amber-700/40 dark:bg-amber-900/20 dark:text-amber-300">
+                Pelas respostas de triagem, voce nao se enquadra no perfil de elegibilidade
+                completa. Se desejar, envie apenas a triagem e prossiga para o app.
+              </p>
+            )}
+          </SectionCard>
+        )}
 
-              <RadioGroup
-                legend="3.2 Qual o seu tempo de experiencia com startups?"
-                name="experienceYears"
-                value={values.experienceYears}
-                options={EXPERIENCE_OPTIONS.map((option) => ({
-                  value: option.value,
-                  label: option.label
-                }))}
-                onChange={(value) => setField("experienceYears", value)}
-              />
+        {isEligible && currentStepKey === "profile" && (
+          <SectionCard title="3. Perfil do respondente">
+            <RadioGroup
+              legend="3.1 Qual o seu papel principal no ecossistema de inovacao?"
+              name="primaryRole"
+              value={values.primaryRole}
+              options={PROFILE_ROLE_OPTIONS.map((option) => ({
+                value: option.value,
+                label: option.label
+              }))}
+              onChange={(value) => setField("primaryRole", value)}
+            />
 
-              <RadioGroup
-                legend="3.3 Qual o setor predominante de sua atuacao?"
-                name="sector"
-                value={values.sector}
-                options={SECTOR_OPTIONS.map((option) => ({
-                  value: option.value,
-                  label: option.label
-                }))}
-                onChange={(value) => setField("sector", value)}
-              />
-
-              {values.sector === "outro" && (
-                <label className="block">
-                  <span className="text-xs font-medium text-text-light-secondary dark:text-text-dark-secondary">
-                    Especifique o setor
-                  </span>
-                  <input
-                    className="mt-1 block w-full rounded-md border-zinc-300 bg-zinc-50 p-2 text-sm text-text-light-primary shadow-sm focus:border-primary focus:ring-primary dark:border-zinc-700 dark:bg-zinc-800 dark:text-text-dark-primary"
-                    type="text"
-                    value={values.sectorOther}
-                    onChange={(event) => setField("sectorOther", event.target.value)}
-                  />
-                </label>
-              )}
-
-              <RadioGroup
-                legend="3.4 Qual o estagio tipico das startups com as quais voce interage?"
-                name="startupStage"
-                value={values.startupStage}
-                options={STAGE_OPTIONS.map((option) => ({
-                  value: option.value,
-                  label: option.label
-                }))}
-                onChange={(value) => setField("startupStage", value)}
-              />
-
+            {values.primaryRole === "outro" && (
               <label className="block">
-                <span className="text-sm font-medium text-text-light-primary dark:text-text-dark-primary">
-                  3.5 Qual a sua localidade/pais de atuacao?
+                <span className="text-xs font-medium text-text-light-secondary dark:text-text-dark-secondary">
+                  Especifique seu papel
                 </span>
                 <input
                   className="mt-1 block w-full rounded-md border-zinc-300 bg-zinc-50 p-2 text-sm text-text-light-primary shadow-sm focus:border-primary focus:ring-primary dark:border-zinc-700 dark:bg-zinc-800 dark:text-text-dark-primary"
                   type="text"
-                  value={values.locationCountry}
-                  onChange={(event) => setField("locationCountry", event.target.value)}
-                  placeholder="Ex.: Campo Grande, Brasil"
+                  value={values.primaryRoleOther}
+                  onChange={(event) => setField("primaryRoleOther", event.target.value)}
                 />
               </label>
+            )}
 
-              <RadioGroup
-                legend="3.6 Qual o tamanho medio das equipes que voce acompanha/avalia?"
-                name="teamSize"
-                value={values.teamSize}
-                options={TEAM_SIZE_OPTIONS.map((option) => ({
-                  value: option.value,
-                  label: option.label
-                }))}
-                onChange={(value) => setField("teamSize", value)}
+            <RadioGroup
+              legend="3.2 Qual o seu tempo de experiencia com startups?"
+              name="experienceYears"
+              value={values.experienceYears}
+              options={EXPERIENCE_OPTIONS.map((option) => ({
+                value: option.value,
+                label: option.label
+              }))}
+              onChange={(value) => setField("experienceYears", value)}
+            />
+
+            <RadioGroup
+              legend="3.3 Qual o setor predominante de sua atuacao?"
+              name="sector"
+              value={values.sector}
+              options={SECTOR_OPTIONS.map((option) => ({
+                value: option.value,
+                label: option.label
+              }))}
+              onChange={(value) => setField("sector", value)}
+            />
+
+            {values.sector === "outro" && (
+              <label className="block">
+                <span className="text-xs font-medium text-text-light-secondary dark:text-text-dark-secondary">
+                  Especifique o setor
+                </span>
+                <input
+                  className="mt-1 block w-full rounded-md border-zinc-300 bg-zinc-50 p-2 text-sm text-text-light-primary shadow-sm focus:border-primary focus:ring-primary dark:border-zinc-700 dark:bg-zinc-800 dark:text-text-dark-primary"
+                  type="text"
+                  value={values.sectorOther}
+                  onChange={(event) => setField("sectorOther", event.target.value)}
+                />
+              </label>
+            )}
+
+            <RadioGroup
+              legend="3.4 Qual o estagio tipico das startups com as quais voce interage?"
+              name="startupStage"
+              value={values.startupStage}
+              options={STAGE_OPTIONS.map((option) => ({
+                value: option.value,
+                label: option.label
+              }))}
+              onChange={(value) => setField("startupStage", value)}
+            />
+
+            <label className="block">
+              <span className="text-sm font-medium text-text-light-primary dark:text-text-dark-primary">
+                3.5 Qual a sua localidade/pais de atuacao?
+              </span>
+              <input
+                className="mt-1 block w-full rounded-md border-zinc-300 bg-zinc-50 p-2 text-sm text-text-light-primary shadow-sm focus:border-primary focus:ring-primary dark:border-zinc-700 dark:bg-zinc-800 dark:text-text-dark-primary"
+                type="text"
+                value={values.locationCountry}
+                onChange={(event) => setField("locationCountry", event.target.value)}
+                placeholder="Ex.: Campo Grande, Brasil"
               />
-            </SectionCard>
+            </label>
 
-            <SectionCard title="5. Avaliacao por dimensao (12 blocos)">
-              <p className="text-xs text-text-light-secondary dark:text-text-dark-secondary">
-                Escala Likert: {likertHelp}
-              </p>
+            <RadioGroup
+              legend="3.6 Qual o tamanho medio das equipes que voce acompanha/avalia?"
+              name="teamSize"
+              value={values.teamSize}
+              options={TEAM_SIZE_OPTIONS.map((option) => ({
+                value: option.value,
+                label: option.label
+              }))}
+              onChange={(value) => setField("teamSize", value)}
+            />
+          </SectionCard>
+        )}
 
-              <div className="space-y-4">
-                {SURVEY_DIMENSIONS.map((dimension, index) => {
-                  const answer = values.dimensionAnswers[dimension.key];
+        {isEligible && isDimensionStepKey(currentStepKey) && (
+          <SectionCard title={DIMENSION_STEP_CONFIG[currentStepKey].title}>
+            <p className="text-xs text-text-light-secondary dark:text-text-dark-secondary">
+              Escala Likert: {likertHelp}
+            </p>
 
-                  return (
-                    <article
-                      key={dimension.key}
-                      className="rounded-xl border border-zinc-200/80 p-3 dark:border-zinc-800/80"
-                    >
-                      <h3 className="text-sm font-semibold text-text-light-primary dark:text-text-dark-primary">
-                        5.{index + 1}. {dimension.label}
-                      </h3>
+            <div className="space-y-4">
+              {DIMENSION_STEP_CONFIG[currentStepKey].dimensions.map((dimension, index) => {
+                const answer = values.dimensionAnswers[dimension.key];
+                const questionNumber =
+                  DIMENSION_STEP_CONFIG[currentStepKey].startQuestionNumber + index;
 
-                      <div className="mt-3 space-y-3">
-                        {DIMENSION_ASSERTIONS.map((assertion) => (
-                          <LikertGroup
-                            key={`${dimension.key}_${assertion.key}`}
-                            legend={assertion.label}
-                            name={`${dimension.key}_${assertion.key}`}
-                            value={answer.ratings[assertion.key]}
-                            onChange={(value) =>
-                              setValues((prev) => ({
-                                ...prev,
-                                dimensionAnswers: {
-                                  ...prev.dimensionAnswers,
-                                  [dimension.key]: {
-                                    ...prev.dimensionAnswers[dimension.key],
-                                    ratings: {
-                                      ...prev.dimensionAnswers[dimension.key].ratings,
-                                      [assertion.key]: value
-                                    }
+                return (
+                  <article
+                    key={dimension.key}
+                    className="rounded-xl border border-zinc-200/80 p-3 dark:border-zinc-800/80"
+                  >
+                    <h3 className="text-sm font-semibold text-text-light-primary dark:text-text-dark-primary">
+                      5.{questionNumber}. {dimension.label}
+                    </h3>
+
+                    <div className="mt-3 space-y-3">
+                      {DIMENSION_ASSERTIONS.map((assertion) => (
+                        <LikertGroup
+                          key={`${dimension.key}_${assertion.key}`}
+                          legend={assertion.label}
+                          name={`${dimension.key}_${assertion.key}`}
+                          value={answer.ratings[assertion.key]}
+                          onChange={(value) =>
+                            setValues((prev) => ({
+                              ...prev,
+                              dimensionAnswers: {
+                                ...prev.dimensionAnswers,
+                                [dimension.key]: {
+                                  ...prev.dimensionAnswers[dimension.key],
+                                  ratings: {
+                                    ...prev.dimensionAnswers[dimension.key].ratings,
+                                    [assertion.key]: value
                                   }
                                 }
-                              }))
-                            }
-                          />
-                        ))}
+                              }
+                            }))
+                          }
+                        />
+                      ))}
 
-                        <label className="block">
-                          <span className="text-xs font-medium text-text-light-secondary dark:text-text-dark-secondary">
-                            Comentario breve (opcional)
-                          </span>
-                          <textarea
-                            className="mt-1 block min-h-20 w-full rounded-md border-zinc-300 bg-zinc-50 p-2 text-sm text-text-light-primary shadow-sm focus:border-primary focus:ring-primary dark:border-zinc-700 dark:bg-zinc-800 dark:text-text-dark-primary"
-                            value={answer.comment}
-                            onChange={(event) =>
-                              setValues((prev) => ({
-                                ...prev,
-                                dimensionAnswers: {
-                                  ...prev.dimensionAnswers,
-                                  [dimension.key]: {
-                                    ...prev.dimensionAnswers[dimension.key],
-                                    comment: event.target.value
-                                  }
+                      <label className="block">
+                        <span className="text-xs font-medium text-text-light-secondary dark:text-text-dark-secondary">
+                          Comentario breve (opcional)
+                        </span>
+                        <textarea
+                          className="mt-1 block min-h-20 w-full rounded-md border-zinc-300 bg-zinc-50 p-2 text-sm text-text-light-primary shadow-sm focus:border-primary focus:ring-primary dark:border-zinc-700 dark:bg-zinc-800 dark:text-text-dark-primary"
+                          value={answer.comment}
+                          onChange={(event) =>
+                            setValues((prev) => ({
+                              ...prev,
+                              dimensionAnswers: {
+                                ...prev.dimensionAnswers,
+                                [dimension.key]: {
+                                  ...prev.dimensionAnswers[dimension.key],
+                                  comment: event.target.value
                                 }
-                              }))
-                            }
-                          />
-                        </label>
-                      </div>
-                    </article>
-                  );
-                })}
-              </div>
-            </SectionCard>
+                              }
+                            }))
+                          }
+                        />
+                      </label>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          </SectionCard>
+        )}
 
+        {isEligible && currentStepKey === "scale_and_sus" && (
+          <>
             <SectionCard title="6. Escala de niveis (1 a 9) - clareza e utilidade">
               <LikertGroup
                 legend="6.1 A escala de 1 a 9 e clara e com ancoras suficientes para diferenciar os niveis?"
@@ -742,7 +1087,11 @@ export function ResearchSurveyPage() {
                 ))}
               </div>
             </SectionCard>
+          </>
+        )}
 
+        {isEligible && currentStepKey === "adoption_and_followup" && (
+          <>
             <SectionCard title="8. Aplicacao, utilidade e adocao">
               <fieldset className="space-y-2">
                 <legend className="text-sm font-medium text-text-light-primary dark:text-text-dark-primary">
@@ -895,16 +1244,41 @@ export function ResearchSurveyPage() {
 
         <form onSubmit={handleSubmit} className="space-y-3">
           <div className="flex flex-wrap gap-2">
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {isSubmitting ? "Enviando..." : "Enviar pesquisa"}
-            </button>
+            {currentStepIndex > 0 && (
+              <button
+                type="button"
+                onClick={goToPreviousStep}
+                disabled={isSubmitting}
+                className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-semibold text-text-light-secondary hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-60 dark:border-zinc-700 dark:text-text-dark-secondary dark:hover:bg-zinc-800"
+              >
+                Etapa anterior
+              </button>
+            )}
+
+            {!isLastStep && (
+              <button
+                type="button"
+                onClick={goToNextStep}
+                disabled={isSubmitting}
+                className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                Proxima etapa
+              </button>
+            )}
+
+            {isLastStep && (
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {isSubmitting ? "Enviando..." : isIneligible ? "Enviar triagem" : "Enviar pesquisa"}
+              </button>
+            )}
+
             <button
               type="button"
-              onClick={() => navigate(nextPath)}
+              onClick={handleAnswerLater}
               className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-semibold text-text-light-secondary hover:bg-zinc-100 dark:border-zinc-700 dark:text-text-dark-secondary dark:hover:bg-zinc-800"
             >
               Responder depois
@@ -912,8 +1286,7 @@ export function ResearchSurveyPage() {
           </div>
           {draftSavedAt && (
             <p className="text-xs text-text-light-secondary dark:text-text-dark-secondary">
-              Rascunho salvo automaticamente em{" "}
-              {new Date(draftSavedAt).toLocaleString("pt-BR")}
+              Rascunho salvo automaticamente em {new Date(draftSavedAt).toLocaleString("pt-BR")}
             </p>
           )}
         </form>
@@ -925,15 +1298,27 @@ export function ResearchSurveyPage() {
 }
 
 function formatDurationLabel(startedAtIso: string): string | null {
+  const totalSeconds = getDurationInSeconds(startedAtIso);
+  if (totalSeconds === null) return null;
+
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+
+  return `${minutes}m ${String(seconds).padStart(2, "0")}s`;
+}
+
+function getDurationInSeconds(startedAtIso: string): number | null {
   const start = new Date(startedAtIso);
   if (Number.isNaN(start.getTime())) return null;
 
   const diffMs = Date.now() - start.getTime();
   if (diffMs < 0) return null;
 
-  const totalSeconds = Math.round(diffMs / 1000);
-  const minutes = Math.floor(totalSeconds / 60);
-  const seconds = totalSeconds % 60;
+  return Math.round(diffMs / 1000);
+}
 
-  return `${minutes}m ${String(seconds).padStart(2, "0")}s`;
+function scrollToTop(): void {
+  if (typeof window === "undefined") return;
+  if (/jsdom/i.test(window.navigator.userAgent)) return;
+  window.scrollTo({ top: 0, behavior: "smooth" });
 }

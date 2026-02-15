@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { ABOUT_SRL_CANVAS } from "../data/aboutSrlCanvas";
+import { useDialogA11y } from "../hooks/useDialogA11y";
 
 interface AboutSrlCanvasModalProps {
   isOpen: boolean;
@@ -7,6 +8,8 @@ interface AboutSrlCanvasModalProps {
 }
 
 export function AboutSrlCanvasModal({ isOpen, onClose }: AboutSrlCanvasModalProps) {
+  const { dialogRef, initialFocusRef } = useDialogA11y<HTMLButtonElement>(isOpen);
+
   useEffect(() => {
     if (!isOpen) return;
 
@@ -21,18 +24,21 @@ export function AboutSrlCanvasModal({ isOpen, onClose }: AboutSrlCanvasModalProp
   if (!isOpen) return null;
 
   return (
-    <div
-      className="fixed inset-0 z-40 flex items-end justify-center bg-slate-900/55 p-4 md:items-center"
-      role="dialog"
-      aria-modal="true"
-      aria-label="Sobre o SRL Canvas"
-    >
-      <div className="max-h-[92vh] w-full max-w-4xl overflow-y-auto rounded-xl bg-card-light shadow-2xl dark:bg-card-dark">
+    <div className="fixed inset-0 z-40 flex items-end justify-center bg-slate-900/55 p-4 md:items-center">
+      <div
+        ref={dialogRef}
+        tabIndex={-1}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Sobre o SRL Canvas"
+        className="max-h-[92vh] w-full max-w-4xl overflow-y-auto rounded-xl bg-card-light shadow-2xl dark:bg-card-dark"
+      >
         <div className="flex items-center justify-between border-b border-zinc-200/80 p-4 dark:border-zinc-800/80">
           <h2 className="text-lg font-bold text-text-light-primary dark:text-text-dark-primary">
             Sobre o SRL Canvas
           </h2>
           <button
+            ref={initialFocusRef}
             type="button"
             className="rounded-md p-2 text-text-light-secondary hover:bg-zinc-100 dark:text-text-dark-secondary dark:hover:bg-zinc-800"
             onClick={onClose}

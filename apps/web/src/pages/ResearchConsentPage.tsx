@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../auth/AuthProvider";
 import { AppHeader } from "../components/AppHeader";
+import { RESEARCH_SURVEY_CONFIG } from "../config/researchSurveyConfig";
 import { FooterNav } from "../components/FooterNav";
 import {
   RESEARCH_TCLE_META,
@@ -31,6 +32,7 @@ export function ResearchConsentPage() {
 
   const nextPath = searchParams.get("next") || "/canvas";
   const surveyPath = useMemo(() => `/survey?next=${encodeURIComponent(nextPath)}`, [nextPath]);
+  const surveyEnabled = RESEARCH_SURVEY_CONFIG.enabled;
 
   const [isLoadingStatus, setIsLoadingStatus] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -42,6 +44,14 @@ export function ResearchConsentPage() {
   const [hasConsent, setHasConsent] = useState(false);
 
   useEffect(() => {
+    if (!surveyEnabled) {
+      setHasConsent(false);
+      setAcceptedAt(null);
+      setErrorMessage(null);
+      setIsLoadingStatus(false);
+      return;
+    }
+
     let alive = true;
 
     void getResearchConsentStatus(user?.id ?? null)
@@ -65,7 +75,11 @@ export function ResearchConsentPage() {
     return () => {
       alive = false;
     };
-  }, [user?.id]);
+  }, [surveyEnabled, user?.id]);
+
+  if (!surveyEnabled) {
+    return <Navigate replace to={nextPath} />;
+  }
 
   const handleAccept = async () => {
     setIsSubmitting(true);
@@ -121,6 +135,9 @@ export function ResearchConsentPage() {
           </h2>
           <p className="mt-2 text-sm text-text-light-secondary dark:text-text-dark-secondary">
             Versao de consentimento: <strong>{RESEARCH_TCLE_VERSION}</strong>
+          </p>
+          <p className="mt-1 text-sm text-text-light-secondary dark:text-text-dark-secondary">
+            Versao do questionario: <strong>{RESEARCH_SURVEY_CONFIG.activeVersion}</strong>
           </p>
           <div className="mt-3 space-y-1 text-sm text-text-light-secondary dark:text-text-dark-secondary">
             <p>

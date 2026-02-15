@@ -65,6 +65,12 @@ Tabela `public.research_survey_responses`:
 O formulario nao solicita dados pessoais sensiveis por padrao.
 Participantes sao instruidos a nao inserir dados sensiveis ou segredos empresariais.
 
+### 4.4 Metricas de produto (instrumentacao local)
+
+- Eventos operacionais locais (inicio, conclusao e abandono por etapa) sem PII.
+- Sem captura de respostas textuais, contatos, startup ou e-mail.
+- Uso exclusivo para analise agregada de UX e iteracao do produto.
+
 ## 5. Minimizacao e pseudonimizacao
 
 - Evitar campos de identificacao direta desnecessarios.
@@ -125,6 +131,7 @@ Implementacao tecnica recomendada:
 - validacao de campos obrigatorios no cliente
 - bloqueio de envio sem consentimento
 - logs sem payload sensivel
+- instrumentacao de metricas sem dados sensiveis, com armazenamento local e agregacao
 - isolamento de rascunhos no `localStorage` por usuario autenticado (sem compartilhamento entre contas no mesmo navegador)
 
 ### 9.3 Infra

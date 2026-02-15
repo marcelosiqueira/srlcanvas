@@ -10,6 +10,7 @@ import {
 } from "chart.js";
 import { Radar } from "react-chartjs-2";
 import { SRL_BLOCKS } from "../data/srlBlocks";
+import { useDialogA11y } from "../hooks/useDialogA11y";
 import { maturityStageFromTotal } from "../utils/score";
 import type { ScoreMetrics } from "../types";
 
@@ -31,6 +32,7 @@ const format = (value: number, digits = 2): string =>
 export function ResultsModal({ onClose, metrics, scores, darkMode }: ResultsModalProps) {
   const [isExporting, setIsExporting] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
+  const { dialogRef, initialFocusRef } = useDialogA11y<HTMLButtonElement>(true);
 
   const radarData = useMemo(
     () => ({
@@ -178,18 +180,21 @@ export function ResultsModal({ onClose, metrics, scores, darkMode }: ResultsModa
   };
 
   return (
-    <div
-      className="fixed inset-0 z-40 flex items-end justify-center bg-slate-900/55 p-4 md:items-center"
-      role="dialog"
-      aria-modal="true"
-      aria-label="Resultados do SRL Canvas"
-    >
-      <div className="max-h-[92vh] w-full max-w-5xl overflow-y-auto rounded-xl bg-card-light shadow-2xl dark:bg-card-dark">
+    <div className="fixed inset-0 z-40 flex items-end justify-center bg-slate-900/55 p-4 md:items-center">
+      <div
+        ref={dialogRef}
+        tabIndex={-1}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Resultados do SRL Canvas"
+        className="max-h-[92vh] w-full max-w-5xl overflow-y-auto rounded-xl bg-card-light shadow-2xl dark:bg-card-dark"
+      >
         <div className="flex items-center justify-between border-b border-zinc-200/80 p-4 dark:border-zinc-800/80">
           <h2 className="text-lg font-bold text-text-light-primary dark:text-text-dark-primary">
             Diagnostico SRL Canvas
           </h2>
           <button
+            ref={initialFocusRef}
             type="button"
             className="rounded-md p-2 text-text-light-secondary hover:bg-zinc-100 dark:text-text-dark-secondary dark:hover:bg-zinc-800"
             onClick={onClose}

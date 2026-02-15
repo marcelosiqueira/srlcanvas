@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import type { GroupMeta } from "../data/srlBlocks";
+import { useDialogA11y } from "../hooks/useDialogA11y";
 
 interface GroupDetailsModalProps {
   group: GroupMeta;
@@ -7,6 +8,8 @@ interface GroupDetailsModalProps {
 }
 
 export function GroupDetailsModal({ group, onClose }: GroupDetailsModalProps) {
+  const { dialogRef, initialFocusRef } = useDialogA11y<HTMLButtonElement>(true);
+
   useEffect(() => {
     const onEsc = (event: KeyboardEvent) => {
       if (event.key === "Escape") onClose();
@@ -17,18 +20,21 @@ export function GroupDetailsModal({ group, onClose }: GroupDetailsModalProps) {
   }, [onClose]);
 
   return (
-    <div
-      className="fixed inset-0 z-40 flex items-end justify-center bg-slate-900/55 p-4 md:items-center"
-      role="dialog"
-      aria-modal="true"
-      aria-label={`Detalhamento do agrupamento ${group.name}`}
-    >
-      <div className="w-full max-w-2xl rounded-xl bg-card-light shadow-2xl dark:bg-card-dark">
+    <div className="fixed inset-0 z-40 flex items-end justify-center bg-slate-900/55 p-4 md:items-center">
+      <div
+        ref={dialogRef}
+        tabIndex={-1}
+        role="dialog"
+        aria-modal="true"
+        aria-label={`Detalhamento do agrupamento ${group.name}`}
+        className="w-full max-w-2xl rounded-xl bg-card-light shadow-2xl dark:bg-card-dark"
+      >
         <div className="flex items-center justify-between border-b border-zinc-200/80 p-4 dark:border-zinc-800/80">
           <h2 className="text-lg font-bold text-text-light-primary dark:text-text-dark-primary">
             Detalhamento do Agrupamento
           </h2>
           <button
+            ref={initialFocusRef}
             type="button"
             className="rounded-md p-2 text-text-light-secondary hover:bg-zinc-100 dark:text-text-dark-secondary dark:hover:bg-zinc-800"
             onClick={onClose}

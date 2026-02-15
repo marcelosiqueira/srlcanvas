@@ -25,6 +25,7 @@ describe("canvasSessionManager", () => {
       meta: makeInitialMeta(),
       blocks: makeInitialBlocks(),
       darkMode: false,
+      remoteCanvasId: null,
       storageScope: GUEST_CANVAS_SCOPE
     });
     useCanvasStore.getState().loadCanvasScope(GUEST_CANVAS_SCOPE);

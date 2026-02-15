@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useDialogA11y } from "../hooks/useDialogA11y";
 import type { CanvasBlockDefinition, CanvasBlockState } from "../types";
 
 interface BlockEditModalProps {
@@ -6,12 +7,33 @@ interface BlockEditModalProps {
   value: CanvasBlockState;
   onClose: () => void;
   onSave: (value: CanvasBlockState) => void;
+  onSaveAndNext?: (value: CanvasBlockState) => void;
+  showSaveAndNext?: boolean;
 }
 
-export function BlockEditModal({ block, value, onClose, onSave }: BlockEditModalProps) {
+const isTypingTarget = (target: EventTarget | null): boolean => {
+  if (!(target instanceof HTMLElement)) return false;
+  const tagName = target.tagName.toLowerCase();
+  return (
+    tagName === "input" ||
+    tagName === "textarea" ||
+    tagName === "select" ||
+    target.isContentEditable
+  );
+};
+
+export function BlockEditModal({
+  block,
+  value,
+  onClose,
+  onSave,
+  onSaveAndNext,
+  showSaveAndNext = false
+}: BlockEditModalProps) {
   const [notes, setNotes] = useState(value.notes);
   const [evidence, setEvidence] = useState(value.evidence);
   const [score, setScore] = useState<number>(value.score ?? 1);
+  const { dialogRef, initialFocusRef } = useDialogA11y<HTMLButtonElement>(true);
 
   useEffect(() => {
     const onEsc = (event: KeyboardEvent) => {
@@ -36,21 +58,65 @@ export function BlockEditModal({ block, value, onClose, onSave }: BlockEditModal
     });
   };
 
+  const saveAndNext = () => {
+    if (!onSaveAndNext) return;
+    onSaveAndNext({
+      score,
+      notes: notes.trim(),
+      evidence: evidence.trim()
+    });
+  };
+
   const missingEvidenceForAdvancedScore = score > 3 && evidence.trim().length === 0;
 
+  useEffect(() => {
+    const onShortcut = (event: KeyboardEvent) => {
+      if (event.key >= "1" && event.key <= "9" && !isTypingTarget(event.target)) {
+        setScore(Number(event.key));
+        return;
+      }
+
+      if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
+        event.preventDefault();
+        onSave({
+          score,
+          notes: notes.trim(),
+          evidence: evidence.trim()
+        });
+      }
+    };
+
+    window.addEventListener("keydown", onShortcut);
+    return () => window.removeEventListener("keydown", onShortcut);
+  }, [evidence, notes, onSave, score]);
+
   return (
-    <div
-      className="fixed inset-0 z-40 flex items-end justify-center bg-slate-900/55 p-4 md:items-center"
-      role="dialog"
-      aria-modal="true"
-      aria-label={`Editar bloco ${block.name}`}
-    >
-      <div className="max-h-[92vh] w-full max-w-3xl overflow-y-auto rounded-xl bg-card-light shadow-2xl dark:bg-card-dark">
+    <div className="fixed inset-0 z-40 flex items-end justify-center bg-slate-900/55 p-4 md:items-center">
+      <div
+        ref={dialogRef}
+        tabIndex={-1}
+        role="dialog"
+        aria-modal="true"
+        aria-label={`Editar bloco ${block.name}`}
+        className="max-h-[92vh] w-full max-w-3xl overflow-y-auto rounded-xl bg-card-light shadow-2xl dark:bg-card-dark"
+      >
         <div className="flex items-center justify-between border-b border-zinc-200/80 p-4 dark:border-zinc-800/80">
           <h2 className="text-lg font-bold text-text-light-primary dark:text-text-dark-primary">
             {block.id}. {block.name}
           </h2>
           <div className="flex items-center gap-2">
+            {showSaveAndNext && onSaveAndNext && (
+              <button
+                type="button"
+                className="inline-flex items-center gap-1 rounded-md border border-zinc-300 px-3 py-1.5 text-xs font-semibold text-text-light-secondary hover:bg-zinc-100 dark:border-zinc-700 dark:text-text-dark-secondary dark:hover:bg-zinc-800"
+                onClick={saveAndNext}
+              >
+                <span className="material-symbols-outlined text-sm" aria-hidden="true">
+                  skip_next
+                </span>
+                Proximo bloco
+              </button>
+            )}
             <button
               type="button"
               className="inline-flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-xs font-semibold text-white hover:brightness-110"
@@ -62,6 +128,7 @@ export function BlockEditModal({ block, value, onClose, onSave }: BlockEditModal
               Salvar
             </button>
             <button
+              ref={initialFocusRef}
               type="button"
               className="rounded-md p-2 text-text-light-secondary hover:bg-zinc-100 dark:text-text-dark-secondary dark:hover:bg-zinc-800"
               onClick={onClose}
@@ -183,10 +250,21 @@ export function BlockEditModal({ block, value, onClose, onSave }: BlockEditModal
               className="mt-2 w-full rounded-lg border-zinc-300 bg-zinc-50 p-3 text-sm text-text-light-primary focus:border-primary focus:ring-primary dark:border-zinc-700 dark:bg-zinc-800 dark:text-text-dark-primary"
             />
           </label>
-
         </div>
 
         <div className="flex justify-end gap-3 border-t border-zinc-200/80 p-4 dark:border-zinc-800/80">
+          {showSaveAndNext && onSaveAndNext && (
+            <button
+              type="button"
+              className="inline-flex items-center gap-1 rounded-lg border border-zinc-300 px-4 py-2 text-sm font-semibold text-text-light-secondary hover:bg-zinc-100 dark:border-zinc-700 dark:text-text-dark-secondary dark:hover:bg-zinc-800"
+              onClick={saveAndNext}
+            >
+              <span className="material-symbols-outlined text-base" aria-hidden="true">
+                skip_next
+              </span>
+              Proximo bloco
+            </button>
+          )}
           <button
             type="button"
             className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-semibold text-text-light-secondary hover:bg-zinc-100 dark:border-zinc-700 dark:text-text-dark-secondary dark:hover:bg-zinc-800"

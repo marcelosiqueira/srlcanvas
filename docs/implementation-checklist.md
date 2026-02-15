@@ -1,146 +1,109 @@
-# Implementation Checklist - Next Phase (Footer Sections + Auth + Database)
+# Implementation Checklist - Live Code Backlog
 
-## Objective
+Ultima atualizacao: 2026-02-15
 
-Expand the product from the current "Meu Canvas" implementation to a complete app with all footer sections:
+## 1. Objetivo
 
-- Dashboard
-- Meu Canvas
-- Novo Canvas
-- Minha Conta
+Executar melhorias de experiencia do SRL Canvas sem perder contexto metodologico,
+com rastreabilidade entre requisito, implementacao, validacao e evidencia academica.
 
-This phase includes backend adoption, authentication, and database persistence.
+## 2. Baseline Atual
 
-Monorepo baseline adopted:
+- Fluxo principal de avaliacao esta funcional (12 blocos, radar, score, exportacao).
+- TCLE e survey academico estao implementados.
+- CI configurada com lint, test, build e e2e.
+- Validacao recente executada:
+  - `pnpm check` (ok)
+  - `pnpm test:e2e` (ok)
 
-- `apps/web` for frontend
-- `apps/api` for backend
-- `packages/*` for shared modules
+## 3. Regras de Execucao
 
-## Execution Plan
+- Sempre trabalhar em incrementos pequenos e verificaveis.
+- Ao mudar comportamento do produto, atualizar docs no mesmo PR.
+- Priorizar itens com maior impacto para iniciantes, especialistas e banca academica.
+- Fechar cada item com criterio de pronto e evidencia de validacao.
 
-### 1. Initial Technical Decisions
+## 4. Backlog Priorizado (P0 -> P2)
 
-1. Choose backend strategy:
-   - Supabase (recommended for speed)
-   - Custom backend (Node/Nest + Postgres + JWT)
-2. Define authentication approach.
-3. Confirm multi-canvas model per user.
-4. Update product scope in `docs/PRD.md`.
+### P0 - Critico (confiabilidade e jornada principal)
 
-### 2. App Architecture
+- [x] P0.1 Persistencia remota completa no fluxo de uso
+  - Escopo: salvar/atualizar canvas remoto durante uso normal; abrir canvas remoto para continuidade.
+  - Evidencias: `canvasApi` usado fora da migracao inicial; fluxo completo testado.
+  - Criterio de pronto: usuario autenticado nao perde progresso ao trocar dispositivo/sessao.
 
-1. Add routing (`react-router-dom`) with:
-   - `/dashboard`
-   - `/canvas/:id`
-   - `/canvas/new`
-   - `/account`
-   - `/auth/*`
-2. Make footer navigation functional.
-3. Create app layout and route guards.
-4. Organize code by feature/service boundaries.
+- [x] P0.2 Onboarding guiado para primeiro uso
+  - Escopo: jornada curta orientada para iniciantes (metadados -> bloco 1 -> resultados).
+  - Evidencias: componentes de guia e estado de progresso inicial.
+  - Criterio de pronto: novo usuario consegue concluir primeira avaliacao sem instrucao externa.
 
-### 3. Data + Authentication Foundation
+- [x] P0.3 Melhoria de acessibilidade dos modais
+  - Escopo: focus trap, foco inicial, retorno de foco ao gatilho e navegacao por teclado.
+  - Evidencias: testes manuais e automatizados de teclado.
+  - Criterio de pronto: modais operaveis sem mouse.
 
-1. Create base schema:
-   - `profiles`
-   - `canvases`
-   - `canvas_versions` (optional)
-   - `block_scores`
-   - `evidences`
-2. Implement auth flows:
-   - signup
-   - login
-   - logout
-   - password reset
-3. Implement access control (user sees only own data).
-4. Build data access layer (read/write services).
+- [x] P0.4 Consistencia de entrada de dados (metadados)
+  - Escopo: padronizar campo de data e validacoes de metadados.
+  - Evidencias: formularios atualizados em `NewCanvasPage` e `CanvasPage`.
+  - Criterio de pronto: formato de data consistente e sem ambiguidade.
 
-### 4. Footer Sections Delivery
+### P1 - Alto impacto (adocao e medicao)
 
-1. Dashboard:
-   - list canvases
-   - quick status and score summary
-   - recent activity
-2. Meu Canvas:
-   - connect current page to database CRUD
-3. Novo Canvas:
-   - create blank canvas
-   - optional duplicate from existing
-4. Minha Conta:
-   - profile data
-   - preferences (theme)
-   - security basics
+- [x] P1.1 Survey academico em etapas com progresso
+  - Escopo: dividir questionario em secoes navegaveis com indicador de progresso.
+  - Evidencias: `ResearchSurveyPage` em 7 etapas, progresso visual, rascunho com etapa atual, governanca por variavel (`enabled`/`activeVersion`) e testes (`vitest` + `playwright`).
+  - Criterio de pronto: fluxo mais curto por etapa e rascunho consistente.
 
-### 5. Reliability and Security
+- [x] P1.2 Modo avancado para usuarios experientes
+  - Escopo: reduzir cliques para edicao rapida e revisao de blocos.
+  - Evidencias: toggle de modo avancado, filtros (`Todos/Pendentes/Pontuados`), acao `Proximo pendente`, ajuste rapido de score (`-1/+1`), atalhos de teclado (`N`, `R`, `F`, `1..9`, `Ctrl/Cmd+Enter`) e teste E2E dedicado.
+  - Criterio de pronto: avaliacao recorrente com menor tempo medio.
 
-1. Keep quality gates active:
-   - lint
-   - unit/integration tests
-   - build
-   - e2e
-2. Add e2e coverage for all footer sections.
-3. Validate auth and access protections.
-4. Add error handling and empty/loading states.
+- [x] P1.3 Historico de canvases com comparativo temporal
+  - Escopo: listar avaliacoes anteriores e comparar evolucao de score.
+  - Evidencias: secao `Historico e Comparativo Temporal` na `DashboardPage`, carregamento remoto por `listCanvasesByUser`, comparativo da avaliacao mais recente vs historico selecionado (delta de Total/Scorecard/CV/Blocos), lista temporal com `Ver Resultados`, utilitario dedicado `canvasHistory` e testes unitarios.
+  - Criterio de pronto: usuario consegue analisar evolucao entre aplicacoes.
 
-### 6. Production Readiness
+- [x] P1.4 Instrumentacao de metricas de produto
+  - Escopo: eventos essenciais (inicio, conclusao, abandono por etapa), sem dados sensiveis.
+  - Evidencias: servico `productMetrics` com dicionario tipado de eventos, coleta em `CanvasPage` e `ResearchSurveyPage`, relatorio agregado em `AccountPage`, documento `docs/product-metrics-events.md` e testes unitarios.
+  - Criterio de pronto: relatorio minimo de uso disponivel para iteracao.
 
-1. Configure environments (dev/staging/prod).
-2. Secure secrets and env vars.
-3. Define backup/recovery for database.
-4. Add monitoring/logging baseline.
-5. Run release checklist before deployment.
+### P2 - Evolucao estrutural (robustez e escala)
 
----
+- [x] P2.1 Code splitting por rotas
+  - Escopo: lazy loading de paginas e chunks menores.
+  - Evidencias: `App.tsx` migrado para `React.lazy + Suspense` em todas as rotas principais; build passou a gerar chunks por rota (ex.: `DashboardPage`, `CanvasPage`, `ResearchSurveyPage`), com reducao do chunk principal (de ~698 kB para ~397 kB no build local).
+  - Criterio de pronto: warning de chunk grande reduzido/mitigado.
 
-## Action Checklist (Sequential)
+- [x] P2.2 Expansao de testes E2E
+  - Escopo: cobrir onboarding, TCLE/survey completo, persistencia remota e exportacao.
+  - Evidencias: `apps/web/e2e/canvas-flow.spec.ts` expandido para 9 cenarios (onboarding guiado, avaliacao e resultados, persistencia apos reload, exportacao PNG/PDF, acessibilidade de foco no modal, survey com TCLE e envio, navegacao por etapas, modo avancado e cenario remoto opcional autenticado com Supabase via variaveis de ambiente); `playwright.config.ts` ajustado para permitir ativacao remota sem quebrar execucao local/CI.
+  - Criterio de pronto: fluxos criticos protegidos contra regressao.
 
-### Phase 0 - Decisions
+- [x] P2.3 Pacote de evidencias para dissertacao
+  - Escopo: consolidar metricas, versoes do instrumento e trilha de decisao.
+  - Evidencias: `docs/dissertation-evidence-package.md` com versoes congeladas do instrumento (survey/TCLE + fingerprint), consolidacao de metricas (produto + pesquisa), SQL base de extracao e trilha ADR para banca.
+  - Criterio de pronto: material pronto para banca com rastreabilidade tecnica.
 
-- [x] Choose backend (Supabase or custom backend)
-- [x] Choose auth implementation details
-- [ ] Confirm user-to-canvas ownership model
-- [ ] Update `docs/PRD.md` with expanded scope
+## 5. Critério de Pronto por Item
 
-### Phase 1 - Routing and Navigation
+1. Escopo implementado conforme PRD/workflow.
+2. Validacao automatica executada (`pnpm check`).
+3. Validacao manual do fluxo impactado.
+4. Documentacao atualizada (quando aplicavel).
+5. Riscos/pendencias registrados.
 
-- [x] Install and configure `react-router-dom`
-- [x] Implement route structure for all footer sections
-- [x] Connect footer buttons to real routes
-- [x] Add protected route logic for authenticated areas
+## 6. Cadencia Sugerida de Live Code
 
-### Phase 2 - Backend + Auth
+- Bloco semanal: 1 item P0 ou 1-2 itens P1 pequenos.
+- Encerramento da sessao:
+  - atualizar status deste checklist.
+  - registrar decisoes no `docs/technical-context.md`.
+  - confirmar proximo item com criterio de pronto.
 
-- [ ] Provision database project/environment
-- [x] Create schema and migrations
-- [x] Implement signup/login/logout/reset flows
-- [x] Implement authorization policies
-- [x] Add typed API/data service layer
+## 7. Dependencias e Riscos
 
-### Phase 3 - Feature Implementation
-
-- [ ] Migrate "Meu Canvas" persistence from local-only to remote
-- [ ] Implement "Novo Canvas" page and creation flow
-- [ ] Implement "Dashboard" page with canvas overview
-- [ ] Implement "Minha Conta" page
-
-### Phase 4 - Data Migration and UX Robustness
-
-- [x] Add localStorage -> database migration strategy
-- [ ] Implement loading, empty, and error states
-- [ ] Validate responsive behavior for new pages
-- [ ] Ensure accessibility basics in new views
-
-### Phase 5 - Quality and Release
-
-- [ ] Add/expand tests for new flows
-- [ ] Ensure CI pipeline passes fully
-- [ ] Validate security rules in practice
-- [ ] Run final release checklist
-
-## Done Criteria for This Plan
-
-- All 4 footer sections are functional and connected
-- Auth works end-to-end
-- Data is persisted in database with proper access controls
-- Quality gates pass (`lint`, `test`, `build`, `e2e`)
+- Dependencia de configuracao Supabase para cenarios remotos.
+- Risco de crescimento de escopo em survey e onboarding.
+- Risco de regressao UX em mobile se mudancas nao forem incrementalmente validadas.

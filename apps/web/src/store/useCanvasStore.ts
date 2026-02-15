@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { SRL_BLOCKS } from "../data/srlBlocks";
 import type { CanvasBlockState, CanvasMeta } from "../types";
+import { formatTodayIso, normalizeCanvasDate } from "../utils/canvasMeta";
 
 export const LEGACY_CANVAS_STORAGE_KEY = "srl-canvas-storage-v1";
 export const CANVAS_STORAGE_KEY_PREFIX = "srl-canvas-storage-v2";
@@ -10,15 +11,12 @@ export interface CanvasPersistedSnapshot {
   meta: CanvasMeta;
   blocks: Record<number, CanvasBlockState>;
   darkMode: boolean;
+  remoteCanvasId: string | null;
   updatedAt: string;
 }
 
 export const formatToday = (): string => {
-  const now = new Date();
-  const day = String(now.getDate()).padStart(2, "0");
-  const month = String(now.getMonth() + 1).padStart(2, "0");
-  const year = String(now.getFullYear());
-  return `${day}/${month}/${year}`;
+  return formatTodayIso();
 };
 
 const getSystemPrefersDark = (): boolean => {
@@ -48,7 +46,8 @@ const sanitizeMeta = (value: unknown): CanvasMeta | null => {
   if (!isRecord(value)) return null;
   const startup = typeof value.startup === "string" ? value.startup : "";
   const evaluator = typeof value.evaluator === "string" ? value.evaluator : "";
-  const date = typeof value.date === "string" && value.date.trim() ? value.date : formatToday();
+  const normalizedDate = typeof value.date === "string" ? normalizeCanvasDate(value.date) : null;
+  const date = normalizedDate ?? formatToday();
   return { startup, evaluator, date };
 };
 
@@ -82,9 +81,13 @@ const parsePersistedSnapshot = (raw: string | null): CanvasPersistedSnapshot | n
     if (!meta || !blocks) return null;
 
     const darkMode = typeof parsed.darkMode === "boolean" ? parsed.darkMode : false;
+    const remoteCanvasId =
+      typeof parsed.remoteCanvasId === "string" && parsed.remoteCanvasId.trim()
+        ? parsed.remoteCanvasId
+        : null;
     const updatedAt =
       typeof parsed.updatedAt === "string" ? parsed.updatedAt : new Date().toISOString();
-    return { meta, blocks, darkMode, updatedAt };
+    return { meta, blocks, darkMode, remoteCanvasId, updatedAt };
   } catch {
     return null;
   }
@@ -102,7 +105,7 @@ const parseLegacySnapshot = (raw: string | null): CanvasPersistedSnapshot | null
     if (!meta || !blocks) return null;
 
     const darkMode = typeof parsed.state.darkMode === "boolean" ? parsed.state.darkMode : false;
-    return { meta, blocks, darkMode, updatedAt: new Date().toISOString() };
+    return { meta, blocks, darkMode, remoteCanvasId: null, updatedAt: new Date().toISOString() };
   } catch {
     return null;
   }
@@ -146,11 +149,12 @@ export const hasMeaningfulCanvasData = (
 };
 
 const makeSnapshotFromState = (
-  state: Pick<CanvasStore, "meta" | "blocks" | "darkMode">
+  state: Pick<CanvasStore, "meta" | "blocks" | "darkMode" | "remoteCanvasId">
 ): CanvasPersistedSnapshot => ({
   meta: state.meta,
   blocks: state.blocks,
   darkMode: state.darkMode,
+  remoteCanvasId: state.remoteCanvasId,
   updatedAt: new Date().toISOString()
 });
 
@@ -158,13 +162,19 @@ interface CanvasStore {
   meta: CanvasMeta;
   blocks: Record<number, CanvasBlockState>;
   darkMode: boolean;
+  remoteCanvasId: string | null;
   storageScope: string;
   setMeta: (updates: Partial<CanvasMeta>) => void;
   updateBlock: (id: number, updates: Partial<CanvasBlockState>) => void;
   resetCanvas: () => void;
   toggleDarkMode: () => void;
+  setRemoteCanvasId: (id: string | null) => void;
   loadCanvasScope: (scope: string) => void;
-  replaceCanvas: (input: { meta: CanvasMeta; blocks: Record<number, CanvasBlockState> }) => void;
+  replaceCanvas: (input: {
+    meta: CanvasMeta;
+    blocks: Record<number, CanvasBlockState>;
+    remoteCanvasId?: string | null;
+  }) => void;
 }
 
 const guestSnapshot = readCanvasSnapshot(GUEST_CANVAS_SCOPE);
@@ -180,6 +190,7 @@ export const useCanvasStore = create<CanvasStore>()((set, get) => {
     meta: guestSnapshot?.meta ?? makeInitialMeta(),
     blocks: guestSnapshot?.blocks ?? makeInitialBlocks(),
     darkMode: initialDarkMode,
+    remoteCanvasId: guestSnapshot?.remoteCanvasId ?? null,
     storageScope: GUEST_CANVAS_SCOPE,
     setMeta: (updates) => {
       set((state) => ({ meta: { ...state.meta, ...updates } }));
@@ -208,18 +219,28 @@ export const useCanvasStore = create<CanvasStore>()((set, get) => {
       set((state) => ({ darkMode: !state.darkMode }));
       persistCurrentScope();
     },
+    setRemoteCanvasId: (id) => {
+      set({ remoteCanvasId: id });
+      persistCurrentScope();
+    },
     loadCanvasScope: (scope) => {
       const snapshot = readCanvasSnapshot(scope);
       set((state) => ({
         storageScope: scope,
         meta: snapshot?.meta ?? makeInitialMeta(),
         blocks: snapshot?.blocks ?? makeInitialBlocks(),
+        remoteCanvasId: snapshot?.remoteCanvasId ?? null,
         darkMode: snapshot?.darkMode ?? state.darkMode
       }));
       persistCurrentScope();
     },
-    replaceCanvas: ({ meta, blocks }) => {
-      set({ meta, blocks });
+    replaceCanvas: ({ meta, blocks, remoteCanvasId }) => {
+      const normalizedDate = normalizeCanvasDate(meta.date);
+      set({
+        meta: { ...meta, date: normalizedDate ?? formatToday() },
+        blocks,
+        remoteCanvasId: remoteCanvasId ?? null
+      });
       persistCurrentScope();
     }
   };

@@ -1,10 +1,10 @@
 import {
   DIMENSION_ASSERTIONS,
   RESEARCH_CONSENT_VERSION,
-  RESEARCH_SURVEY_VERSION,
   SUS_ITEMS,
   SURVEY_DIMENSIONS
 } from "../data/researchSurvey";
+import { RESEARCH_SURVEY_CONFIG } from "../config/researchSurveyConfig";
 import { supabase } from "../lib/supabase";
 import type { Likert5, ResearchSurveyFormValues, YesNoAnswer } from "../types/researchSurvey";
 
@@ -33,6 +33,7 @@ interface StoredSurveyDraft {
   values: ResearchSurveyFormValues;
   nextPath: string;
   startedAtIso?: string;
+  currentStepKey?: string;
   updatedAt: string;
 }
 
@@ -117,11 +118,13 @@ export function saveResearchSurveyDraft(input: {
   values: ResearchSurveyFormValues;
   nextPath: string;
   startedAtIso?: string | null;
+  currentStepKey?: string;
 }): void {
   const payload: StoredSurveyDraft = {
     values: input.values,
     nextPath: input.nextPath,
     startedAtIso: input.startedAtIso ?? undefined,
+    currentStepKey: input.currentStepKey,
     updatedAt: new Date().toISOString()
   };
 
@@ -191,7 +194,7 @@ const buildPayload = ({ userId, values, nextPath, startedAtIso }: SaveResearchSu
       allows_anonymous_quotes: toBoolean(values.allowsAnonymousQuotes)
     },
     metadata: {
-      survey_version: RESEARCH_SURVEY_VERSION,
+      survey_version: RESEARCH_SURVEY_CONFIG.activeVersion,
       submitted_from_route: "/survey",
       next_path: nextPath,
       user_agent: typeof navigator !== "undefined" ? navigator.userAgent : "unknown",

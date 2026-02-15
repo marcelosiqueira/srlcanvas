@@ -2,19 +2,32 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppHeader } from "../components/AppHeader";
 import { FooterNav } from "../components/FooterNav";
+import { RESEARCH_SURVEY_CONFIG } from "../config/researchSurveyConfig";
 import { formatToday, useCanvasStore } from "../store/useCanvasStore";
+import { validateCanvasMeta } from "../utils/canvasMeta";
 
 export function NewCanvasPage() {
   const navigate = useNavigate();
-  const { resetCanvas, setMeta } = useCanvasStore();
+  const { resetCanvas, setMeta, setRemoteCanvasId } = useCanvasStore();
   const [startup, setStartup] = useState("");
   const [evaluator, setEvaluator] = useState("");
   const [date, setDate] = useState(formatToday());
+  const [attemptedSubmit, setAttemptedSubmit] = useState(false);
+
+  const metaValidation = validateCanvasMeta({ startup, evaluator, date });
 
   const createCanvas = () => {
+    setAttemptedSubmit(true);
+    if (!metaValidation.isValid) return;
+
     resetCanvas();
-    setMeta({ startup, evaluator, date });
-    navigate("/survey/consent?next=/canvas");
+    setRemoteCanvasId(null);
+    setMeta({
+      startup: startup.trim(),
+      evaluator: evaluator.trim(),
+      date
+    });
+    navigate(RESEARCH_SURVEY_CONFIG.enabled ? "/survey/consent?next=/canvas" : "/canvas");
   };
 
   return (
@@ -36,6 +49,7 @@ export function NewCanvasPage() {
                 className="mt-1 block w-full rounded-md border-zinc-300 bg-zinc-50 p-2 text-sm text-text-light-primary shadow-sm focus:border-primary focus:ring-primary dark:border-zinc-700 dark:bg-zinc-800 dark:text-text-dark-primary"
                 value={startup}
                 onChange={(event) => setStartup(event.target.value)}
+                aria-invalid={attemptedSubmit && !metaValidation.startupValid}
                 type="text"
               />
             </label>
@@ -48,6 +62,7 @@ export function NewCanvasPage() {
                 className="mt-1 block w-full rounded-md border-zinc-300 bg-zinc-50 p-2 text-sm text-text-light-primary shadow-sm focus:border-primary focus:ring-primary dark:border-zinc-700 dark:bg-zinc-800 dark:text-text-dark-primary"
                 value={evaluator}
                 onChange={(event) => setEvaluator(event.target.value)}
+                aria-invalid={attemptedSubmit && !metaValidation.evaluatorValid}
                 type="text"
               />
             </label>
@@ -60,11 +75,17 @@ export function NewCanvasPage() {
                 className="mt-1 block w-full rounded-md border-zinc-300 bg-zinc-50 p-2 text-sm text-text-light-primary shadow-sm focus:border-primary focus:ring-primary dark:border-zinc-700 dark:bg-zinc-800 dark:text-text-dark-primary"
                 value={date}
                 onChange={(event) => setDate(event.target.value)}
-                placeholder="dd/mm/aaaa"
-                type="text"
+                aria-invalid={attemptedSubmit && !metaValidation.dateValid}
+                type="date"
               />
             </label>
           </div>
+
+          {attemptedSubmit && !metaValidation.isValid && (
+            <p className="mt-3 text-xs text-amber-700 dark:text-amber-300">
+              Preencha Startup, Avaliador e Data valida antes de criar o canvas.
+            </p>
+          )}
 
           <button
             className="mt-4 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:brightness-110"

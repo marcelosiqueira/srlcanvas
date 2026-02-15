@@ -19,6 +19,7 @@ interface SyncCanvasScopeInput {
 let lastSyncRequest = 0;
 
 const toSnapshotFromRemote = (input: {
+  remoteCanvasId: string;
   meta: CanvasMeta;
   blocks: Record<number, CanvasBlockState>;
   darkMode: boolean;
@@ -26,6 +27,7 @@ const toSnapshotFromRemote = (input: {
   meta: input.meta,
   blocks: input.blocks,
   darkMode: input.darkMode,
+  remoteCanvasId: input.remoteCanvasId,
   updatedAt: new Date().toISOString()
 });
 
@@ -61,6 +63,7 @@ export async function syncCanvasScopeForSession(input: SyncCanvasScopeInput): Pr
       meta: guestSnapshot.meta,
       blocks: guestSnapshot.blocks,
       darkMode: guestSnapshot.darkMode,
+      remoteCanvasId: null,
       updatedAt: new Date().toISOString()
     };
     userSnapshot = claimedSnapshot;
@@ -68,11 +71,16 @@ export async function syncCanvasScopeForSession(input: SyncCanvasScopeInput): Pr
     removeCanvasSnapshot(GUEST_CANVAS_SCOPE);
 
     try {
-      await saveCanvas({
+      const savedCanvas = await saveCanvas({
         userId: input.userId,
         meta: claimedSnapshot.meta,
         blocks: claimedSnapshot.blocks
       });
+      userSnapshot = {
+        ...claimedSnapshot,
+        remoteCanvasId: savedCanvas.id
+      };
+      writeCanvasSnapshot(userScope, userSnapshot);
     } catch (error) {
       console.error("Falha ao salvar migracao inicial do canvas no Supabase:", error);
     }
@@ -84,6 +92,7 @@ export async function syncCanvasScopeForSession(input: SyncCanvasScopeInput): Pr
       const latestRemote = remoteCanvases[0];
       if (latestRemote) {
         userSnapshot = toSnapshotFromRemote({
+          remoteCanvasId: latestRemote.id,
           meta: latestRemote.meta,
           blocks: latestRemote.blocks,
           darkMode: currentDarkMode

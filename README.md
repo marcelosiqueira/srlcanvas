@@ -106,6 +106,19 @@ pnpm format
 pnpm format:check
 ```
 
+### E2E remoto (opcional)
+
+Para habilitar o cenario E2E de persistencia remota autenticada (Supabase), defina:
+
+```env
+VITE_SUPABASE_URL=https://YOUR_PROJECT.supabase.co
+VITE_SUPABASE_ANON_KEY=YOUR_ANON_KEY
+E2E_REMOTE_EMAIL=usuario_teste@example.com
+E2E_REMOTE_PASSWORD=senha_do_usuario_teste
+```
+
+Sem essas variaveis, o cenario remoto fica `skip` e os demais testes E2E locais continuam executando.
+
 ## Supabase (Auth + Banco)
 
 O frontend funciona em modo local mesmo sem Supabase configurado.
@@ -118,7 +131,22 @@ Para habilitar auth e persistencia remota:
 ```env
 VITE_SUPABASE_URL=https://YOUR_PROJECT.supabase.co
 VITE_SUPABASE_ANON_KEY=YOUR_ANON_KEY
+VITE_RESEARCH_SURVEY_ENABLED=true
+VITE_RESEARCH_SURVEY_ACTIVE_VERSION=questionario_quantitativo_srl_canvas_revisado_2025-11-28
+VITE_PRODUCT_METRICS_ENABLED=true
 ```
+
+Variaveis da pesquisa academica:
+
+- `VITE_RESEARCH_SURVEY_ENABLED`:
+  - `true`: exibe TCLE + questionario.
+  - `false`: desativa o fluxo de survey no app (rotas e CTAs).
+- `VITE_RESEARCH_SURVEY_ACTIVE_VERSION`:
+  - registra a versao ativa do instrumento nos payloads de consentimento e survey.
+  - recomendacao: manter alinhada ao instrumento aprovado no comite de etica.
+- `VITE_PRODUCT_METRICS_ENABLED`:
+  - `true`: habilita instrumentacao local de eventos de produto (inicio/conclusao/abandono).
+  - `false`: desabilita coleta local de metricas.
 
 3. Aplicar migracao SQL:
 
@@ -139,6 +167,9 @@ Com a API rodando localmente:
 - `docs/output-patterns.md`
 - `docs/progressive-disclosure-patterns.md`
 - `docs/implementation-checklist.md`
+- `docs/technical-context.md`
+- `docs/product-metrics-events.md`
+- `docs/dissertation-evidence-package.md`
 - `docs/LGPD.md`
 - `docs/TCLE.md`
 

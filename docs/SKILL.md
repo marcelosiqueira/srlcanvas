@@ -51,6 +51,7 @@ Padronizar como agentes de IA colaboram neste projeto, com foco em qualidade, ra
 
 - Preferir alteracoes incrementais em vez de refatoracoes grandes.
 - Em mudancas de dominio, atualizar tambem `PRD.md` e `workflows.md`.
+- Em mudancas de arquitetura/decisoes tecnicas, atualizar `technical-context.md`.
 - Em mudancas de formato de resposta da IA, atualizar `output-patterns.md`.
 - Em mudancas de UX informacional, atualizar `progressive-disclosure-patterns.md`.
 
