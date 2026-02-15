@@ -41,7 +41,7 @@ Fundadores e avaliadores tendem a superestimar maturidade por opiniao. Falta uma
 9. Exportar resultados em PNG e PDF.
 10. Resetar canvas atual sob confirmacao.
 11. Persistir dados no `localStorage` com isolamento por escopo (`guest` e por `user_id` autenticado).
-12. Suportar tema claro/escuro.
+12. Suportar tema claro/escuro, com preferencia inicial baseada em `prefers-color-scheme` do navegador/sistema.
 13. Exibir landing page publica em `/` com CTA para login/cadastro (ou entrada direta no app quando auth estiver desabilitado), incluindo blocos de "Sobre o Projeto" e "Material de Apoio (Uso Offline)".
 14. Disponibilizar logout rapido no header das telas autenticadas, com redirecionamento para a landing page (`/`).
 

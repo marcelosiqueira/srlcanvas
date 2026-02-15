@@ -21,6 +21,14 @@ export const formatToday = (): string => {
   return `${day}/${month}/${year}`;
 };
 
+const getSystemPrefersDark = (): boolean => {
+  if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
+    return false;
+  }
+
+  return window.matchMedia("(prefers-color-scheme: dark)").matches;
+};
+
 export const makeInitialBlocks = (): Record<number, CanvasBlockState> =>
   SRL_BLOCKS.reduce<Record<number, CanvasBlockState>>((acc, block) => {
     acc[block.id] = { score: null, notes: "", evidence: "" };
@@ -74,7 +82,8 @@ const parsePersistedSnapshot = (raw: string | null): CanvasPersistedSnapshot | n
     if (!meta || !blocks) return null;
 
     const darkMode = typeof parsed.darkMode === "boolean" ? parsed.darkMode : false;
-    const updatedAt = typeof parsed.updatedAt === "string" ? parsed.updatedAt : new Date().toISOString();
+    const updatedAt =
+      typeof parsed.updatedAt === "string" ? parsed.updatedAt : new Date().toISOString();
     return { meta, blocks, darkMode, updatedAt };
   } catch {
     return null;
@@ -99,7 +108,8 @@ const parseLegacySnapshot = (raw: string | null): CanvasPersistedSnapshot | null
   }
 };
 
-export const getCanvasStorageKey = (scope: string): string => `${CANVAS_STORAGE_KEY_PREFIX}:${scope}`;
+export const getCanvasStorageKey = (scope: string): string =>
+  `${CANVAS_STORAGE_KEY_PREFIX}:${scope}`;
 
 export const readCanvasSnapshot = (scope: string): CanvasPersistedSnapshot | null =>
   parsePersistedSnapshot(window.localStorage.getItem(getCanvasStorageKey(scope)));
@@ -158,6 +168,7 @@ interface CanvasStore {
 }
 
 const guestSnapshot = readCanvasSnapshot(GUEST_CANVAS_SCOPE);
+const initialDarkMode = guestSnapshot?.darkMode ?? getSystemPrefersDark();
 
 export const useCanvasStore = create<CanvasStore>()((set, get) => {
   const persistCurrentScope = () => {
@@ -168,7 +179,7 @@ export const useCanvasStore = create<CanvasStore>()((set, get) => {
   return {
     meta: guestSnapshot?.meta ?? makeInitialMeta(),
     blocks: guestSnapshot?.blocks ?? makeInitialBlocks(),
-    darkMode: guestSnapshot?.darkMode ?? false,
+    darkMode: initialDarkMode,
     storageScope: GUEST_CANVAS_SCOPE,
     setMeta: (updates) => {
       set((state) => ({ meta: { ...state.meta, ...updates } }));
