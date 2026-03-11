@@ -62,6 +62,8 @@ Falta uma ferramenta simples e estruturada que force evidencias e destaque deseq
 20. Para usuario autenticado com Supabase habilitado, sincronizar canvas remoto automaticamente durante a edicao, sem etapa manual de confirmacao na dashboard.
 21. Exibir historico remoto de aplicacoes na dashboard e permitir comparativo temporal basico da avaliacao mais recente contra uma avaliacao anterior (delta de total, scorecard, CV e blocos preenchidos).
 22. Instrumentar eventos essenciais de produto (inicio, conclusao e abandono por etapa) sem dados sensiveis, com relatorio agregado minimo disponivel para iteracao.
+23. No cadastro autenticado, coletar `nome`, `email` e `senha`, salvando o nome no metadata da conta em `name` para identificacao basica do usuario.
+24. Em `Minha Conta`, permitir editar `nome` e sincronizar alteracao no metadata da conta autenticada em `name`.
 
 ## 8. Requisitos Nao Funcionais
 

@@ -34,7 +34,7 @@ async function seedConsent(page: Page): Promise<void> {
 test("shows guided first-evaluation onboarding", async ({ page }) => {
   await openCanvas(page);
 
-  await expect(page.getByText("Primeira avaliacao guiada")).toBeVisible();
+  await expect(page.getByText("Primeira avaliação guiada")).toBeVisible();
   await expect(page.getByText(/Passo 1 de 3/i)).toBeVisible();
 
   await page.getByLabel("Startup").fill("Startup Onboarding");
@@ -43,15 +43,15 @@ test("shows guided first-evaluation onboarding", async ({ page }) => {
 
   await page.getByRole("button", { name: "Abrir bloco 1" }).click();
   await page.locator('input[type="range"]').fill("4");
-  await page.getByLabel("Evidencias").fill("Entrevistas com clientes");
+  await page.getByLabel("Evidências").fill("Entrevistas com clientes");
   await page.getByLabel("Notas do bloco").fill("Guia validado");
   await page.getByRole("button", { name: "Salvar" }).first().click();
   await expect(page.getByText(/Passo 3 de 3/i)).toBeVisible();
 
   await page.getByRole("button", { name: "Abrir resultados" }).click();
-  await expect(page.getByRole("heading", { name: "Diagnostico SRL Canvas" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Diagnóstico SRL Canvas" })).toBeVisible();
   await page.getByLabel("Fechar").first().click();
-  await expect(page.getByText("Primeira avaliacao guiada")).toBeHidden();
+  await expect(page.getByText("Primeira avaliação guiada")).toBeHidden();
 });
 
 test("can evaluate one block and open results modal", async ({ page }) => {
@@ -63,13 +63,13 @@ test("can evaluate one block and open results modal", async ({ page }) => {
   await page.getByRole("button", { name: /1\. Problema \/ Oportunidade/ }).click();
   await page.getByLabel("Notas do bloco").fill("Validacao inicial com entrevistas");
   await page.locator('input[type="range"]').fill("4");
-  await page.getByLabel("Evidencias").fill("Link para entrevistas e relatorio");
+  await page.getByLabel("Evidências").fill("Link para entrevistas e relatorio");
   await page.getByRole("button", { name: "Salvar" }).first().click();
 
   await expect(page.getByText("Nota: 4/9")).toBeVisible();
 
   await page.getByRole("button", { name: "Ver Resultados" }).click();
-  await expect(page.getByRole("heading", { name: "Diagnostico SRL Canvas" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Diagnóstico SRL Canvas" })).toBeVisible();
   await expect(page.getByText("4 / 108", { exact: true })).toBeVisible();
 });
 
@@ -80,7 +80,7 @@ test("persists canvas progress after reload", async ({ page }) => {
   await page.getByLabel("Avaliador").fill("Equipe Persist");
   await page.getByRole("button", { name: /1\. Problema \/ Oportunidade/ }).click();
   await page.locator('input[type="range"]').fill("6");
-  await page.getByLabel("Evidencias").fill("Persistencia local validada");
+  await page.getByLabel("Evidências").fill("Persistencia local validada");
   await page.getByLabel("Notas do bloco").fill("Primeiro bloco salvo");
   await page.getByRole("button", { name: "Salvar" }).first().click();
   await expect(page.getByText("Nota: 6/9")).toBeVisible();
@@ -99,12 +99,12 @@ test("exports results in PNG and PDF", async ({ page }) => {
   await page.getByLabel("Avaliador").fill("Equipe Export");
   await page.getByRole("button", { name: /1\. Problema \/ Oportunidade/ }).click();
   await page.locator('input[type="range"]').fill("5");
-  await page.getByLabel("Evidencias").fill("Evidencia para exportacao");
+  await page.getByLabel("Evidências").fill("Evidencia para exportacao");
   await page.getByLabel("Notas do bloco").fill("Teste de exportacao");
   await page.getByRole("button", { name: "Salvar" }).first().click();
 
   await page.getByRole("button", { name: "Ver Resultados" }).click();
-  await expect(page.getByRole("heading", { name: "Diagnostico SRL Canvas" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Diagnóstico SRL Canvas" })).toBeVisible();
 
   const pngDownloadPromise = page.waitForEvent("download");
   await page.getByRole("button", { name: "Exportar PNG" }).click();
@@ -147,14 +147,14 @@ test("submits academic survey with TCLE consent (triage completion path)", async
 
   await expect(page.getByText("Etapa 1 de 7")).toBeVisible();
   await page.getByRole("group", { name: /1\.1/ }).getByText("Sim").click();
-  await page.getByRole("group", { name: /1\.2/ }).getByText("Nao").click();
+  await page.getByRole("group", { name: /1\.2/ }).getByText("Não").click();
   await page.getByRole("group", { name: /1\.3/ }).getByText("Sim").click();
   await expect(
-    page.getByText(/nao se enquadra no perfil de elegibilidade completa/i)
+    page.getByText(/não se enquadra no perfil de elegibilidade completa/i)
   ).toBeVisible();
   await page.getByRole("button", { name: "Enviar triagem" }).click();
 
-  await expect(page.getByText("Obrigado pela sua contribuicao")).toBeVisible();
+  await expect(page.getByText("Obrigado pela sua contribuição")).toBeVisible();
   await expect(page.getByText(/Protocolo:/)).toBeVisible();
 });
 
@@ -164,20 +164,20 @@ test("navigates survey by steps with progress", async ({ page }) => {
 
   await expect(page.getByText("Etapa 1 de 7")).toBeVisible();
 
-  const ageGroup = page.getByRole("group", { name: "1.1 Voce possui 18 anos ou mais?" });
+  const ageGroup = page.getByRole("group", { name: "1.1 Você possui 18 anos ou mais?" });
   await ageGroup.getByText("Sim").click();
 
   const ecosystemGroup = page.getByRole("group", {
-    name: "1.2 Voce atua ou atuou no ecossistema de inovacao/startups nos ultimos 12 meses?"
+    name: "1.2 Você atua ou atuou no ecossistema de inovação/startups nos últimos 12 meses?"
   });
   await ecosystemGroup.getByText("Sim").click();
 
   const materialGroup = page.getByRole("group", {
-    name: "1.3 Antes de responder, voce visualizou o SRL Canvas e o guia breve de aplicacao?"
+    name: "1.3 Antes de responder, você visualizou o SRL Canvas e o guia breve de aplicação?"
   });
   await materialGroup.getByText("Sim").click();
 
-  await page.getByRole("button", { name: "Proxima etapa" }).click();
+  await page.getByRole("button", { name: "Próxima etapa" }).click();
 
   await expect(page.getByText("Etapa 2 de 7")).toBeVisible();
   await expect(page.getByText("3. Perfil do respondente")).toBeVisible();
@@ -186,10 +186,10 @@ test("navigates survey by steps with progress", async ({ page }) => {
 test("uses advanced mode quick actions and shortcuts", async ({ page }) => {
   await openCanvas(page);
 
-  await page.getByRole("button", { name: /Modo avancado inativo/i }).click();
-  await expect(page.getByRole("button", { name: /Modo avancado ativo/i })).toBeVisible();
+  await page.getByRole("button", { name: /Modo avançado inativo/i }).click();
+  await expect(page.getByRole("button", { name: /Modo avançado ativo/i })).toBeVisible();
 
-  await page.getByRole("button", { name: "Proximo pendente" }).click();
+  await page.getByRole("button", { name: "Próximo pendente" }).click();
   await expect(
     page.getByRole("dialog", { name: /Editar bloco Problema \/ Oportunidade/ })
   ).toBeVisible();
@@ -222,7 +222,7 @@ test("syncs canvas remotely for authenticated user when Supabase is configured",
   await page.getByLabel("Avaliador").fill("Equipe E2E");
   await page.getByRole("button", { name: /1\. Problema \/ Oportunidade/ }).click();
   await page.locator('input[type="range"]').fill("6");
-  await page.getByLabel("Evidencias").fill("E2E remote evidence");
+  await page.getByLabel("Evidências").fill("E2E remote evidence");
   await page.getByLabel("Notas do bloco").fill("E2E remote persistence");
   await page.getByRole("button", { name: "Salvar" }).first().click();
 

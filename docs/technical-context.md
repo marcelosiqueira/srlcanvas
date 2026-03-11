@@ -194,6 +194,22 @@ facilitando continuidade entre sessoes e justificativa tecnica para avaliacao ac
 - Motivo: elevar clareza linguistica e qualidade percebida da plataforma sem quebrar compatibilidade
   de dados e regras existentes.
 
+### ADR-017 - Cadastro com nome obrigatorio
+
+- Status: aprovado.
+- Decisao: incluir campo `Nome` obrigatorio na `SignupPage` e enviar o valor no `signUp` para o
+  Supabase Auth em `user_metadata` (`name`).
+- Motivo: melhorar identificacao basica da conta e preparar exibicoes futuras sem depender apenas do
+  e-mail do usuario.
+
+### ADR-018 - Edicao de nome em Minha Conta
+
+- Status: aprovado.
+- Decisao: adicionar secao `Perfil` em `AccountPage` com campo editavel `Nome`, carregando o valor
+  atual pelo metadata do Auth; ao salvar, sincronizar apenas metadata (`name`) do usuario autenticado.
+- Motivo: permitir manutencao de identificacao da conta apos cadastro, mantendo consistencia entre
+  perfil exibido no app e dados de autenticacao.
+
 ## 8. Rastreabilidade de Escopo
 
 Para cada melhoria implementada, registrar:

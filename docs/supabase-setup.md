@@ -21,6 +21,7 @@ VITE_SUPABASE_ANON_KEY=YOUR_ANON_KEY
 
 1. Abrir SQL Editor no Supabase.
 2. Executar `infra/supabase/migrations/0001_init.sql`.
+3. Executar `infra/supabase/migrations/0002_drop_profiles_full_name.sql`.
 
 ## 4. Validar
 

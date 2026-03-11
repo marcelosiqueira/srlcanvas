@@ -6,6 +6,7 @@ import { useAuth } from "../auth/AuthProvider";
 export function SignupPage() {
   const navigate = useNavigate();
   const { signUp, user, isEnabled } = useAuth();
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -21,9 +22,13 @@ export function SignupPage() {
 
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (!name.trim()) {
+      setError("Informe seu nome para criar a conta.");
+      return;
+    }
     setLoading(true);
     setError(null);
-    const result = await signUp(email, password);
+    const result = await signUp(name, email, password);
     setLoading(false);
 
     if (result.error) {
@@ -45,6 +50,19 @@ export function SignupPage() {
         </h1>
 
         <label className="mt-4 block">
+          <span className="text-xs font-medium text-text-light-secondary dark:text-text-dark-secondary">
+            Nome
+          </span>
+          <input
+            className="mt-1 block w-full rounded-md border-zinc-300 bg-zinc-50 p-2 text-sm text-text-light-primary shadow-sm focus:border-primary focus:ring-primary dark:border-zinc-700 dark:bg-zinc-800 dark:text-text-dark-primary"
+            value={name}
+            onChange={(event) => setName(event.target.value)}
+            type="text"
+            required
+          />
+        </label>
+
+        <label className="mt-3 block">
           <span className="text-xs font-medium text-text-light-secondary dark:text-text-dark-secondary">
             Email
           </span>

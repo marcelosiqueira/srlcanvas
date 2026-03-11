@@ -19,6 +19,9 @@
 1. Acessar `/` (landing page publica).
 2. Clicar em `Entrar` ou `Criar conta` quando auth estiver habilitado.
 3. Concluir autenticacao.
+   - Cadastro: informar `Nome`, `Email` e `Senha`.
+   - Cadastro: nome salvo no metadata da conta (`name`).
+   - Login: informar `Email` e `Senha`.
 4. Seguir para `/dashboard` e iniciar fluxo de avaliacao.
 
 ## 1.2 Workflow: Pesquisa Academica (TCLE -> Survey)
@@ -56,6 +59,16 @@
 4. Se houver saida sem envio final na survey, sistema registra abandono da etapa atual.
 5. Abrir `Minha Conta` para consultar relatorio agregado local (inicio, conclusao, abandono e taxa).
 6. Usar relatorio para iterar UX e reduzir abandono, sem coletar dados sensiveis.
+
+## 1.5 Workflow: Minha Conta (Edicao de Nome)
+
+1. Acessar `Minha Conta`.
+2. Confirmar usuario autenticado com Supabase ativo.
+3. Na secao `Perfil`, visualizar identificacao de autenticacao (email e acao `Sair`).
+4. Carregar nome atual a partir do metadata da conta autenticada.
+5. Editar campo `Nome`.
+6. Salvar alteracao.
+7. Sistema sincroniza nome no metadata (`name`) do usuario autenticado.
 
 ## 2. Workflow: Live Code de Melhorias (Time)
 
