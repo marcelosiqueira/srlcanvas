@@ -6,7 +6,7 @@ import { useCanvasStore } from "../store/useCanvasStore";
 
 const SRL_DOWNLOADS = [
   {
-    label: "Baixar Guia de Aplicacao",
+    label: "Baixar Guia de Aplicação",
     href: "/downloads/guia-aplicacao-srl-canvas.pdf"
   },
   {
@@ -14,7 +14,7 @@ const SRL_DOWNLOADS = [
     href: "/downloads/srl-canvas-modelo-manual.pdf"
   },
   {
-    label: "Baixar Grafico Radar",
+    label: "Baixar Gráfico Radar",
     href: "/downloads/grafico-radar-srl-canvas.pdf"
   }
 ] as const;
@@ -22,7 +22,7 @@ const SRL_DOWNLOADS = [
 const SEO_TITLE =
   "SRL Canvas | Ferramenta Visual para Diagnóstico e Orientação Estratégica de Startups";
 const SEO_DESCRIPTION =
-  "Facilite a aplicacao do SRL Canvas com 12 blocos, evidencias, grafico radar e scorecard comparavel para startups.";
+  "Facilite a aplicação do SRL Canvas com 12 blocos, evidências, gráfico radar e scorecard comparável para startups.";
 
 const upsertMetaTag = (selector: string, attrs: Record<string, string>, content: string) => {
   let node = document.head.querySelector<HTMLMetaElement>(selector);
@@ -141,12 +141,12 @@ export function LandingPage() {
             Ferramenta Visual para Diagnóstico e Orientação Estratégica de Startups
           </p>
           <h1 className="mt-3 text-4xl font-bold tracking-tight text-text-light-primary dark:text-text-dark-primary md:text-6xl">
-            Avalie os 12 blocos do SRL Canvas com evidencias e score comparavel.
+            Avalie os 12 blocos do SRL Canvas com evidências e score comparável.
           </h1>
           <p className="mt-5 max-w-2xl text-base text-text-light-secondary dark:text-text-dark-secondary md:text-lg">
-            Esta plataforma foi criada para facilitar a aplicacao do SRL Canvas na pratica: organize
-            a avaliacao, visualize desequilibrios no radar e gere um scorecard com consistencia
-            metodologica.
+            Esta plataforma foi criada para facilitar a aplicação do SRL Canvas na prática: organize
+            a avaliação, visualize desequilíbrios no radar e gere um scorecard com consistência
+            metodológica.
           </p>
 
           <div className="mt-8 flex flex-wrap gap-3">
@@ -168,7 +168,7 @@ export function LandingPage() {
 
           {!isEnabled && (
             <p className="mt-4 text-xs text-text-light-secondary dark:text-text-dark-secondary">
-              Modo local ativo. Configure o Supabase para habilitar autenticacao e persistencia
+              Modo local ativo. Configure o Supabase para habilitar autenticação e persistência
               remota.
             </p>
           )}
@@ -180,24 +180,24 @@ export function LandingPage() {
               Escala guiada
             </h2>
             <p className="mt-2 text-sm text-text-light-secondary dark:text-text-dark-secondary">
-              Aplique notas de 1 a 9 com registro de evidencia por bloco para sustentar cada
-              avaliacao.
+              Aplique notas de 1 a 9 com registro de evidência por bloco para sustentar cada
+              avaliação.
             </p>
           </article>
           <article className="rounded-2xl border border-zinc-200/80 bg-card-light p-5 dark:border-zinc-800/80 dark:bg-card-dark">
             <h2 className="text-sm font-semibold text-text-light-primary dark:text-text-dark-primary">
-              Analise visual
+              Análise visual
             </h2>
             <p className="mt-2 text-sm text-text-light-secondary dark:text-text-dark-secondary">
-              Enxergue lacunas com radar de 12 dimensoes e priorize os pontos de maior risco.
+              Enxergue lacunas com radar de 12 dimensões e priorize os pontos de maior risco.
             </p>
           </article>
           <article className="rounded-2xl border border-zinc-200/80 bg-card-light p-5 dark:border-zinc-800/80 dark:bg-card-dark">
             <h2 className="text-sm font-semibold text-text-light-primary dark:text-text-dark-primary">
-              Exportacao pronta
+              Exportação pronta
             </h2>
             <p className="mt-2 text-sm text-text-light-secondary dark:text-text-dark-secondary">
-              Gere PNG e PDF para compartilhar resultados com equipe, mentores e comites.
+              Gere PNG e PDF para compartilhar resultados com equipe, mentores e comitês.
             </p>
           </article>
         </section>
@@ -207,9 +207,9 @@ export function LandingPage() {
             Sobre o Projeto
           </h2>
           <p className="mt-2 text-sm text-text-light-secondary dark:text-text-dark-secondary">
-            O nome oficial da ferramenta e{" "}
-            <strong>SRL Canvas (Startup Readiness Level Canvas)</strong>. Aqui voce encontra o
-            contexto, proposito e publico-alvo do framework.
+            O nome oficial da ferramenta é{" "}
+            <strong>SRL Canvas (Startup Readiness Level Canvas)</strong>. Aqui você encontra o
+            contexto, propósito e público-alvo do framework.
           </p>
           <button
             type="button"
@@ -225,9 +225,9 @@ export function LandingPage() {
             Material de Apoio (Uso Offline)
           </h3>
           <p className="mt-2 text-sm text-text-light-secondary dark:text-text-dark-secondary">
-            Nao e obrigatorio usar esta plataforma para aplicar o SRL Canvas. O metodo foi desenhado
-            para ser simples e agil: voce pode baixar o guia de aplicacao, o modelo do SRL Canvas e
-            o grafico radar para preenchimento manual.
+            Não é obrigatório usar esta plataforma para aplicar o SRL Canvas. O método foi desenhado
+            para ser simples e ágil: você pode baixar o guia de aplicação, o modelo do SRL Canvas e
+            o gráfico radar para preenchimento manual.
           </p>
           <div className="mt-3 flex flex-wrap gap-2">
             {SRL_DOWNLOADS.map((item) => (

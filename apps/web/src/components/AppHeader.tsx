@@ -8,6 +8,7 @@ interface AppHeaderProps {
   title: string;
   backTo?: string;
   backAriaLabel?: string;
+  showBackButton?: boolean;
   rightSlot?: ReactNode;
 }
 
@@ -15,6 +16,7 @@ export function AppHeader({
   title,
   backTo = "/canvas",
   backAriaLabel = "Voltar",
+  showBackButton = true,
   rightSlot
 }: AppHeaderProps) {
   const navigate = useNavigate();
@@ -54,14 +56,18 @@ export function AppHeader({
     <>
       <header className="sticky top-0 z-10 flex h-16 items-center border-b border-zinc-200/80 bg-background-light/85 px-4 backdrop-blur-sm dark:border-zinc-800/80 dark:bg-background-dark/85">
         <div className="flex w-36 items-center">
-          <button
-            type="button"
-            onClick={handleBack}
-            className="flex h-12 w-12 items-center justify-center text-text-light-primary dark:text-text-dark-primary"
-            aria-label={backAriaLabel}
-          >
-            <span className="material-symbols-outlined text-2xl">arrow_back_ios_new</span>
-          </button>
+          {showBackButton ? (
+            <button
+              type="button"
+              onClick={handleBack}
+              className="flex h-12 w-12 items-center justify-center text-text-light-primary dark:text-text-dark-primary"
+              aria-label={backAriaLabel}
+            >
+              <span className="material-symbols-outlined text-2xl">arrow_back_ios_new</span>
+            </button>
+          ) : (
+            <div className="h-12 w-12" aria-hidden="true" />
+          )}
           <div className="h-12 w-12" aria-hidden="true" />
           <div className="h-12 w-12" aria-hidden="true" />
         </div>
@@ -75,7 +81,7 @@ export function AppHeader({
             type="button"
             onClick={openOpinionForm}
             className="flex h-12 w-12 items-center justify-center text-text-light-primary dark:text-text-dark-primary"
-            aria-label="Abrir formulario de opiniao"
+            aria-label="Abrir formulário de opinião"
           >
             <span className="material-symbols-outlined text-2xl">rate_review</span>
           </button>

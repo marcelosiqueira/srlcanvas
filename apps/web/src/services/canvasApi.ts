@@ -36,7 +36,7 @@ export async function listCanvasesByUser(userId: string): Promise<RemoteCanvas[]
 
 export async function saveCanvas(input: SaveCanvasInput): Promise<RemoteCanvas> {
   if (!supabase) {
-    throw new Error("Supabase nao configurado");
+    throw new Error("Supabase não configurado");
   }
 
   const payload = {

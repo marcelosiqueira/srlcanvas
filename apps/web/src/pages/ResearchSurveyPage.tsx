@@ -33,7 +33,7 @@ import type { Likert5, ResearchSurveyFormValues, YesNoAnswer } from "../types/re
 
 const YES_NO_OPTIONS: Array<{ value: Exclude<YesNoAnswer, "">; label: string }> = [
   { value: "sim", label: "Sim" },
-  { value: "nao", label: "Nao" }
+  { value: "nao", label: "Não" }
 ];
 
 type SurveyStepKey =
@@ -62,31 +62,31 @@ const ELIGIBLE_SURVEY_STEPS: SurveyStepDefinition[] = [
   {
     key: "profile",
     title: "Etapa 2 - Perfil",
-    description: "Contexto profissional e experiencia."
+    description: "Contexto profissional e experiência."
   },
   {
     key: "dimensions_1_4",
     title: "Etapa 3 - Blocos 1 a 4",
-    description: "Avalie clareza e relevancia dos primeiros blocos."
+    description: "Avalie clareza e relevância dos primeiros blocos."
   },
   {
     key: "dimensions_5_8",
     title: "Etapa 4 - Blocos 5 a 8",
-    description: "Continue a avaliacao dos blocos intermediarios."
+    description: "Continue a avaliação dos blocos intermediários."
   },
   {
     key: "dimensions_9_12",
     title: "Etapa 5 - Blocos 9 a 12",
-    description: "Finalize a avaliacao das 12 dimensoes."
+    description: "Finalize a avaliação das 12 dimensões."
   },
   {
     key: "scale_and_sus",
     title: "Etapa 6 - Escala e Usabilidade",
-    description: "Percepcao da escala 1-9 e SUS."
+    description: "Percepção da escala 1-9 e SUS."
   },
   {
     key: "adoption_and_followup",
-    title: "Etapa 7 - Adocao e Follow-up",
+    title: "Etapa 7 - Adoção e Follow-up",
     description: "Contexto de uso, NPS e dados opcionais."
   }
 ];
@@ -102,17 +102,17 @@ const DIMENSION_STEP_CONFIG: Record<
   }
 > = {
   dimensions_1_4: {
-    title: "5. Avaliacao por dimensao (blocos 1-4)",
+    title: "5. Avaliação por dimensão (blocos 1-4)",
     startQuestionNumber: 1,
     dimensions: SURVEY_DIMENSIONS.slice(0, 4)
   },
   dimensions_5_8: {
-    title: "5. Avaliacao por dimensao (blocos 5-8)",
+    title: "5. Avaliação por dimensão (blocos 5-8)",
     startQuestionNumber: 5,
     dimensions: SURVEY_DIMENSIONS.slice(4, 8)
   },
   dimensions_9_12: {
-    title: "5. Avaliacao por dimensao (blocos 9-12)",
+    title: "5. Avaliação por dimensão (blocos 9-12)",
     startQuestionNumber: 9,
     dimensions: SURVEY_DIMENSIONS.slice(8, 12)
   }
@@ -380,10 +380,10 @@ export function ResearchSurveyPage() {
 
     if (values.age18OrMore === "") nextErrors.push("Responda se possui 18 anos ou mais.");
     if (values.actedInEcosystem12Months === "") {
-      nextErrors.push("Responda se atua ou atuou no ecossistema nos ultimos 12 meses.");
+      nextErrors.push("Responda se atua ou atuou no ecossistema nos últimos 12 meses.");
     }
     if (values.viewedSrlMaterial === "") {
-      nextErrors.push("Confirme se visualizou o SRL Canvas e o guia breve de aplicacao.");
+      nextErrors.push("Confirme se visualizou o SRL Canvas e o guia breve de aplicação.");
     }
 
     return nextErrors;
@@ -393,11 +393,11 @@ export function ResearchSurveyPage() {
     const nextErrors: string[] = [];
 
     if (!values.primaryRole) nextErrors.push("Selecione seu papel principal.");
-    if (!values.experienceYears) nextErrors.push("Selecione seu tempo de experiencia.");
+    if (!values.experienceYears) nextErrors.push("Selecione seu tempo de experiência.");
     if (!values.sector) nextErrors.push("Selecione o setor predominante.");
-    if (!values.startupStage) nextErrors.push("Selecione o estagio tipico das startups.");
-    if (!values.locationCountry.trim()) nextErrors.push("Informe localidade/pais de atuacao.");
-    if (!values.teamSize) nextErrors.push("Selecione o tamanho medio das equipes.");
+    if (!values.startupStage) nextErrors.push("Selecione o estágio típico das startups.");
+    if (!values.locationCountry.trim()) nextErrors.push("Informe localidade/país de atuação.");
+    if (!values.teamSize) nextErrors.push("Selecione o tamanho médio das equipes.");
     if (values.primaryRole === "outro" && !values.primaryRoleOther.trim()) {
       nextErrors.push("Descreva seu papel principal em 'Outro'.");
     }
@@ -417,7 +417,7 @@ export function ResearchSurveyPage() {
       const answer = values.dimensionAnswers[dimension.key];
       for (const assertion of DIMENSION_ASSERTIONS) {
         if (answer.ratings[assertion.key] === null) {
-          nextErrors.push(`Preencha todas as avaliacoes do bloco ${dimension.label}.`);
+          nextErrors.push(`Preencha todas as avaliações do bloco ${dimension.label}.`);
           break;
         }
       }
@@ -458,8 +458,8 @@ export function ResearchSurveyPage() {
     if (values.usageContexts.includes("outro") && !values.usageContextOther.trim()) {
       nextErrors.push("Descreva o contexto em 'Outro'.");
     }
-    if (values.npsScore === null) nextErrors.push("Informe a nota de recomendacao (NPS).");
-    if (!values.acceptableTime) nextErrors.push("Selecione o tempo aceitavel de aplicacao.");
+    if (values.npsScore === null) nextErrors.push("Informe a nota de recomendação (NPS).");
+    if (!values.acceptableTime) nextErrors.push("Selecione o tempo aceitável de aplicação.");
     if (values.acceptsInterview === "sim" && !values.preferredContact.trim()) {
       nextErrors.push("Informe contato preferido para follow-up.");
     }
@@ -639,7 +639,7 @@ export function ResearchSurveyPage() {
   if (consentLoading) {
     return (
       <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden bg-background-light font-display dark:bg-background-dark">
-        <AppHeader title="Questionario Quantitativo SRL Canvas" backTo={nextPath} />
+        <AppHeader title="Questionário Quantitativo SRL Canvas" backTo={nextPath} />
 
         <main className="flex-grow px-4 pb-28 pt-6">
           <section className="rounded-xl border border-zinc-200/80 bg-card-light p-4 text-sm text-text-light-secondary dark:border-zinc-800/80 dark:bg-card-dark dark:text-text-dark-secondary">
@@ -655,15 +655,15 @@ export function ResearchSurveyPage() {
   if (!hasConsent) {
     return (
       <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden bg-background-light font-display dark:bg-background-dark">
-        <AppHeader title="Questionario Quantitativo SRL Canvas" backTo={nextPath} />
+        <AppHeader title="Questionário Quantitativo SRL Canvas" backTo={nextPath} />
 
         <main className="flex-grow space-y-4 px-4 pb-28 pt-6">
           <section className="rounded-xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-700/40 dark:bg-amber-900/20">
             <h2 className="text-sm font-semibold text-amber-800 dark:text-amber-300">
-              Consentimento obrigatorio
+              Consentimento obrigatório
             </h2>
             <p className="mt-2 text-sm text-amber-800 dark:text-amber-300">
-              Para responder o questionario, voce precisa aceitar o TCLE antes.
+              Para responder o questionário, você precisa aceitar o TCLE antes.
             </p>
             {consentError && (
               <p className="mt-2 text-xs text-red-600 dark:text-red-300">{consentError}</p>
@@ -695,12 +695,12 @@ export function ResearchSurveyPage() {
   if (result) {
     return (
       <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden bg-background-light font-display dark:bg-background-dark">
-        <AppHeader title="Pesquisa Academica" backTo={nextPath} />
+        <AppHeader title="Pesquisa Acadêmica" backTo={nextPath} />
 
         <main className="flex-grow px-4 pb-28 pt-6">
           <section className="rounded-xl border border-emerald-300/80 bg-emerald-50 p-4 dark:border-emerald-700/70 dark:bg-emerald-900/20">
             <h2 className="text-base font-semibold text-emerald-900 dark:text-emerald-200">
-              Obrigado pela sua contribuicao
+              Obrigado pela sua contribuição
             </h2>
             <p className="mt-2 text-sm text-emerald-800 dark:text-emerald-300">
               Resposta enviada com sucesso. Protocolo: <strong>{result.id}</strong>
@@ -750,25 +750,25 @@ export function ResearchSurveyPage() {
 
   return (
     <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden bg-background-light font-display dark:bg-background-dark">
-      <AppHeader title="Questionario Quantitativo SRL Canvas" backTo={nextPath} />
+      <AppHeader title="Questionário Quantitativo SRL Canvas" backTo={nextPath} />
 
       <main className="flex-grow space-y-4 px-4 pb-28 pt-6">
         <section className="rounded-xl border border-zinc-200/80 bg-card-light p-4 dark:border-zinc-800/80 dark:bg-card-dark">
           <h2 className="text-base font-semibold text-text-light-primary dark:text-text-dark-primary">
-            Antes de comecar
+            Antes de começar
           </h2>
           <p className="mt-2 text-sm text-text-light-secondary dark:text-text-dark-secondary">
             Tempo estimado de resposta: <strong>10 a 12 minutos</strong>.
           </p>
           <p className="mt-1 text-sm text-text-light-secondary dark:text-text-dark-secondary">
-            Sua participacao e essencial para esta pesquisa de mestrado e para validar
+            Sua participação é essencial para esta pesquisa de mestrado e para validar
             cientificamente o SRL Canvas.
           </p>
           <p className="mt-1 text-sm text-text-light-secondary dark:text-text-dark-secondary">
-            O questionario foi dividido em etapas curtas para facilitar a conclusao.
+            O questionário foi dividido em etapas curtas para facilitar a conclusão.
           </p>
           <p className="mt-1 text-xs text-text-light-secondary dark:text-text-dark-secondary">
-            Versao ativa do instrumento: <strong>{RESEARCH_SURVEY_CONFIG.activeVersion}</strong>
+            Versão ativa do instrumento: <strong>{RESEARCH_SURVEY_CONFIG.activeVersion}</strong>
           </p>
         </section>
 
@@ -778,7 +778,7 @@ export function ResearchSurveyPage() {
               Etapa {currentStepIndex + 1} de {surveySteps.length}
             </p>
             <p className="text-xs text-text-light-secondary dark:text-text-dark-secondary">
-              {progressPercent}% concluido
+              {progressPercent}% concluído
             </p>
           </div>
           <div
@@ -804,21 +804,21 @@ export function ResearchSurveyPage() {
         {currentStepKey === "triage" && (
           <SectionCard title="1. Triagem e elegibilidade">
             <RadioGroup
-              legend="1.1 Voce possui 18 anos ou mais?"
+              legend="1.1 Você possui 18 anos ou mais?"
               name="age18"
               value={values.age18OrMore}
               options={YES_NO_OPTIONS}
               onChange={(value) => setField("age18OrMore", value)}
             />
             <RadioGroup
-              legend="1.2 Voce atua ou atuou no ecossistema de inovacao/startups nos ultimos 12 meses?"
+              legend="1.2 Você atua ou atuou no ecossistema de inovação/startups nos últimos 12 meses?"
               name="ecosystem12months"
               value={values.actedInEcosystem12Months}
               options={YES_NO_OPTIONS}
               onChange={(value) => setField("actedInEcosystem12Months", value)}
             />
             <RadioGroup
-              legend="1.3 Antes de responder, voce visualizou o SRL Canvas e o guia breve de aplicacao?"
+              legend="1.3 Antes de responder, você visualizou o SRL Canvas e o guia breve de aplicação?"
               name="viewedMaterial"
               value={values.viewedSrlMaterial}
               options={YES_NO_OPTIONS}
@@ -827,7 +827,7 @@ export function ResearchSurveyPage() {
 
             {isIneligible && (
               <p className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800 dark:border-amber-700/40 dark:bg-amber-900/20 dark:text-amber-300">
-                Pelas respostas de triagem, voce nao se enquadra no perfil de elegibilidade
+                Pelas respostas de triagem, você não se enquadra no perfil de elegibilidade
                 completa. Se desejar, envie apenas a triagem e prossiga para o app.
               </p>
             )}
@@ -837,7 +837,7 @@ export function ResearchSurveyPage() {
         {isEligible && currentStepKey === "profile" && (
           <SectionCard title="3. Perfil do respondente">
             <RadioGroup
-              legend="3.1 Qual o seu papel principal no ecossistema de inovacao?"
+              legend="3.1 Qual o seu papel principal no ecossistema de inovação?"
               name="primaryRole"
               value={values.primaryRole}
               options={PROFILE_ROLE_OPTIONS.map((option) => ({
@@ -862,7 +862,7 @@ export function ResearchSurveyPage() {
             )}
 
             <RadioGroup
-              legend="3.2 Qual o seu tempo de experiencia com startups?"
+              legend="3.2 Qual o seu tempo de experiência com startups?"
               name="experienceYears"
               value={values.experienceYears}
               options={EXPERIENCE_OPTIONS.map((option) => ({
@@ -873,7 +873,7 @@ export function ResearchSurveyPage() {
             />
 
             <RadioGroup
-              legend="3.3 Qual o setor predominante de sua atuacao?"
+              legend="3.3 Qual o setor predominante de sua atuação?"
               name="sector"
               value={values.sector}
               options={SECTOR_OPTIONS.map((option) => ({
@@ -898,7 +898,7 @@ export function ResearchSurveyPage() {
             )}
 
             <RadioGroup
-              legend="3.4 Qual o estagio tipico das startups com as quais voce interage?"
+              legend="3.4 Qual o estágio típico das startups com as quais você interage?"
               name="startupStage"
               value={values.startupStage}
               options={STAGE_OPTIONS.map((option) => ({
@@ -910,7 +910,7 @@ export function ResearchSurveyPage() {
 
             <label className="block">
               <span className="text-sm font-medium text-text-light-primary dark:text-text-dark-primary">
-                3.5 Qual a sua localidade/pais de atuacao?
+                3.5 Qual a sua localidade/país de atuação?
               </span>
               <input
                 className="mt-1 block w-full rounded-md border-zinc-300 bg-zinc-50 p-2 text-sm text-text-light-primary shadow-sm focus:border-primary focus:ring-primary dark:border-zinc-700 dark:bg-zinc-800 dark:text-text-dark-primary"
@@ -922,7 +922,7 @@ export function ResearchSurveyPage() {
             </label>
 
             <RadioGroup
-              legend="3.6 Qual o tamanho medio das equipes que voce acompanha/avalia?"
+              legend="3.6 Qual o tamanho médio das equipes que você acompanha/avalia?"
               name="teamSize"
               value={values.teamSize}
               options={TEAM_SIZE_OPTIONS.map((option) => ({
@@ -1011,21 +1011,21 @@ export function ResearchSurveyPage() {
 
         {isEligible && currentStepKey === "scale_and_sus" && (
           <>
-            <SectionCard title="6. Escala de niveis (1 a 9) - clareza e utilidade">
+            <SectionCard title="6. Escala de níveis (1 a 9) - clareza e utilidade">
               <LikertGroup
-                legend="6.1 A escala de 1 a 9 e clara e com ancoras suficientes para diferenciar os niveis?"
+                legend="6.1 A escala de 1 a 9 é clara e com âncoras suficientes para diferenciar os níveis?"
                 name="scaleClarity"
                 value={values.scaleClarity}
                 onChange={(value) => setField("scaleClarity", value)}
               />
               <LikertGroup
-                legend="6.2 A escala de 1 a 9 e util para comparacoes entre startups?"
+                legend="6.2 A escala de 1 a 9 é útil para comparações entre startups?"
                 name="scaleUtility"
                 value={values.scaleUtility}
                 onChange={(value) => setField("scaleUtility", value)}
               />
               <RadioGroup
-                legend="6.3 Voce preferiria outra escala?"
+                legend="6.3 Você preferiria outra escala?"
                 name="preferredScale"
                 value={values.preferredScale}
                 options={PREFERRED_SCALE_OPTIONS.map((option) => ({
@@ -1092,10 +1092,10 @@ export function ResearchSurveyPage() {
 
         {isEligible && currentStepKey === "adoption_and_followup" && (
           <>
-            <SectionCard title="8. Aplicacao, utilidade e adocao">
+            <SectionCard title="8. Aplicação, utilidade e adoção">
               <fieldset className="space-y-2">
                 <legend className="text-sm font-medium text-text-light-primary dark:text-text-dark-primary">
-                  8.1 Em quais contextos voce usaria o SRL Canvas? (Marque todas as opcoes)
+                  8.1 Em quais contextos você usaria o SRL Canvas? (Marque todas as opções)
                 </legend>
                 <div className="flex flex-wrap gap-2">
                   {USAGE_CONTEXT_OPTIONS.map((option) => {
@@ -1137,7 +1137,7 @@ export function ResearchSurveyPage() {
               )}
 
               <RadioGroup
-                legend="8.2 Qual a probabilidade de voce recomendar o SRL Canvas? (NPS 0 a 10)"
+                legend="8.2 Qual a probabilidade de você recomendar o SRL Canvas? (NPS 0 a 10)"
                 name="npsScore"
                 value={values.npsScore}
                 options={Array.from({ length: 11 }, (_, index) => ({
@@ -1149,7 +1149,7 @@ export function ResearchSurveyPage() {
               />
 
               <RadioGroup
-                legend="8.3 Qual seria o tempo aceitavel de aplicacao do SRL Canvas (por startup)?"
+                legend="8.3 Qual seria o tempo aceitável de aplicação do SRL Canvas (por startup)?"
                 name="acceptableTime"
                 value={values.acceptableTime}
                 options={ACCEPTABLE_TIME_OPTIONS.map((option) => ({
@@ -1161,7 +1161,7 @@ export function ResearchSurveyPage() {
 
               <label className="block">
                 <span className="text-sm font-medium text-text-light-primary dark:text-text-dark-primary">
-                  8.4 Quais barreiras de adocao voce enxerga para o SRL Canvas?
+                  8.4 Quais barreiras de adoção você enxerga para o SRL Canvas?
                 </span>
                 <textarea
                   className="mt-1 block min-h-24 w-full rounded-md border-zinc-300 bg-zinc-50 p-2 text-sm text-text-light-primary shadow-sm focus:border-primary focus:ring-primary dark:border-zinc-700 dark:bg-zinc-800 dark:text-text-dark-primary"
@@ -1172,7 +1172,7 @@ export function ResearchSurveyPage() {
 
               <label className="block">
                 <span className="text-sm font-medium text-text-light-primary dark:text-text-dark-primary">
-                  8.5 Quais as 1-3 principais melhorias que voce sugeriria para o SRL Canvas?
+                  8.5 Quais as 1-3 principais melhorias que você sugeriria para o SRL Canvas?
                 </span>
                 <textarea
                   className="mt-1 block min-h-24 w-full rounded-md border-zinc-300 bg-zinc-50 p-2 text-sm text-text-light-primary shadow-sm focus:border-primary focus:ring-primary dark:border-zinc-700 dark:bg-zinc-800 dark:text-text-dark-primary"
@@ -1184,7 +1184,7 @@ export function ResearchSurveyPage() {
 
             <SectionCard title="9. Dados para follow-up (opcionais)">
               <RadioGroup
-                legend="9.1 Deseja receber a versao final do SRL Canvas e/ou relatorio-sintese da pesquisa?"
+                legend="9.1 Deseja receber a versão final do SRL Canvas e/ou relatório-síntese da pesquisa?"
                 name="wantsFinalVersion"
                 value={values.wantsFinalVersion}
                 options={YES_NO_OPTIONS}
@@ -1214,7 +1214,7 @@ export function ResearchSurveyPage() {
               )}
 
               <RadioGroup
-                legend="9.4 Autoriza citacao nao identificada de trechos das respostas em publicacoes academicas?"
+                legend="9.4 Autoriza citação não identificada de trechos das respostas em publicações acadêmicas?"
                 name="allowsAnonymousQuotes"
                 value={values.allowsAnonymousQuotes}
                 options={YES_NO_OPTIONS}
@@ -1262,7 +1262,7 @@ export function ResearchSurveyPage() {
                 disabled={isSubmitting}
                 className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                Proxima etapa
+                Próxima etapa
               </button>
             )}
 

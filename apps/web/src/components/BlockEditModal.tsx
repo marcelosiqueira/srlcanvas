@@ -114,7 +114,7 @@ export function BlockEditModal({
                 <span className="material-symbols-outlined text-sm" aria-hidden="true">
                   skip_next
                 </span>
-                Proximo bloco
+                Próximo bloco
               </button>
             )}
             <button
@@ -200,14 +200,14 @@ export function BlockEditModal({
                   {selectedLevel.description}
                 </p>
                 <p className="mt-3 text-xs text-text-light-secondary dark:text-text-dark-secondary">
-                  <strong>Evidencia sugerida:</strong> {selectedLevel.evidence}
+                  <strong>Evidência sugerida:</strong> {selectedLevel.evidence}
                 </p>
               </div>
             )}
 
             {missingEvidenceForAdvancedScore && (
               <p className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800 dark:border-amber-700/40 dark:bg-amber-900/20 dark:text-amber-300">
-                Regra pratica do guia: evite notas acima de 3 sem registrar evidencia minima.
+                Regra prática do guia: evite notas acima de 3 sem registrar evidência mínima.
               </p>
             )}
           </section>
@@ -227,13 +227,13 @@ export function BlockEditModal({
 
           <label className="block">
             <span className="text-sm font-semibold text-text-light-primary dark:text-text-dark-primary">
-              Evidencias
+              Evidências
             </span>
             <textarea
               value={evidence}
               onChange={(event) => setEvidence(event.target.value)}
               rows={4}
-              placeholder="Inclua links, metricas, entrevistas ou documentos que sustentem a nota."
+              placeholder="Inclua links, métricas, entrevistas ou documentos que sustentem a nota."
               className="mt-2 w-full rounded-lg border-zinc-300 bg-zinc-50 p-3 text-sm text-text-light-primary focus:border-primary focus:ring-primary dark:border-zinc-700 dark:bg-zinc-800 dark:text-text-dark-primary"
             />
           </label>
@@ -246,7 +246,7 @@ export function BlockEditModal({
               value={notes}
               onChange={(event) => setNotes(event.target.value)}
               rows={4}
-              placeholder="Descreva a situacao atual deste bloco..."
+              placeholder="Descreva a situação atual deste bloco..."
               className="mt-2 w-full rounded-lg border-zinc-300 bg-zinc-50 p-3 text-sm text-text-light-primary focus:border-primary focus:ring-primary dark:border-zinc-700 dark:bg-zinc-800 dark:text-text-dark-primary"
             />
           </label>
@@ -262,7 +262,7 @@ export function BlockEditModal({
               <span className="material-symbols-outlined text-base" aria-hidden="true">
                 skip_next
               </span>
-              Proximo bloco
+              Próximo bloco
             </button>
           )}
           <button

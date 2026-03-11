@@ -28,9 +28,9 @@ export const calculateScoreMetrics = (scores: number[]): ScoreMetrics => {
 };
 
 export const maturityStageFromTotal = (total: number): string => {
-  if (total <= 35) return "Ideacao";
-  if (total <= 59) return "Validacao";
-  if (total <= 83) return "Tracao";
+  if (total <= 35) return "Ideação";
+  if (total <= 59) return "Validação";
+  if (total <= 83) return "Tração";
   if (total <= 101) return "Escala";
   return "Maturidade Alta";
 };

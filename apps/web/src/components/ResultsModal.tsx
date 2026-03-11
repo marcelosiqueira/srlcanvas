@@ -21,6 +21,8 @@ interface ResultsModalProps {
   metrics: ScoreMetrics;
   scores: number[];
   darkMode: boolean;
+  projectTitle?: string;
+  updatedAt?: string | null;
 }
 
 const format = (value: number, digits = 2): string =>
@@ -29,17 +31,33 @@ const format = (value: number, digits = 2): string =>
     maximumFractionDigits: digits
   }).format(value);
 
-export function ResultsModal({ onClose, metrics, scores, darkMode }: ResultsModalProps) {
+const formatDateTime = (value: string): string => {
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return value;
+  return parsed.toLocaleString("pt-BR");
+};
+
+export function ResultsModal({
+  onClose,
+  metrics,
+  scores,
+  darkMode,
+  projectTitle,
+  updatedAt
+}: ResultsModalProps) {
   const [isExporting, setIsExporting] = useState(false);
+  const [openedAt] = useState(() => new Date().toISOString());
   const cardRef = useRef<HTMLDivElement>(null);
   const { dialogRef, initialFocusRef } = useDialogA11y<HTMLButtonElement>(true);
+  const resolvedProjectTitle = projectTitle?.trim() || "Meu SRL Canvas";
+  const resolvedUpdatedAt = formatDateTime(updatedAt ?? openedAt);
 
   const radarData = useMemo(
     () => ({
       labels: SRL_BLOCKS.map((block) => `${block.id}. ${block.shortLabel}`),
       datasets: [
         {
-          label: "Nivel SRL",
+          label: "Nível SRL",
           data: scores,
           borderWidth: 2,
           borderColor: "#135bec",
@@ -191,7 +209,7 @@ export function ResultsModal({ onClose, metrics, scores, darkMode }: ResultsModa
       >
         <div className="flex items-center justify-between border-b border-zinc-200/80 p-4 dark:border-zinc-800/80">
           <h2 className="text-lg font-bold text-text-light-primary dark:text-text-dark-primary">
-            Diagnostico SRL Canvas
+            Diagnóstico SRL Canvas
           </h2>
           <button
             ref={initialFocusRef}
@@ -209,13 +227,22 @@ export function ResultsModal({ onClose, metrics, scores, darkMode }: ResultsModa
             ref={cardRef}
             className="space-y-5 rounded-xl border border-zinc-200/80 p-4 dark:border-zinc-800/80"
           >
-            <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="rounded-lg border border-zinc-200/80 bg-zinc-50 p-3 dark:border-zinc-800/80 dark:bg-zinc-800/70">
+              <p className="text-lg font-bold text-text-light-primary dark:text-text-dark-primary">
+                {resolvedProjectTitle}
+              </p>
+              <p className="mt-1 text-xs text-text-light-secondary dark:text-text-dark-secondary">
+                (Atualizado {resolvedUpdatedAt})
+              </p>
+              <p className="mt-1 text-sm text-text-light-secondary dark:text-text-dark-secondary">
+                Estágio: {maturityStageFromTotal(metrics.total)}
+              </p>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-3">
               <p className="text-sm font-semibold text-text-light-primary dark:text-text-dark-primary">
                 Radar de Maturidade (12 blocos)
               </p>
-              <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary dark:bg-primary/20">
-                Estagio: {maturityStageFromTotal(metrics.total)}
-              </span>
             </div>
 
             <div className="h-[340px] w-full">
@@ -225,7 +252,7 @@ export function ResultsModal({ onClose, metrics, scores, darkMode }: ResultsModa
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
               <div className="rounded-lg bg-zinc-50 p-3 dark:bg-zinc-800">
                 <p className="text-xs text-text-light-secondary dark:text-text-dark-secondary">
-                  Pontuacao Total
+                  Pontuação Total
                 </p>
                 <p className="text-lg font-bold text-text-light-primary dark:text-text-dark-primary">
                   {metrics.total} / 108
@@ -233,7 +260,7 @@ export function ResultsModal({ onClose, metrics, scores, darkMode }: ResultsModa
               </div>
               <div className="rounded-lg bg-zinc-50 p-3 dark:bg-zinc-800">
                 <p className="text-xs text-text-light-secondary dark:text-text-dark-secondary">
-                  Media
+                  Média
                 </p>
                 <p className="text-lg font-bold text-text-light-primary dark:text-text-dark-primary">
                   {format(metrics.mean)}
@@ -241,7 +268,7 @@ export function ResultsModal({ onClose, metrics, scores, darkMode }: ResultsModa
               </div>
               <div className="rounded-lg bg-zinc-50 p-3 dark:bg-zinc-800">
                 <p className="text-xs text-text-light-secondary dark:text-text-dark-secondary">
-                  Desvio-padrao
+                  Desvio-padrão
                 </p>
                 <p className="text-lg font-bold text-text-light-primary dark:text-text-dark-primary">
                   {format(metrics.stdDev)}
@@ -249,7 +276,7 @@ export function ResultsModal({ onClose, metrics, scores, darkMode }: ResultsModa
               </div>
               <div className="rounded-lg bg-zinc-50 p-3 dark:bg-zinc-800">
                 <p className="text-xs text-text-light-secondary dark:text-text-dark-secondary">
-                  Coeficiente de Variacao
+                  Coeficiente de Variação
                 </p>
                 <p className="text-lg font-bold text-text-light-primary dark:text-text-dark-primary">
                   {format(metrics.cv)}
@@ -264,7 +291,7 @@ export function ResultsModal({ onClose, metrics, scores, darkMode }: ResultsModa
             </div>
 
             <p className="text-xs text-text-light-secondary dark:text-text-dark-secondary">
-              Formula: Scorecard = Pontuacao Total x (1 - Coeficiente de Variacao).
+              Fórmula: Scorecard = Pontuação Total x (1 - Coeficiente de Variação).
             </p>
 
             <div className="space-y-3">
@@ -289,7 +316,7 @@ export function ResultsModal({ onClose, metrics, scores, darkMode }: ResultsModa
 
                     {!item.band && (
                       <p className="mt-2 text-xs text-text-light-secondary dark:text-text-dark-secondary">
-                        Sem nota atribuida para este bloco.
+                        Sem nota atribuída para este bloco.
                       </p>
                     )}
 
@@ -299,7 +326,7 @@ export function ResultsModal({ onClose, metrics, scores, darkMode }: ResultsModa
                           <strong>Agrupamento:</strong> {item.band.grouping}
                         </p>
                         <p>
-                          <strong>Nivel:</strong> {item.band.minLevel}-{item.band.maxLevel}
+                          <strong>Nível:</strong> {item.band.minLevel}-{item.band.maxLevel}
                         </p>
                         <p>
                           <strong>Foco estratégico:</strong> {item.band.strategicFocus}

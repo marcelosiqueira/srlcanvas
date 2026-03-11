@@ -84,7 +84,7 @@ export function LoginPage() {
         </button>
 
         <p className="mt-4 text-xs text-text-light-secondary dark:text-text-dark-secondary">
-          Nao tem conta?{" "}
+          Não tem conta?{" "}
           <Link className="font-semibold text-primary" to="/auth/signup">
             Criar conta
           </Link>

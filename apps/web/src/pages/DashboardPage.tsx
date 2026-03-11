@@ -21,7 +21,7 @@ import { SRL_BLOCKS } from "../data/srlBlocks";
 
 const SRL_DOWNLOADS = [
   {
-    label: "Baixar Guia de Aplicacao",
+    label: "Baixar Guia de Aplicação",
     href: "/downloads/guia-aplicacao-srl-canvas.pdf"
   },
   {
@@ -29,7 +29,7 @@ const SRL_DOWNLOADS = [
     href: "/downloads/srl-canvas-modelo-manual.pdf"
   },
   {
-    label: "Baixar Grafico Radar",
+    label: "Baixar Gráfico Radar",
     href: "/downloads/grafico-radar-srl-canvas.pdf"
   }
 ] as const;
@@ -44,6 +44,8 @@ export function DashboardPage() {
   const [resultsPayload, setResultsPayload] = useState<{
     scores: number[];
     metrics: ScoreMetrics;
+    projectTitle: string;
+    updatedAt: string | null;
   } | null>(null);
 
   useEffect(() => {
@@ -75,7 +77,7 @@ export function DashboardPage() {
       })
       .catch((error) => {
         if (!isActive) return;
-        setHistoryError(error instanceof Error ? error.message : "Falha ao carregar historico.");
+        setHistoryError(error instanceof Error ? error.message : "Falha ao carregar histórico.");
         setHistoryEntries([]);
         setComparisonTargetId(null);
       });
@@ -111,7 +113,7 @@ export function DashboardPage() {
 
   return (
     <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden bg-background-light font-display dark:bg-background-dark">
-      <AppHeader title="Dashboard" />
+      <AppHeader title="Dashboard" showBackButton={false} />
 
       <main className="flex-grow space-y-4 px-4 pb-28 pt-6">
         <section className="rounded-xl border border-zinc-200/80 bg-card-light p-4 dark:border-zinc-800/80 dark:bg-card-dark">
@@ -121,7 +123,14 @@ export function DashboardPage() {
             </p>
             <button
               type="button"
-              onClick={() => setResultsPayload({ scores: currentScores, metrics })}
+              onClick={() =>
+                setResultsPayload({
+                  scores: currentScores,
+                  metrics,
+                  projectTitle: currentCanvasTitle,
+                  updatedAt: latestHistoryEntry?.updatedAt ?? new Date().toISOString()
+                })
+              }
               className="rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-white hover:brightness-110"
             >
               Ver Resultados
@@ -136,7 +145,7 @@ export function DashboardPage() {
             </p>
           )}
           <p className="mt-1 text-sm text-text-light-secondary dark:text-text-dark-secondary">
-            Estagio: {maturityStageFromTotal(metrics.total)}
+            Estágio: {maturityStageFromTotal(metrics.total)}
           </p>
           <div className="mt-3 h-2.5 w-full overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-700">
             <div
@@ -156,7 +165,7 @@ export function DashboardPage() {
             </div>
             <div className="rounded-lg border border-zinc-200/80 bg-zinc-50 p-3 dark:border-zinc-800/80 dark:bg-zinc-800/70">
               <p className="text-xs text-text-light-secondary dark:text-text-dark-secondary">
-                Coeficiente de Variacao
+                Coeficiente de Variação
               </p>
               <p className="mt-1 text-2xl font-bold text-text-light-primary dark:text-text-dark-primary">
                 {metrics.cv.toFixed(2)}
@@ -167,7 +176,7 @@ export function DashboardPage() {
 
         <section className="rounded-xl border border-zinc-200/80 bg-card-light p-4 dark:border-zinc-800/80 dark:bg-card-dark">
           <h3 className="text-sm font-semibold text-text-light-primary dark:text-text-dark-primary">
-            Acoes
+            Ações
           </h3>
           <div className="mt-3 flex flex-wrap gap-2">
             <Link
@@ -190,9 +199,9 @@ export function DashboardPage() {
             Sobre o Projeto
           </h2>
           <p className="mt-2 text-sm text-text-light-secondary dark:text-text-dark-secondary">
-            O nome oficial da ferramenta e{" "}
-            <strong>SRL Canvas (Startup Readiness Level Canvas)</strong>. Aqui voce encontra o
-            contexto, proposito e publico-alvo do framework.
+            O nome oficial da ferramenta é{" "}
+            <strong>SRL Canvas (Startup Readiness Level Canvas)</strong>. Aqui você encontra o
+            contexto, propósito e público-alvo do framework.
           </p>
           <button
             type="button"
@@ -208,9 +217,9 @@ export function DashboardPage() {
             Material de Apoio (Uso Offline)
           </h3>
           <p className="mt-2 text-sm text-text-light-secondary dark:text-text-dark-secondary">
-            Nao e obrigatorio usar esta plataforma para aplicar o SRL Canvas. O metodo foi desenhado
-            para ser simples e agil: voce pode baixar o guia de aplicacao, o modelo do SRL Canvas e
-            o grafico radar para preenchimento manual.
+            Não é obrigatório usar esta plataforma para aplicar o SRL Canvas. O método foi desenhado
+            para ser simples e ágil: você pode baixar o guia de aplicação, o modelo do SRL Canvas e
+            o gráfico radar para preenchimento manual.
           </p>
           <div className="mt-3 flex flex-wrap gap-2">
             {SRL_DOWNLOADS.map((item) => (
@@ -232,7 +241,7 @@ export function DashboardPage() {
 
         <section className="rounded-xl border border-zinc-200/80 bg-card-light p-4 dark:border-zinc-800/80 dark:bg-card-dark">
           <h3 className="text-sm font-semibold text-text-light-primary dark:text-text-dark-primary">
-            Status de Sincronizacao
+            Status de Sincronização
           </h3>
           {!isEnabled && (
             <p className="mt-2 text-sm text-text-light-secondary dark:text-text-dark-secondary">
@@ -241,43 +250,43 @@ export function DashboardPage() {
           )}
           {isEnabled && !user && (
             <p className="mt-2 text-sm text-text-light-secondary dark:text-text-dark-secondary">
-              Faça login para habilitar sincronizacao automatica do canvas.
+              Faça login para habilitar sincronização automática do canvas.
             </p>
           )}
           {isEnabled && user && (
             <p className="mt-2 text-sm text-text-light-secondary dark:text-text-dark-secondary">
-              Sincronizacao automatica ativa durante a edicao do canvas.
+              Sincronização automática ativa durante a edição do canvas.
             </p>
           )}
         </section>
 
         <section className="rounded-xl border border-zinc-200/80 bg-card-light p-4 dark:border-zinc-800/80 dark:bg-card-dark">
           <h3 className="text-sm font-semibold text-text-light-primary dark:text-text-dark-primary">
-            Historico e Comparativo Temporal
+            Histórico e Comparativo Temporal
           </h3>
           <div className="mt-2 rounded-lg border border-zinc-200/80 bg-zinc-50 p-3 text-xs text-text-light-secondary dark:border-zinc-800/80 dark:bg-zinc-800/70 dark:text-text-dark-secondary">
             <p className="font-semibold text-text-light-primary dark:text-text-dark-primary">
               Como usar este comparativo
             </p>
             <p className="mt-1">
-              A avaliacao mais recente e a referencia. Em <strong>Comparar com</strong>, selecione
-              uma avaliacao anterior do seu historico para ver a evolucao.
+              A avaliação mais recente é a referência. Em <strong>Comparar com</strong>, selecione
+              uma avaliação anterior do seu histórico para ver a evolução.
             </p>
             <p className="mt-1">
               Delta <strong>positivo</strong> em Total/Scorecard indica melhoria. Em CV, valores
-              <strong> negativos</strong> indicam maior equilibrio entre blocos.
+              <strong> negativos</strong> indicam maior equilíbrio entre blocos.
             </p>
           </div>
 
           {!isEnabled && (
             <p className="mt-2 text-sm text-text-light-secondary dark:text-text-dark-secondary">
-              Supabase desabilitado. Historico temporal disponivel apenas no modo remoto.
+              Supabase desabilitado. Histórico temporal disponível apenas no modo remoto.
             </p>
           )}
 
           {isEnabled && !user && (
             <p className="mt-2 text-sm text-text-light-secondary dark:text-text-dark-secondary">
-              Faça login para visualizar avaliacoes anteriores e comparativos de evolucao.
+              Faça login para visualizar avaliações anteriores e comparativos de evolução.
             </p>
           )}
 
@@ -285,13 +294,13 @@ export function DashboardPage() {
             <div className="mt-3 space-y-3">
               {historyError && (
                 <p className="text-sm text-amber-700 dark:text-amber-300">
-                  Nao foi possivel carregar o historico: {historyError}
+                  Não foi possível carregar o histórico: {historyError}
                 </p>
               )}
 
               {!historyError && historyEntries.length === 0 && (
                 <p className="text-sm text-text-light-secondary dark:text-text-dark-secondary">
-                  Nenhuma avaliacao remota encontrada ainda.
+                  Nenhuma avaliação remota encontrada ainda.
                 </p>
               )}
 
@@ -299,7 +308,7 @@ export function DashboardPage() {
                 <>
                   <div className="rounded-lg border border-zinc-200/80 bg-zinc-50 p-3 dark:border-zinc-800/80 dark:bg-zinc-800/70">
                     <p className="text-xs font-semibold text-text-light-secondary dark:text-text-dark-secondary">
-                      Avaliacao mais recente
+                      Avaliação mais recente
                     </p>
                     <p className="mt-1 text-sm font-semibold text-text-light-primary dark:text-text-dark-primary">
                       {latestHistoryEntry?.title} (Atualizado{" "}
@@ -360,7 +369,7 @@ export function DashboardPage() {
                   )}
                   {historyEntries.length > 1 && comparisonCandidates.length === 0 && (
                     <p className="text-xs text-text-light-secondary dark:text-text-dark-secondary">
-                      Nenhuma avaliacao anterior com diferenca de metricas para comparar.
+                      Nenhuma avaliação anterior com diferença de métricas para comparar.
                     </p>
                   )}
 
@@ -381,13 +390,18 @@ export function DashboardPage() {
                                 {entry.title} (Atualizado {formatDateTime(entry.updatedAt)})
                               </p>
                               <p className="text-xs text-text-light-secondary dark:text-text-dark-secondary">
-                                Estagio: {maturityStageFromTotal(entry.metrics.total)}
+                                Estágio: {maturityStageFromTotal(entry.metrics.total)}
                               </p>
                             </div>
                             <button
                               type="button"
                               onClick={() =>
-                                setResultsPayload({ scores: entry.scores, metrics: entry.metrics })
+                                setResultsPayload({
+                                  scores: entry.scores,
+                                  metrics: entry.metrics,
+                                  projectTitle: entry.title,
+                                  updatedAt: entry.updatedAt
+                                })
                               }
                               className="rounded-md border border-zinc-300 px-2 py-1 text-xs font-semibold text-text-light-secondary hover:bg-zinc-100 dark:border-zinc-700 dark:text-text-dark-secondary dark:hover:bg-zinc-800"
                             >
@@ -401,7 +415,7 @@ export function DashboardPage() {
                           </p>
                           {scoreDelta !== null && (
                             <p className="mt-1 text-xs text-text-light-secondary dark:text-text-dark-secondary">
-                              Evolucao do Scorecard vs avaliacao anterior:{" "}
+                              Evolucao do Scorecard vs avaliação anterior:{" "}
                               <strong className="text-text-light-primary dark:text-text-dark-primary">
                                 {formatSignedNumber(scoreDelta, 2)}
                               </strong>
@@ -425,6 +439,8 @@ export function DashboardPage() {
           darkMode={darkMode}
           metrics={resultsPayload.metrics}
           scores={resultsPayload.scores}
+          projectTitle={resultsPayload.projectTitle}
+          updatedAt={resultsPayload.updatedAt}
           onClose={() => setResultsPayload(null)}
         />
       )}

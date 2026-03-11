@@ -37,7 +37,7 @@ export function NewCanvasPage() {
       <main className="flex-grow space-y-4 px-4 pb-28 pt-6">
         <section className="rounded-xl border border-zinc-200/80 bg-card-light p-4 dark:border-zinc-800/80 dark:bg-card-dark">
           <p className="mb-4 text-sm text-text-light-secondary dark:text-text-dark-secondary">
-            Crie um novo SRL Canvas para iniciar uma avaliacao do zero.
+            Crie um novo SRL Canvas para iniciar uma avaliação do zero.
           </p>
 
           <div className="space-y-3">
@@ -83,7 +83,7 @@ export function NewCanvasPage() {
 
           {attemptedSubmit && !metaValidation.isValid && (
             <p className="mt-3 text-xs text-amber-700 dark:text-amber-300">
-              Preencha Startup, Avaliador e Data valida antes de criar o canvas.
+              Preencha Startup, Avaliador e Data válida antes de criar o canvas.
             </p>
           )}
 

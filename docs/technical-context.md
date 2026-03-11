@@ -1,6 +1,6 @@
 # Technical Context - SRL Canvas
 
-Ultima atualizacao: 2026-02-15
+Ultima atualizacao: 2026-03-11
 
 ## 1. Objetivo do Documento
 
@@ -142,6 +142,8 @@ facilitando continuidade entre sessoes e justificativa tecnica para avaliacao ac
   (sem delta relevante) para evitar comparativos zerados por duplicidade.
   Ajuste de UX (2026-02-15): adicionar texto explicativo no proprio bloco para orientar como ler o
   comparativo e interpretar sinais de delta (incluindo leitura do CV).
+  Ajuste de UX (2026-03-11): `DashboardPage` passa a ocultar o botao de voltar no `AppHeader`
+  (`showBackButton={false}`) para evitar acao sem utilidade imediata apos login.
 - Motivo: permitir leitura de evolucao entre aplicacoes sem exigir exportacao externa ou navegacao
   adicional, atendendo usuarios experientes e rastreabilidade academica.
 
@@ -168,6 +170,9 @@ facilitando continuidade entre sessoes e justificativa tecnica para avaliacao ac
 - Decisao: ampliar `canvas-flow.spec.ts` para cobrir onboarding, envio da survey com TCLE, exportacao,
   persistencia apos reload e atalhos/modais; manter teste de persistencia remota autenticada como
   cenario opcional condicionado a variaveis de ambiente de Supabase/conta de teste.
+  Ajuste de UX (2026-03-11): exportacao de resultados no `ResultsModal` (PNG/PDF) passa a incluir
+  identificacao do projeto no topo do artefato (titulo do canvas, carimbo `(Atualizado ...)` e
+  `Estagio`) para facilitar compartilhamento e leitura de contexto fora da plataforma.
 - Motivo: aumentar protecao contra regressao em CI/local sem tornar o pipeline dependente de credenciais
   externas em todos os ambientes.
 
@@ -179,6 +184,15 @@ facilitando continuidade entre sessoes e justificativa tecnica para avaliacao ac
   decisao por ADR.
 - Motivo: garantir rastreabilidade ponta a ponta entre implementacao tecnica e material de avaliacao
   academica da dissertacao.
+
+### ADR-016 - Normalizacao de acentuacao na interface PT-BR
+
+- Status: aprovado.
+- Decisao: revisar textos visiveis ao usuario (paginas, modais, labels e mensagens) para corrigir
+  acentuacao em portugues, mantendo valores tecnicos de dominio (ex.: `nao`, `ideacao`, `validacao`,
+  `tracao`) quando usados como chaves/payload.
+- Motivo: elevar clareza linguistica e qualidade percebida da plataforma sem quebrar compatibilidade
+  de dados e regras existentes.
 
 ## 8. Rastreabilidade de Escopo
 

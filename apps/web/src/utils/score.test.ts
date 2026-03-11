@@ -34,9 +34,9 @@ describe("calculateScoreMetrics", () => {
 
 describe("maturityStageFromTotal", () => {
   it("maps each score range to the expected maturity stage", () => {
-    expect(maturityStageFromTotal(35)).toBe("Ideacao");
-    expect(maturityStageFromTotal(59)).toBe("Validacao");
-    expect(maturityStageFromTotal(83)).toBe("Tracao");
+    expect(maturityStageFromTotal(35)).toBe("Ideação");
+    expect(maturityStageFromTotal(59)).toBe("Validação");
+    expect(maturityStageFromTotal(83)).toBe("Tração");
     expect(maturityStageFromTotal(101)).toBe("Escala");
     expect(maturityStageFromTotal(108)).toBe("Maturidade Alta");
   });

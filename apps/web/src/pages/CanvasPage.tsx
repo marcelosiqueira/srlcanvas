@@ -20,6 +20,7 @@ import {
 } from "../services/productMetrics";
 import type { GroupKey } from "../types";
 import { validateCanvasMeta } from "../utils/canvasMeta";
+import { buildCanvasTitle } from "../utils/canvasIdentity";
 import { calculateScoreMetrics } from "../utils/score";
 
 const MAX_SCORE = 108;
@@ -351,7 +352,7 @@ export function CanvasPage() {
             type="button"
             onClick={openOpinionForm}
             className="flex h-12 w-12 items-center justify-center text-text-light-primary dark:text-text-dark-primary"
-            aria-label="Abrir formulario de opiniao"
+            aria-label="Abrir formulário de opinião"
           >
             <span className="material-symbols-outlined text-2xl">rate_review</span>
           </button>
@@ -380,7 +381,7 @@ export function CanvasPage() {
         <div className="mb-6 rounded-xl border border-zinc-200/80 bg-card-light p-4 dark:border-zinc-800/80 dark:bg-card-dark">
           <div className="mb-3 flex items-center justify-between">
             <h2 className="text-sm font-semibold text-text-light-primary dark:text-text-dark-primary">
-              Informacoes Gerais
+              Informações Gerais
             </h2>
             <div className="flex items-center gap-2">
               <button
@@ -393,7 +394,7 @@ export function CanvasPage() {
                 onClick={toggleAdvancedMode}
                 aria-pressed={advancedModeEnabled}
               >
-                Modo avancado {advancedModeEnabled ? "ativo" : "inativo"}
+                Modo avançado {advancedModeEnabled ? "ativo" : "inativo"}
               </button>
               <button
                 type="button"
@@ -466,8 +467,8 @@ export function CanvasPage() {
 
           {!metaValidation.isValid && (
             <p className="mt-3 text-xs text-amber-700 dark:text-amber-300">
-              Metadados incompletos: preencha Startup, Avaliador e Data valida para manter
-              consistencia do diagnostico.
+              Metadados incompletos: preencha Startup, Avaliador e Data válida para manter
+              consistência do diagnóstico.
             </p>
           )}
 
@@ -483,7 +484,7 @@ export function CanvasPage() {
           {advancedModeEnabled && (
             <div className="mt-3 rounded-lg border border-zinc-200/80 bg-zinc-50 p-3 text-xs text-text-light-secondary dark:border-zinc-800/80 dark:bg-zinc-900/40 dark:text-text-dark-secondary">
               <p>
-                Modo avancado: use <strong>N</strong> (proximo pendente), <strong>R</strong>{" "}
+                Modo avançado: use <strong>N</strong> (próximo pendente), <strong>R</strong>{" "}
                 (resultados) e <strong>F</strong> (alternar filtro).
               </p>
               <p className="mt-1">
@@ -497,7 +498,7 @@ export function CanvasPage() {
             <section className="mt-4 rounded-lg border border-primary/30 bg-primary/5 p-3 dark:border-primary/40 dark:bg-primary/10">
               <div className="flex items-center justify-between gap-2">
                 <p className="text-xs font-semibold uppercase tracking-wide text-primary">
-                  Primeira avaliacao guiada
+                  Primeira avaliação guiada
                 </p>
                 <button
                   type="button"
@@ -509,7 +510,7 @@ export function CanvasPage() {
               </div>
 
               <p className="mt-2 text-sm text-text-light-secondary dark:text-text-dark-secondary">
-                Passo {guideStep} de 3: {guideStep === 1 && "preencha os metadados da avaliacao."}
+                Passo {guideStep} de 3: {guideStep === 1 && "preencha os metadados da avaliação."}
                 {guideStep === 2 && "registre a primeira nota no bloco 1."}
                 {guideStep === 3 && "abra os resultados para fechar a jornada inicial."}
               </p>
@@ -567,7 +568,7 @@ export function CanvasPage() {
                 onClick={openNextPendingBlock}
                 className="rounded-lg border border-zinc-300 px-3 py-2 text-xs font-semibold text-text-light-secondary hover:bg-zinc-100 dark:border-zinc-700 dark:text-text-dark-secondary dark:hover:bg-zinc-800"
               >
-                Proximo pendente
+                Próximo pendente
               </button>
 
               <div className="inline-flex rounded-lg border border-zinc-300 p-0.5 dark:border-zinc-700">
@@ -734,6 +735,8 @@ export function CanvasPage() {
           darkMode={darkMode}
           metrics={metrics}
           scores={scores}
+          projectTitle={buildCanvasTitle(meta)}
+          updatedAt={new Date().toISOString()}
           onClose={() => setIsResultsOpen(false)}
         />
       )}

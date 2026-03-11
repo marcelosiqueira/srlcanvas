@@ -47,12 +47,12 @@ export function AccountPage() {
 
         <section className="rounded-xl border border-zinc-200/80 bg-card-light p-4 dark:border-zinc-800/80 dark:bg-card-dark">
           <h2 className="text-sm font-semibold text-text-light-primary dark:text-text-dark-primary">
-            Autenticacao
+            Autenticação
           </h2>
 
           {!isEnabled && (
             <p className="mt-2 text-sm text-text-light-secondary dark:text-text-dark-secondary">
-              Supabase nao configurado. O app esta em modo local/visitante.
+              Supabase não configurado. O app está em modo local/visitante.
             </p>
           )}
 
@@ -109,10 +109,10 @@ export function AccountPage() {
 
         <section className="rounded-xl border border-zinc-200/80 bg-card-light p-4 dark:border-zinc-800/80 dark:bg-card-dark">
           <h2 className="text-sm font-semibold text-text-light-primary dark:text-text-dark-primary">
-            Metricas de Produto (Local)
+            Métricas de Produto (Local)
           </h2>
           <p className="mt-2 text-sm text-text-light-secondary dark:text-text-dark-secondary">
-            Relatorio local para iteracao de produto (sem dados sensiveis). Eventos monitorados:{" "}
+            Relatório local para iteração de produto (sem dados sensíveis). Eventos monitorados:{" "}
             <strong>{metricsEventCount}</strong>.
           </p>
 
@@ -122,35 +122,35 @@ export function AccountPage() {
                 Canvas
               </p>
               <p className="mt-1 text-xs text-text-light-secondary dark:text-text-dark-secondary">
-                Inicio: <strong>{metricsReport.canvas.started}</strong>
+                Início: <strong>{metricsReport.canvas.started}</strong>
               </p>
               <p className="mt-1 text-xs text-text-light-secondary dark:text-text-dark-secondary">
-                Conclusao: <strong>{metricsReport.canvas.completed}</strong>
+                Conclusão: <strong>{metricsReport.canvas.completed}</strong>
               </p>
               <p className="mt-1 text-xs text-text-light-secondary dark:text-text-dark-secondary">
                 Abandono: <strong>{metricsReport.canvas.abandoned}</strong>
               </p>
               <p className="mt-1 text-xs text-text-light-secondary dark:text-text-dark-secondary">
-                Taxa de conclusao:{" "}
+                Taxa de conclusão:{" "}
                 <strong>{metricsReport.canvas.completionRate.toFixed(1)}%</strong>
               </p>
             </div>
 
             <div className="rounded-lg border border-zinc-200/80 bg-zinc-50 p-3 dark:border-zinc-800/80 dark:bg-zinc-800/70">
               <p className="text-xs text-text-light-secondary dark:text-text-dark-secondary">
-                Survey Academica
+                Survey Acadêmica
               </p>
               <p className="mt-1 text-xs text-text-light-secondary dark:text-text-dark-secondary">
-                Inicio: <strong>{metricsReport.survey.started}</strong>
+                Início: <strong>{metricsReport.survey.started}</strong>
               </p>
               <p className="mt-1 text-xs text-text-light-secondary dark:text-text-dark-secondary">
-                Conclusao: <strong>{metricsReport.survey.completed}</strong>
+                Conclusão: <strong>{metricsReport.survey.completed}</strong>
               </p>
               <p className="mt-1 text-xs text-text-light-secondary dark:text-text-dark-secondary">
                 Abandono: <strong>{metricsReport.survey.abandoned}</strong>
               </p>
               <p className="mt-1 text-xs text-text-light-secondary dark:text-text-dark-secondary">
-                Taxa de conclusao:{" "}
+                Taxa de conclusão:{" "}
                 <strong>{metricsReport.survey.completionRate.toFixed(1)}%</strong>
               </p>
             </div>
@@ -162,7 +162,7 @@ export function AccountPage() {
             {metricsReport.survey.abandonedByStep.dimensions_1_4} | blocos 5-8{" "}
             {metricsReport.survey.abandonedByStep.dimensions_5_8} | blocos 9-12{" "}
             {metricsReport.survey.abandonedByStep.dimensions_9_12} | escala/SUS{" "}
-            {metricsReport.survey.abandonedByStep.scale_and_sus} | adocao/follow-up{" "}
+            {metricsReport.survey.abandonedByStep.scale_and_sus} | adoção/follow-up{" "}
             {metricsReport.survey.abandonedByStep.adoption_and_followup}
           </p>
 
@@ -172,7 +172,7 @@ export function AccountPage() {
               onClick={() => setMetricsReport(buildProductMetricsReport())}
               className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-semibold text-text-light-secondary hover:bg-zinc-100 dark:border-zinc-700 dark:text-text-dark-secondary dark:hover:bg-zinc-800"
             >
-              Atualizar relatorio
+              Atualizar relatório
             </button>
             <button
               type="button"
@@ -182,7 +182,7 @@ export function AccountPage() {
               }}
               className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-semibold text-text-light-secondary hover:bg-zinc-100 dark:border-zinc-700 dark:text-text-dark-secondary dark:hover:bg-zinc-800"
             >
-              Limpar metricas locais
+              Limpar métricas locais
             </button>
           </div>
         </section>

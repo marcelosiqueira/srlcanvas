@@ -97,27 +97,27 @@ export const PRODUCT_METRICS_EVENT_DICTIONARY: Record<
   }
 > = {
   canvas_started: {
-    description: "Inicio de sessao de avaliacao no canvas.",
+    description: "Início de sessão de avaliação no canvas.",
     payloadFields: ["sessionId", "scopeType", "supabaseEnabled", "advancedMode"]
   },
   canvas_completed: {
-    description: "Conclusao de avaliacao com 12 blocos pontuados.",
+    description: "Conclusão de avaliação com 12 blocos pontuados.",
     payloadFields: ["sessionId", "filledBlocks", "completionPercent", "advancedMode"]
   },
   canvas_abandoned: {
-    description: "Saida do canvas sem concluir 12 blocos.",
+    description: "Saída do canvas sem concluir 12 blocos.",
     payloadFields: ["sessionId", "filledBlocks", "stage"]
   },
   survey_started: {
-    description: "Inicio de sessao da survey academica.",
+    description: "Início de sessão da survey acadêmica.",
     payloadFields: ["sessionId", "startedWithDraft"]
   },
   survey_step_viewed: {
-    description: "Visualizacao de etapa da survey.",
+    description: "Visualização de etapa da survey.",
     payloadFields: ["sessionId", "stepKey", "stepIndex", "stepCount"]
   },
   survey_completed: {
-    description: "Envio concluido da survey academica.",
+    description: "Envio concluído da survey acadêmica.",
     payloadFields: ["sessionId", "eligible", "stepCount", "completionSeconds", "storage"]
   },
   survey_step_abandoned: {

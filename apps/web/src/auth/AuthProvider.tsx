@@ -60,17 +60,17 @@ export function AuthProvider({ children }: PropsWithChildren) {
       loading,
       isEnabled: isSupabaseConfigured,
       signIn: async (email, password) => {
-        if (!supabase) return { error: "Supabase nao configurado." };
+        if (!supabase) return { error: "Supabase não configurado." };
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         return { error: error?.message ?? null };
       },
       signUp: async (email, password) => {
-        if (!supabase) return { error: "Supabase nao configurado." };
+        if (!supabase) return { error: "Supabase não configurado." };
         const { error } = await supabase.auth.signUp({ email, password });
         return { error: error?.message ?? null };
       },
       signOut: async () => {
-        if (!supabase) return { error: "Supabase nao configurado." };
+        if (!supabase) return { error: "Supabase não configurado." };
         const { error } = await supabase.auth.signOut();
         return { error: error?.message ?? null };
       }

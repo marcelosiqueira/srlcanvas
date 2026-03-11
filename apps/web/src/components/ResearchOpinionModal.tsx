@@ -36,13 +36,13 @@ export function ResearchOpinionModal({ isOpen, nextPath, onClose }: ResearchOpin
         tabIndex={-1}
         role="dialog"
         aria-modal="true"
-        aria-label="Formulario de opiniao"
+        aria-label="Formulário de opinião"
         className="w-full max-w-3xl rounded-2xl border border-zinc-200/80 bg-background-light p-4 shadow-2xl dark:border-zinc-800/80 dark:bg-background-dark"
         onClick={(event) => event.stopPropagation()}
       >
         <div className="mb-2 flex items-center justify-between">
           <h2 className="text-base font-semibold text-text-light-primary dark:text-text-dark-primary">
-            Formulario de opiniao
+            Formulário de opinião
           </h2>
           <button
             ref={initialFocusRef}

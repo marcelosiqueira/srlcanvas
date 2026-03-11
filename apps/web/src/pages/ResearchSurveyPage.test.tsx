@@ -19,7 +19,7 @@ describe("ResearchSurveyPage", () => {
       </MemoryRouter>
     );
 
-    expect(screen.getByText("Questionario Quantitativo SRL Canvas")).toBeInTheDocument();
+    expect(screen.getByText("Questionário Quantitativo SRL Canvas")).toBeInTheDocument();
     expect(await screen.findByRole("button", { name: "Ler e aceitar TCLE" })).toBeInTheDocument();
   });
 
@@ -45,20 +45,20 @@ describe("ResearchSurveyPage", () => {
 
     expect(await screen.findByText("Etapa 1 de 7")).toBeInTheDocument();
 
-    const ageGroup = screen.getByRole("group", { name: "1.1 Voce possui 18 anos ou mais?" });
+    const ageGroup = screen.getByRole("group", { name: "1.1 Você possui 18 anos ou mais?" });
     await user.click(within(ageGroup).getByRole("radio", { name: "Sim" }));
 
     const ecosystemGroup = screen.getByRole("group", {
-      name: "1.2 Voce atua ou atuou no ecossistema de inovacao/startups nos ultimos 12 meses?"
+      name: "1.2 Você atua ou atuou no ecossistema de inovação/startups nos últimos 12 meses?"
     });
     await user.click(within(ecosystemGroup).getByRole("radio", { name: "Sim" }));
 
     const materialGroup = screen.getByRole("group", {
-      name: "1.3 Antes de responder, voce visualizou o SRL Canvas e o guia breve de aplicacao?"
+      name: "1.3 Antes de responder, você visualizou o SRL Canvas e o guia breve de aplicação?"
     });
     await user.click(within(materialGroup).getByRole("radio", { name: "Sim" }));
 
-    await user.click(screen.getByRole("button", { name: "Proxima etapa" }));
+    await user.click(screen.getByRole("button", { name: "Próxima etapa" }));
 
     expect(await screen.findByText("Etapa 2 de 7")).toBeInTheDocument();
     expect(screen.getByText("3. Perfil do respondente")).toBeInTheDocument();

@@ -115,7 +115,7 @@ export function ResearchConsentPage() {
       setAcceptedAt(null);
       setConsentResult(null);
       setStatusMessage(
-        "Consentimento revogado. A pesquisa nao podera ser enviada sem novo aceite."
+        "Consentimento revogado. A pesquisa não podera ser enviada sem novo aceite."
       );
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : "Falha ao revogar consentimento.");
@@ -126,7 +126,7 @@ export function ResearchConsentPage() {
 
   return (
     <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden bg-background-light font-display dark:bg-background-dark">
-      <AppHeader title="TCLE - Pesquisa Academica" backTo={nextPath} />
+      <AppHeader title="TCLE - Pesquisa Acadêmica" backTo={nextPath} />
 
       <main className="flex-grow space-y-4 px-4 pb-28 pt-6">
         <section className="rounded-xl border border-zinc-200/80 bg-card-light p-4 dark:border-zinc-800/80 dark:bg-card-dark">
@@ -134,17 +134,17 @@ export function ResearchConsentPage() {
             Termo de Consentimento Livre e Esclarecido (TCLE)
           </h2>
           <p className="mt-2 text-sm text-text-light-secondary dark:text-text-dark-secondary">
-            Versao de consentimento: <strong>{RESEARCH_TCLE_VERSION}</strong>
+            Versão de consentimento: <strong>{RESEARCH_TCLE_VERSION}</strong>
           </p>
           <p className="mt-1 text-sm text-text-light-secondary dark:text-text-dark-secondary">
-            Versao do questionario: <strong>{RESEARCH_SURVEY_CONFIG.activeVersion}</strong>
+            Versão do questionário: <strong>{RESEARCH_SURVEY_CONFIG.activeVersion}</strong>
           </p>
           <div className="mt-3 space-y-1 text-sm text-text-light-secondary dark:text-text-dark-secondary">
             <p>
-              <strong>Titulo da pesquisa:</strong> {RESEARCH_TCLE_META.title}
+              <strong>Título da pesquisa:</strong> {RESEARCH_TCLE_META.title}
             </p>
             <p>
-              <strong>Pesquisador responsavel:</strong> {RESEARCH_TCLE_META.researcher}
+              <strong>Pesquisador responsável:</strong> {RESEARCH_TCLE_META.researcher}
             </p>
             <p>
               <strong>Contato do pesquisador:</strong> {RESEARCH_TCLE_META.researcherContact}
@@ -153,7 +153,7 @@ export function ResearchConsentPage() {
               <strong>Orientador:</strong> {RESEARCH_TCLE_META.advisor}
             </p>
             <p>
-              <strong>Instituicao proponente:</strong> {RESEARCH_TCLE_META.institution}
+              <strong>Instituição proponente:</strong> {RESEARCH_TCLE_META.institution}
             </p>
             <p>
               <strong>Programa:</strong> {RESEARCH_TCLE_META.program}
@@ -179,24 +179,24 @@ export function ResearchConsentPage() {
 
         <section className="rounded-xl border border-zinc-200/80 bg-card-light p-4 dark:border-zinc-800/80 dark:bg-card-dark">
           <h3 className="text-sm font-semibold text-text-light-primary dark:text-text-dark-primary">
-            Informacoes eticas e de protecao de dados
+            Informações éticas e de proteção de dados
           </h3>
           <div className="mt-2 space-y-2 text-sm text-text-light-secondary dark:text-text-dark-secondary">
             <p>
-              <strong>Comite de Etica:</strong> {RESEARCH_TCLE_META.ethicsCommittee.name}
+              <strong>Comitê de Ética:</strong> {RESEARCH_TCLE_META.ethicsCommittee.name}
             </p>
             <p>
               <strong>Contato CEP:</strong> {RESEARCH_TCLE_META.ethicsCommittee.contact}
             </p>
             <p>
-              <strong>Endereco CEP:</strong> {RESEARCH_TCLE_META.ethicsCommittee.address}
+              <strong>Endereço CEP:</strong> {RESEARCH_TCLE_META.ethicsCommittee.address}
             </p>
             <p>
               <strong>DPO/Encarregada IFMS:</strong> {RESEARCH_TCLE_META.dpo}
             </p>
             <p>
-              Ao continuar, voce declara que leu e compreendeu o TCLE e concorda em participar da
-              pesquisa de forma livre e voluntaria.
+              Ao continuar, você declara que leu e compreendeu o TCLE e concorda em participar da
+              pesquisa de forma livre e voluntária.
             </p>
           </div>
         </section>
@@ -254,7 +254,7 @@ export function ResearchConsentPage() {
                 onClick={() => navigate(nextPath)}
                 className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-semibold text-text-light-secondary hover:bg-zinc-100 dark:border-zinc-700 dark:text-text-dark-secondary dark:hover:bg-zinc-800"
               >
-                Nao concordo
+                Não concordo
               </button>
 
               {hasConsent && (
