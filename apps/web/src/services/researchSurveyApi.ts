@@ -5,7 +5,7 @@ import {
   SURVEY_DIMENSIONS
 } from "../data/researchSurvey";
 import { RESEARCH_SURVEY_CONFIG } from "../config/researchSurveyConfig";
-import { supabase } from "../lib/supabase";
+import { apiFetch, isApiConfigured } from "../lib/apiClient";
 import type { Likert5, ResearchSurveyFormValues, YesNoAnswer } from "../types/researchSurvey";
 
 const LOCAL_SURVEY_STORAGE_KEY = "srl-research-survey-responses-v1";
@@ -26,7 +26,7 @@ interface SaveResearchSurveyInput {
 
 export interface SaveResearchSurveyResult {
   id: string;
-  storage: "supabase" | "local";
+  storage: "remote" | "local";
 }
 
 interface StoredSurveyDraft {
@@ -230,22 +230,33 @@ export async function saveResearchSurveyResponse(
 ): Promise<SaveResearchSurveyResult> {
   const payload = buildPayload(input);
 
-  if (!supabase || !input.userId) {
+  if (!isApiConfigured || !input.userId) {
     return saveLocally(payload);
   }
 
-  const { data, error } = await supabase
-    .from("research_survey_responses")
-    .insert(payload)
-    .select("id")
-    .single();
-
-  if (error) {
-    throw new Error(error.message);
-  }
+  // A API usa camelCase no topo do contrato; os objetos internos (profile,
+  // dimension_answers etc.) são opacos e seguem como estão.
+  const data = await apiFetch<{ id: string }>("/research/survey-responses", {
+    method: "POST",
+    body: {
+      consentAccepted: payload.consent_accepted,
+      consentVersion: payload.consent_version,
+      age18OrMore: payload.age_18_or_more,
+      actedInEcosystem12m: payload.acted_in_ecosystem_12m,
+      viewedSrlMaterial: payload.viewed_srl_material,
+      isEligible: payload.is_eligible,
+      profile: payload.profile,
+      dimensionAnswers: payload.dimension_answers,
+      scaleFeedback: payload.scale_feedback,
+      susAnswers: payload.sus_answers,
+      adoptionFeedback: payload.adoption_feedback,
+      followUp: payload.follow_up,
+      metadata: payload.metadata
+    }
+  });
 
   return {
-    id: data.id as string,
-    storage: "supabase"
+    id: data.id,
+    storage: "remote"
   };
 }

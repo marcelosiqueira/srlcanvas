@@ -56,7 +56,7 @@ interface ProductMetricsPayloadMap {
     eligible: boolean;
     stepCount: number;
     completionSeconds: number | null;
-    storage: "supabase" | "local";
+    storage: "remote" | "local";
   };
   survey_step_abandoned: BaseProductMetricsPayload & {
     stepKey: ProductSurveyStepKey;

@@ -245,7 +245,7 @@ export function DashboardPage() {
           </h3>
           {!isEnabled && (
             <p className="mt-2 text-sm text-text-light-secondary dark:text-text-dark-secondary">
-              Supabase desabilitado. Operando apenas em modo local.
+              Modo local: dados salvos apenas neste dispositivo.
             </p>
           )}
           {isEnabled && !user && (
@@ -280,7 +280,7 @@ export function DashboardPage() {
 
           {!isEnabled && (
             <p className="mt-2 text-sm text-text-light-secondary dark:text-text-dark-secondary">
-              Supabase desabilitado. Histórico temporal disponível apenas no modo remoto.
+              Modo local: histórico disponível apenas com conta.
             </p>
           )}
 

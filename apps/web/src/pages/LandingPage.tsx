@@ -168,8 +168,8 @@ export function LandingPage() {
 
           {!isEnabled && (
             <p className="mt-4 text-xs text-text-light-secondary dark:text-text-dark-secondary">
-              Modo local ativo. Configure o Supabase para habilitar autenticação e persistência
-              remota.
+              Modo local ativo. Autenticação e persistência remota estão desabilitadas nesta
+              configuração.
             </p>
           )}
         </section>

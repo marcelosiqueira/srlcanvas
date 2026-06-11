@@ -1,6 +1,6 @@
 import { RESEARCH_SURVEY_CONFIG } from "../config/researchSurveyConfig";
 import { RESEARCH_TCLE_VERSION } from "../data/researchConsent";
-import { supabase } from "../lib/supabase";
+import { apiFetch, isApiConfigured } from "../lib/apiClient";
 
 const LOCAL_RESEARCH_CONSENT_KEY = "srl-research-consent-v1";
 
@@ -18,13 +18,19 @@ interface AcceptResearchConsentInput {
 export interface ResearchConsentStatus {
   accepted: boolean;
   acceptedAt: string | null;
-  storage: "supabase" | "local" | "none";
+  storage: "remote" | "local" | "none";
   consentId: string | null;
 }
 
 export interface ResearchConsentResult {
   id: string;
-  storage: "supabase" | "local";
+  storage: "remote" | "local";
+}
+
+interface RemoteConsentStatus {
+  accepted: boolean;
+  acceptedAt: string | null;
+  consentId: string | null;
 }
 
 function readLocalConsent(): LocalConsentState | null {
@@ -45,7 +51,7 @@ function writeLocalConsent(state: LocalConsentState): void {
 export async function getResearchConsentStatus(
   userId: string | null
 ): Promise<ResearchConsentStatus> {
-  if (!supabase || !userId) {
+  if (!isApiConfigured || !userId) {
     const local = readLocalConsent();
     if (!local || local.revokedAt) {
       return { accepted: false, acceptedAt: null, storage: "none", consentId: null };
@@ -59,27 +65,17 @@ export async function getResearchConsentStatus(
     };
   }
 
-  const { data, error } = await supabase
-    .from("research_consents")
-    .select("id,accepted,revoked_at,created_at")
-    .eq("user_id", userId)
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
+  const data = await apiFetch<RemoteConsentStatus>("/research/consent");
 
-  if (error) {
-    throw new Error(error.message);
-  }
-
-  if (!data || !data.accepted || data.revoked_at) {
+  if (!data.accepted || !data.consentId) {
     return { accepted: false, acceptedAt: null, storage: "none", consentId: null };
   }
 
   return {
     accepted: true,
-    acceptedAt: data.created_at as string,
-    storage: "supabase",
-    consentId: data.id as string
+    acceptedAt: data.acceptedAt,
+    storage: "remote",
+    consentId: data.consentId
   };
 }
 
@@ -100,41 +96,32 @@ function acceptLocally(): ResearchConsentResult {
 export async function acceptResearchConsent(
   input: AcceptResearchConsentInput
 ): Promise<ResearchConsentResult> {
-  if (!supabase || !input.userId) {
+  if (!isApiConfigured || !input.userId) {
     return acceptLocally();
   }
 
-  const payload = {
-    user_id: input.userId,
-    accepted: true,
-    consent_version: RESEARCH_TCLE_VERSION,
-    survey_version: RESEARCH_SURVEY_CONFIG.activeVersion,
-    metadata: {
-      next_path: input.nextPath,
-      accepted_at_client: new Date().toISOString(),
-      source_route: "/survey/consent",
-      user_agent: typeof navigator !== "undefined" ? navigator.userAgent : "unknown"
+  const data = await apiFetch<{ id: string }>("/research/consent", {
+    method: "POST",
+    body: {
+      consentVersion: RESEARCH_TCLE_VERSION,
+      surveyVersion: RESEARCH_SURVEY_CONFIG.activeVersion,
+      metadata: {
+        next_path: input.nextPath,
+        accepted_at_client: new Date().toISOString(),
+        source_route: "/survey/consent",
+        user_agent: typeof navigator !== "undefined" ? navigator.userAgent : "unknown"
+      }
     }
-  };
-
-  const { data, error } = await supabase
-    .from("research_consents")
-    .insert(payload)
-    .select("id")
-    .single();
-
-  if (error) {
-    throw new Error(error.message);
-  }
+  });
 
   return {
-    id: data.id as string,
-    storage: "supabase"
+    id: data.id,
+    storage: "remote"
   };
 }
 
 export async function revokeResearchConsent(userId: string | null): Promise<void> {
-  if (!supabase || !userId) {
+  if (!isApiConfigured || !userId) {
     const local = readLocalConsent();
     if (!local) return;
 
@@ -145,29 +132,5 @@ export async function revokeResearchConsent(userId: string | null): Promise<void
     return;
   }
 
-  const { data, error } = await supabase
-    .from("research_consents")
-    .select("id")
-    .eq("user_id", userId)
-    .eq("accepted", true)
-    .is("revoked_at", null)
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
-
-  if (error) {
-    throw new Error(error.message);
-  }
-
-  if (!data) return;
-
-  const { error: updateError } = await supabase
-    .from("research_consents")
-    .update({ revoked_at: new Date().toISOString() })
-    .eq("id", data.id as string)
-    .eq("user_id", userId);
-
-  if (updateError) {
-    throw new Error(updateError.message);
-  }
+  await apiFetch<void>("/research/consent/revoke", { method: "POST" });
 }
