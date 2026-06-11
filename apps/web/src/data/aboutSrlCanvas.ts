@@ -1,29 +1,27 @@
 export const ABOUT_SRL_CANVAS = {
   title: "POR QUE O SRL CANVAS?",
-  terminologyNote:
-    "Nota Terminológica: O acrônimo SRL neste framework refere-se exclusivamente a Startup Readiness Level (Nível de Prontidão da Startup), e não ao conceito de Self-Regulated Learning (Autorregulação da Aprendizagem) da psicologia educacional. A escolha e diferenciação terminológica são detalhadas na Dissertação de Mestrado.",
   contextAndGap:
-    "Contexto e Lacuna: Startups operam em ambientes de extrema incerteza. Frameworks como o Business Model Canvas (BMC) são excelentes para a geração de hipóteses, mas não medem o nível de validação dessas hipóteses. O Technology Readiness Level (TRL) foca no risco técnico, ignorando o maior risco de uma startup: construir algo que ninguém quer.",
+    "Startups operam em contextos de alta incerteza. Por isso, um de seus maiores desafios não é apenas formular boas hipóteses, mas compreender o que já foi validado, o que ainda é suposição e onde estão os principais gargalos de maturidade do negócio. Frameworks como o Business Model Canvas (BMC) são úteis para estruturar hipóteses sobre proposta de valor, clientes, canais, receitas e operações, mas não foram desenhados para medir o nível de validação dessas hipóteses. De modo semelhante, o Technology Readiness Level (TRL) foca na prontidão tecnológica, mas não aborda o maior risco de muitas startups: desenvolver algo que o mercado não deseja ou não valoriza.",
   purpose:
-    "O Propósito do SRL Canvas: O SRL Canvas foi desenvolvido como uma ferramenta visual e prática que complementa o BMC. Enquanto o BMC é a ferramenta de geração de hipóteses, o SRL Canvas é a ferramenta de diagnóstico e medição do nível de validação dessas hipóteses em 12 dimensões essenciais.",
+    "Nesse contexto, o SRL Canvas foi desenvolvido como uma ferramenta visual e prática que complementa o BMC. Enquanto o BMC organiza hipóteses sobre o modelo de negócio, o SRL Canvas permite diagnosticar, em 12 dimensões essenciais, o estágio de maturidade e validação dessas hipóteses.",
   whoShouldUseTitle: "1. Quem Deve Usar Este Guia",
   whoShouldUseIntro:
-    "O SRL Canvas foi desenhado para ser uma ferramenta versátil, atendendo a diferentes atores do ecossistema de inovação:",
+    "O SRL Canvas atende diferentes atores do ecossistema de inovação, sempre com foco em diagnóstico, aprendizado e tomada de decisão:",
   whoShouldUse: [
-    "Fundadores de Startups: Para autoavaliação, identificação de gargalos e priorização de esforços de validação.",
-    "Aceleradoras e Incubadoras: Para diagnóstico e acompanhamento do portfólio, permitindo uma comparação objetiva da maturidade das startups.",
-    "Investidores Anjo e VCs: Como ferramenta de due diligence para avaliar o risco e o nível de validação de um potencial investimento, com foco nas evidências anexadas.",
-    "Pesquisadores e Acadêmicos: Como instrumento de pesquisa para estudos sobre maturidade de startups e fatores de sucesso."
+    "Fundadores de startups: Apoiar a autoavaliação, identificar gargalos e orientar a priorização de testes e validações.",
+    "Aceleradoras e incubadoras: Diagnosticar e acompanhar startups de portfólio com maior consistência comparativa.",
+    "Investidores anjo e fundos: Apoiar análises de risco e due diligence, especialmente quando as pontuações são acompanhadas de evidências.",
+    "Pesquisadores e acadêmicos: Utilizar o framework como instrumento analítico em estudos sobre maturidade, validação e evolução de startups."
   ],
   propositionTitle: "2. O que o SRL Canvas se Propõe a Ser",
   propositionItems: [
-    "Uma ferramenta diagnóstica baseada em evidências que avalia a maturidade em níveis de 1 a 9.",
-    "Um instrumento que serve como bússola de aprendizado, guiando a experimentação e a tomada de decisão de empreendedores, aceleradoras, incubadoras e investidores.",
-    "Uma estrutura que adota uma abordagem market-first, onde a maturidade de mercado e cliente é o preditor mais crítico de sucesso."
+    "Ferramenta diagnóstica: Avalia a maturidade da startup em níveis de 1 a 9, com base em critérios objetivos e evidências.",
+    "Bússola de aprendizado: Indica onde a startup precisa validar mais, aprender mais ou corrigir rotas.",
+    "Estrutura market-first: Parte do princípio de que a maturidade de mercado e cliente é um dos principais determinantes da evolução sustentável do negócio."
   ],
   propositionSummary:
-    "Em síntese, o SRL Canvas se propõe a ser uma ferramenta diagnóstica baseada em evidências. Por isso, este guia recomenda que as pontuações do SRL sejam sempre sustentadas por evidências concretas, detalhadas na Seção 5 (Protocolo de Evidências).",
+    "Em síntese, o SRL Canvas é uma ferramenta diagnóstica baseada em evidências. Por isso, recomenda-se que as pontuações atribuídas a cada bloco sejam sempre sustentadas por registros verificáveis, conforme o protocolo de evidências do guia oficial.",
   notTitle: "O que o SRL Canvas Não É",
   notDescription:
-    "O SRL Canvas não substitui ferramentas de formulação estratégica (como o próprio BMC), planejamento financeiro detalhado ou modelagem jurídica. Ele funciona como um painel de diagnóstico de maturidade que deve ser usado em conjunto com outras ferramentas de gestão."
+    "O SRL Canvas não substitui ferramentas de formulação estratégica, planejamento financeiro detalhado, modelagem societária ou estruturação jurídica. Ele funciona como um painel diagnóstico de maturidade e deve ser utilizado em conjunto com outras ferramentas de gestão, validação e execução."
 };

@@ -54,9 +54,6 @@ export function AboutSrlCanvasModal({ isOpen, onClose }: AboutSrlCanvasModalProp
           </h3>
 
           <p className="text-sm text-text-light-secondary dark:text-text-dark-secondary">
-            {ABOUT_SRL_CANVAS.terminologyNote}
-          </p>
-          <p className="text-sm text-text-light-secondary dark:text-text-dark-secondary">
             {ABOUT_SRL_CANVAS.contextAndGap}
           </p>
           <p className="text-sm text-text-light-secondary dark:text-text-dark-secondary">
