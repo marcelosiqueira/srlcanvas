@@ -1,13 +1,18 @@
 import Fastify, { type FastifyInstance } from "fastify";
 
 import { registerErrorHandler } from "./lib/errors.js";
+import { authPlugin } from "./plugins/auth.js";
 import { corsPlugin } from "./plugins/cors.js";
 import { prismaPlugin } from "./plugins/prisma.js";
+import { authRoutes } from "./routes/auth.js";
 import { healthRoutes } from "./routes/health.js";
+import { meRoutes } from "./routes/me.js";
 
 async function apiRoutes(app: FastifyInstance): Promise<void> {
-  // Placeholder: as rotas reais (auth, canvases, research) chegam nas fases 1b/1c.
-  app.get("/ping", async () => ({ pong: true }));
+  // authRoutes e um plugin encapsulado: o rate limit registrado dentro dele
+  // nao afeta as demais rotas da API.
+  await app.register(authRoutes);
+  await app.register(meRoutes);
 }
 
 export interface BuildAppOptions {
@@ -21,6 +26,7 @@ export async function buildApp(opts: BuildAppOptions = {}): Promise<FastifyInsta
 
   await app.register(corsPlugin);
   await app.register(prismaPlugin);
+  await app.register(authPlugin);
   await app.register(healthRoutes);
   await app.register(apiRoutes, { prefix: "/api" });
 

@@ -3,7 +3,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { buildTestApp } from "./helpers.js";
 
-describe("health & ping", () => {
+describe("health", () => {
   let app: FastifyInstance;
 
   beforeAll(async () => {
@@ -22,12 +22,5 @@ describe("health & ping", () => {
     expect(body.status).toBe("ok");
     expect(body.service).toBe("@srl/api");
     expect(typeof body.timestamp).toBe("string");
-  });
-
-  it("GET /api/ping responde 200 com pong", async () => {
-    const response = await app.inject({ method: "GET", url: "/api/ping" });
-
-    expect(response.statusCode).toBe(200);
-    expect(response.json()).toEqual({ pong: true });
   });
 });
