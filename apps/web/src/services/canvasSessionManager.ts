@@ -82,7 +82,7 @@ export async function syncCanvasScopeForSession(input: SyncCanvasScopeInput): Pr
       };
       writeCanvasSnapshot(userScope, userSnapshot);
     } catch (error) {
-      console.error("Falha ao salvar migracao inicial do canvas no Supabase:", error);
+      console.error("Falha ao sincronizar canvas com o servidor:", error);
     }
   }
 

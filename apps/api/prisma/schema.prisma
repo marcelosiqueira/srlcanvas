@@ -1,0 +1,81 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  name         String
+  passwordHash String   @map("password_hash")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @default(now()) @updatedAt @map("updated_at")
+
+  canvases        Canvas[]
+  consents        ResearchConsent[]
+  surveyResponses ResearchSurveyResponse[]
+
+  @@map("users")
+}
+
+model Canvas {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  title     String   @default("Meu Canvas Estrategico")
+  meta      Json
+  blocks    Json
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([updatedAt(sort: Desc)])
+  @@map("canvases")
+}
+
+model ResearchConsent {
+  id             String    @id @default(uuid())
+  userId         String    @map("user_id")
+  accepted       Boolean
+  consentVersion String    @map("consent_version")
+  surveyVersion  String    @map("survey_version")
+  revokedAt      DateTime? @map("revoked_at")
+  metadata       Json
+  createdAt      DateTime  @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([createdAt(sort: Desc)])
+  @@map("research_consents")
+}
+
+model ResearchSurveyResponse {
+  id                  String   @id @default(uuid())
+  userId              String   @map("user_id")
+  consentAccepted     Boolean  @map("consent_accepted")
+  consentVersion      String   @map("consent_version")
+  age18OrMore         Boolean  @map("age_18_or_more")
+  actedInEcosystem12m Boolean  @map("acted_in_ecosystem_12m")
+  viewedSrlMaterial   Boolean  @map("viewed_srl_material")
+  isEligible          Boolean  @map("is_eligible")
+  profile             Json
+  dimensionAnswers    Json     @map("dimension_answers")
+  scaleFeedback       Json     @map("scale_feedback")
+  susAnswers          Json     @map("sus_answers")
+  adoptionFeedback    Json     @map("adoption_feedback")
+  followUp            Json     @map("follow_up")
+  metadata            Json
+  createdAt           DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([createdAt(sort: Desc)])
+  @@map("research_survey_responses")
+}

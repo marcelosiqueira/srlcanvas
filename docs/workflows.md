@@ -12,7 +12,7 @@
 8. Repetir ate os 12 blocos.
 9. Abrir `Ver Resultados`.
 10. Exportar PNG/PDF (opcional).
-11. Quando autenticado com Supabase ativo, sincronizacao remota acontece automaticamente em background.
+11. Quando autenticado com a API ativa, sincronizacao remota acontece automaticamente em background.
 
 ## 1.1 Workflow: Entrada no App (Publico -> Auth)
 
@@ -44,7 +44,7 @@
 ## 1.3 Workflow: Historico e Comparativo Temporal
 
 1. Acessar `Dashboard`.
-2. Confirmar usuario autenticado com Supabase ativo.
+2. Confirmar usuario autenticado com a API ativa.
 3. Visualizar secao `Historico e Comparativo Temporal`.
 4. Revisar avaliacao mais recente (total, scorecard, CV, blocos preenchidos).
 5. Selecionar avaliacao anterior no campo `Comparar com`.
@@ -63,7 +63,7 @@
 ## 1.5 Workflow: Minha Conta (Edicao de Nome)
 
 1. Acessar `Minha Conta`.
-2. Confirmar usuario autenticado com Supabase ativo.
+2. Confirmar usuario autenticado com a API ativa.
 3. Na secao `Perfil`, visualizar identificacao de autenticacao (email e acao `Sair`).
 4. Carregar nome atual a partir do metadata da conta autenticada.
 5. Editar campo `Nome`.
@@ -129,7 +129,7 @@
 2. Rodar `pnpm test`.
 3. Rodar `pnpm build`.
 4. Em mudancas de fluxo critico, rodar `pnpm test:e2e`.
-   - para cenario remoto autenticado no E2E, configurar `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `E2E_REMOTE_EMAIL` e `E2E_REMOTE_PASSWORD`.
+   - para cenario remoto autenticado no E2E, configurar `VITE_API_URL`, `E2E_REMOTE_EMAIL` e `E2E_REMOTE_PASSWORD` (com a API rodando).
    - sem estas variaveis, o teste remoto fica `skip` e a suite local permanece estavel.
 5. Garantir pipeline de CI (`.github/workflows/ci.yml`) verde.
 
@@ -144,6 +144,6 @@
 
 1. Confirmar versoes congeladas do instrumento (`RESEARCH_SURVEY_VERSION`, `RESEARCH_TCLE_VERSION`).
 2. Confirmar integridade do instrumento via fingerprint (`researchInstrumentFingerprint`).
-3. Consolidar metricas de produto (local, sem PII) e metricas da pesquisa (Supabase).
+3. Consolidar metricas de produto (local, sem PII) e metricas da pesquisa (banco MySQL da API).
 4. Atualizar `docs/dissertation-evidence-package.md` com consultas SQL, trilha ADR e matriz de rastreabilidade.
 5. Atualizar `docs/implementation-checklist.md` e `docs/technical-context.md` com o estado corrente.

@@ -32,6 +32,7 @@ interface BaseProductMetricsPayload {
 interface ProductMetricsPayloadMap {
   canvas_started: BaseProductMetricsPayload & {
     scopeType: "guest" | "authenticated";
+    // nome historico; indica backend remoto habilitado
     supabaseEnabled: boolean;
     advancedMode: boolean;
   };
@@ -56,7 +57,7 @@ interface ProductMetricsPayloadMap {
     eligible: boolean;
     stepCount: number;
     completionSeconds: number | null;
-    storage: "supabase" | "local";
+    storage: "remote" | "local";
   };
   survey_step_abandoned: BaseProductMetricsPayload & {
     stepKey: ProductSurveyStepKey;

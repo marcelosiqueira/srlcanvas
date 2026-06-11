@@ -1,3 +1,8 @@
 packages:
   - "apps/*"
   - "packages/*"
+# Nota: apps/api declara jiti@^1.21.7 como devDep de propósito. O prisma traz
+# jiti@2 (via @prisma/config -> c12) e, sem o pin, o pnpm cria duas variantes
+# peer de vitest (web=jiti1 via tailwindcss, api=jiti2), o que duplica o runtime
+# do vitest e quebra toMatchInlineSnapshot no web ("snapshot state not found").
+# Remover o pin só quando tailwindcss usar jiti@2 (v4+).

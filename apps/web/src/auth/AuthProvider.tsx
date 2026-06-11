@@ -1,90 +1,160 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import type { PropsWithChildren } from "react";
-import type { Session, User } from "@supabase/supabase-js";
-import { isSupabaseConfigured, supabase } from "../lib/supabase";
+import {
+  ApiError,
+  AUTH_EXPIRED_EVENT,
+  apiFetch,
+  clearStoredToken,
+  getStoredToken,
+  isApiConfigured,
+  setStoredToken
+} from "../lib/apiClient";
 import { syncCanvasScopeForSession } from "../services/canvasSessionManager";
+
+export interface AppUser {
+  id: string;
+  email: string;
+  name: string;
+}
 
 interface AuthResult {
   error: string | null;
 }
 
 interface AuthContextValue {
-  user: User | null;
-  session: Session | null;
+  user: AppUser | null;
   loading: boolean;
   isEnabled: boolean;
   signIn: (email: string, password: string) => Promise<AuthResult>;
   signUp: (name: string, email: string, password: string) => Promise<AuthResult>;
   signOut: () => Promise<AuthResult>;
+  updateProfile: (name: string) => Promise<AuthResult>;
+}
+
+interface AuthPayload {
+  token: string;
+  user: AppUser;
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
+function toFriendlyError(error: unknown): string {
+  if (error instanceof ApiError) {
+    switch (error.message) {
+      case "invalid_credentials":
+        return "Email ou senha inválidos.";
+      case "email_already_registered":
+        return "Este email já está cadastrado.";
+      case "validation_error":
+        return "Dados inválidos.";
+      case "network_error":
+        return "Falha de conexão.";
+      default:
+        return error.message;
+    }
+  }
+
+  return error instanceof Error ? error.message : "Erro inesperado.";
+}
+
 export function AuthProvider({ children }: PropsWithChildren) {
-  const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(isSupabaseConfigured);
+  const [user, setUser] = useState<AppUser | null>(null);
+  const [loading, setLoading] = useState(() => isApiConfigured && Boolean(getStoredToken()));
 
   useEffect(() => {
-    if (!isSupabaseConfigured || !supabase) {
+    if (!isApiConfigured || !getStoredToken()) {
       return;
     }
 
-    void supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session);
-      setLoading(false);
-    });
+    let isActive = true;
 
-    const {
-      data: { subscription }
-    } = supabase.auth.onAuthStateChange((_event, nextSession) => {
-      setSession(nextSession);
-      setLoading(false);
-    });
+    void apiFetch<{ user: AppUser }>("/me")
+      .then((data) => {
+        if (isActive) setUser(data.user);
+      })
+      .catch(() => {
+        // Em 401 o token já foi limpo pelo apiClient; demais erros mantêm modo deslogado.
+        if (isActive) setUser(null);
+      })
+      .finally(() => {
+        if (isActive) setLoading(false);
+      });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      isActive = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleAuthExpired = () => setUser(null);
+    window.addEventListener(AUTH_EXPIRED_EVENT, handleAuthExpired);
+    return () => window.removeEventListener(AUTH_EXPIRED_EVENT, handleAuthExpired);
   }, []);
 
   useEffect(() => {
     if (loading) return;
 
     void syncCanvasScopeForSession({
-      userId: session?.user?.id ?? null,
-      isAuthEnabled: isSupabaseConfigured
+      userId: user?.id ?? null,
+      isAuthEnabled: isApiConfigured
     });
-  }, [loading, session?.user?.id]);
+  }, [loading, user?.id]);
 
   const value = useMemo<AuthContextValue>(
     () => ({
-      user: session?.user ?? null,
-      session,
+      user,
       loading,
-      isEnabled: isSupabaseConfigured,
+      isEnabled: isApiConfigured,
       signIn: async (email, password) => {
-        if (!supabase) return { error: "Supabase não configurado." };
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
-        return { error: error?.message ?? null };
+        if (!isApiConfigured) return { error: "Autenticação não configurada." };
+        try {
+          const data = await apiFetch<AuthPayload>("/auth/login", {
+            method: "POST",
+            body: { email, password },
+            auth: false
+          });
+          setStoredToken(data.token);
+          setUser(data.user);
+          return { error: null };
+        } catch (error) {
+          return { error: toFriendlyError(error) };
+        }
       },
       signUp: async (name, email, password) => {
-        if (!supabase) return { error: "Supabase não configurado." };
-        const normalizedName = name.trim();
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            data: {
-              name: normalizedName
-            }
-          }
-        });
-        return { error: error?.message ?? null };
+        if (!isApiConfigured) return { error: "Autenticação não configurada." };
+        try {
+          const data = await apiFetch<AuthPayload>("/auth/register", {
+            method: "POST",
+            body: { name: name.trim(), email, password },
+            auth: false
+          });
+          setStoredToken(data.token);
+          setUser(data.user);
+          return { error: null };
+        } catch (error) {
+          return { error: toFriendlyError(error) };
+        }
       },
       signOut: async () => {
-        if (!supabase) return { error: "Supabase não configurado." };
-        const { error } = await supabase.auth.signOut();
-        return { error: error?.message ?? null };
+        clearStoredToken();
+        setUser(null);
+        return { error: null };
+      },
+      updateProfile: async (name) => {
+        if (!isApiConfigured) return { error: "Autenticação não configurada." };
+        try {
+          const data = await apiFetch<{ user: AppUser }>("/me", {
+            method: "PATCH",
+            body: { name: name.trim() }
+          });
+          setUser(data.user);
+          return { error: null };
+        } catch (error) {
+          return { error: toFriendlyError(error) };
+        }
       }
     }),
-    [session, loading]
+    [user, loading]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

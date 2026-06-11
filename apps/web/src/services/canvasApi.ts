@@ -1,5 +1,5 @@
 import type { CanvasBlockState, CanvasMeta } from "../types";
-import { supabase } from "../lib/supabase";
+import { apiFetch, isApiConfigured } from "../lib/apiClient";
 import { buildCanvasTitle } from "../utils/canvasIdentity";
 
 export interface RemoteCanvas {
@@ -18,44 +18,31 @@ interface SaveCanvasInput {
   blocks: Record<number, CanvasBlockState>;
 }
 
-export async function listCanvasesByUser(userId: string): Promise<RemoteCanvas[]> {
-  if (!supabase) return [];
+// O parâmetro userId é mantido por compatibilidade de assinatura com os
+// consumidores existentes; o servidor identifica o usuário pelo JWT.
+export async function listCanvasesByUser(_userId: string): Promise<RemoteCanvas[]> {
+  void _userId;
 
-  const { data, error } = await supabase
-    .from("canvases")
-    .select("id,title,meta,blocks,updated_at")
-    .eq("user_id", userId)
-    .order("updated_at", { ascending: false });
+  if (!isApiConfigured) return [];
 
-  if (error) {
-    throw new Error(error.message);
-  }
-
-  return (data ?? []) as RemoteCanvas[];
+  const data = await apiFetch<{ canvases: RemoteCanvas[] }>("/canvases");
+  return data.canvases;
 }
 
 export async function saveCanvas(input: SaveCanvasInput): Promise<RemoteCanvas> {
-  if (!supabase) {
-    throw new Error("Supabase não configurado");
+  if (!isApiConfigured) {
+    throw new Error("API não configurada");
   }
 
-  const payload = {
-    id: input.id,
-    user_id: input.userId,
-    title: input.title?.trim() || buildCanvasTitle(input.meta),
-    meta: input.meta,
-    blocks: input.blocks
-  };
+  const data = await apiFetch<{ canvas: RemoteCanvas }>("/canvases", {
+    method: "PUT",
+    body: {
+      id: input.id,
+      title: input.title?.trim() || buildCanvasTitle(input.meta),
+      meta: input.meta,
+      blocks: input.blocks
+    }
+  });
 
-  const { data, error } = await supabase
-    .from("canvases")
-    .upsert(payload)
-    .select("id,title,meta,blocks,updated_at")
-    .single();
-
-  if (error) {
-    throw new Error(error.message);
-  }
-
-  return data as RemoteCanvas;
+  return data.canvas;
 }

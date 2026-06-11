@@ -712,7 +712,7 @@ export function ResearchSurveyPage() {
             )}
             <p className="mt-1 text-xs text-emerald-700 dark:text-emerald-400">
               Armazenamento:{" "}
-              {result.storage === "supabase" ? "Supabase" : "localStorage (modo local)"}
+              {result.storage === "remote" ? "servidor (conta)" : "localStorage (modo local)"}
             </p>
             <div className="mt-4 flex flex-wrap gap-2">
               <button

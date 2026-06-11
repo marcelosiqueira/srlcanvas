@@ -1,6 +1,6 @@
 # Technical Context - SRL Canvas
 
-Ultima atualizacao: 2026-03-11
+Ultima atualizacao: 2026-06-11
 
 ## 1. Objetivo do Documento
 
@@ -11,10 +11,13 @@ facilitando continuidade entre sessoes e justificativa tecnica para avaliacao ac
 
 - Monorepo: pnpm workspaces.
 - Frontend: `apps/web` (React + Vite + TypeScript + Tailwind + Zustand).
-- Backend: `apps/api` (Fastify + TypeScript, endpoint base de health).
-- Persistencia:
+- Backend: `apps/api` (Fastify + TypeScript + Prisma/MySQL, auth propria com JWT e argon2id).
+- Persistencia (dupla):
   - Local: `localStorage` (escopo `guest` e por `user_id`).
-  - Remota: Supabase (auth + tabelas de canvases/survey/consent).
+  - Remota: API propria sobre MySQL (tabelas `users`, `canvases`, `research_consents`,
+    `research_survey_responses`), habilitada via `VITE_API_URL`.
+- Autenticacao: JWT emitido pela API (`/auth/register`, `/auth/login`); senha com hash argon2id.
+- Setup: `docs/backend-setup.md`.
 
 ## 3. Mapa Funcional
 
@@ -55,7 +58,7 @@ facilitando continuidade entre sessoes e justificativa tecnica para avaliacao ac
 ## 6. Lacunas Tecnicas Prioritarias
 
 1. P2.3 concluido com pacote metodologico versionado em `docs/dissertation-evidence-package.md`.
-2. Cobertura remota autenticada em E2E depende de credenciais Supabase de teste.
+2. Cobertura remota autenticada em E2E depende de API configurada (`VITE_API_URL`) e conta de teste (`E2E_REMOTE_EMAIL`/`E2E_REMOTE_PASSWORD`).
 3. Monitorar crescimento dos chunks por rota apos novas features.
 4. Formalizar rotina periodica de extracao pseudonimizada para analise da dissertacao.
 
@@ -72,6 +75,8 @@ facilitando continuidade entre sessoes e justificativa tecnica para avaliacao ac
 - Status: aprovado.
 - Decisao: permitir envio em modo local quando Supabase indisponivel.
 - Motivo: nao bloquear coleta em ambiente de demonstracao/avaliacao.
+- Atualizacao (2026-06): Supabase foi substituido pela API propria (Fastify + MySQL/Prisma);
+  a decisao permanece valida com a API no papel de backend remoto.
 
 ### ADR-003 - Scorecard baseado em CV
 
@@ -175,6 +180,8 @@ facilitando continuidade entre sessoes e justificativa tecnica para avaliacao ac
   `Estagio`) para facilitar compartilhamento e leitura de contexto fora da plataforma.
 - Motivo: aumentar protecao contra regressao em CI/local sem tornar o pipeline dependente de credenciais
   externas em todos os ambientes.
+- Atualizacao (2026-06): Supabase substituido pela API propria; o gating do cenario remoto passou a usar
+  `VITE_API_URL` + `E2E_REMOTE_EMAIL`/`E2E_REMOTE_PASSWORD`.
 
 ### ADR-015 - Pacote metodologico versionado para banca
 
@@ -201,6 +208,8 @@ facilitando continuidade entre sessoes e justificativa tecnica para avaliacao ac
   Supabase Auth em `user_metadata` (`name`).
 - Motivo: melhorar identificacao basica da conta e preparar exibicoes futuras sem depender apenas do
   e-mail do usuario.
+- Atualizacao (2026-06): substituido pela API propria; o nome agora e coluna `name` da tabela `users`
+  (`POST /auth/register`).
 
 ### ADR-018 - Edicao de nome em Minha Conta
 
