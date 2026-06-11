@@ -4,11 +4,8 @@ import type { FastifyInstance } from "fastify";
 
 import { AppError } from "../lib/errors.js";
 import { hashPassword, verifyPassword } from "../lib/password.js";
+import { publicUser } from "../lib/serializers.js";
 import { loginSchema, registerSchema } from "../schemas/auth.js";
-
-function publicUser(user: User): { id: string; email: string; name: string } {
-  return { id: user.id, email: user.email, name: user.name };
-}
 
 export async function authRoutes(app: FastifyInstance): Promise<void> {
   // Escopado a este plugin: limita apenas as rotas de auth, nao a API toda.
