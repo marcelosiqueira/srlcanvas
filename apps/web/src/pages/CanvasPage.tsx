@@ -632,7 +632,7 @@ export function CanvasPage() {
 
                     <div className="flex min-w-0 flex-col justify-center">
                       <p className="font-semibold text-text-light-primary dark:text-text-dark-primary">
-                        <span className={`font-bold ${group.badgeClass}`}>{block.id}.</span>{" "}
+                        <span className={`font-bold ${group.badgeClass}`}>{block.number}.</span>{" "}
                         {block.name}
                       </p>
                       <p className="text-sm text-text-light-secondary dark:text-text-dark-secondary">
@@ -648,7 +648,7 @@ export function CanvasPage() {
                         onClick={() => adjustBlockScore(block.id, -1)}
                         disabled={!hasScore}
                         className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-zinc-300 text-text-light-secondary hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-40 dark:border-zinc-700 dark:text-text-dark-secondary dark:hover:bg-zinc-800"
-                        aria-label={`Diminuir nota do bloco ${block.id}`}
+                        aria-label={`Diminuir nota do bloco ${block.number}`}
                       >
                         <span className="material-symbols-outlined text-base" aria-hidden="true">
                           remove
@@ -658,7 +658,7 @@ export function CanvasPage() {
                         type="button"
                         onClick={() => adjustBlockScore(block.id, 1)}
                         className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-zinc-300 text-text-light-secondary hover:bg-zinc-100 dark:border-zinc-700 dark:text-text-dark-secondary dark:hover:bg-zinc-800"
-                        aria-label={`Aumentar nota do bloco ${block.id}`}
+                        aria-label={`Aumentar nota do bloco ${block.number}`}
                       >
                         <span className="material-symbols-outlined text-base" aria-hidden="true">
                           add

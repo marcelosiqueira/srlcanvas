@@ -54,7 +54,7 @@ export function ResultsModal({
 
   const radarData = useMemo(
     () => ({
-      labels: SRL_BLOCKS.map((block) => `${block.id}. ${block.shortLabel}`),
+      labels: SRL_BLOCKS.map((block) => `${block.number}. ${block.shortLabel}`),
       datasets: [
         {
           label: "Nível SRL",
@@ -118,6 +118,7 @@ export function ResultsModal({
         if (!summary || score < 1) {
           return {
             blockId: block.id,
+            blockNumber: block.number,
             blockName: block.name,
             score,
             band: null,
@@ -130,6 +131,7 @@ export function ResultsModal({
 
         return {
           blockId: block.id,
+          blockNumber: block.number,
           blockName: block.name,
           score,
           band,
@@ -307,7 +309,7 @@ export function ResultsModal({
                   >
                     <div className="flex items-center justify-between gap-2">
                       <p className="text-sm font-semibold text-text-light-primary dark:text-text-dark-primary">
-                        {item.blockId}. {item.blockName}
+                        {item.blockNumber}. {item.blockName}
                       </p>
                       <span className="rounded-full bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary dark:bg-primary/20">
                         Nota: {item.score > 0 ? `${item.score}/9` : "Pendente"}

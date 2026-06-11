@@ -102,7 +102,7 @@ export function BlockEditModal({
       >
         <div className="flex items-center justify-between border-b border-zinc-200/80 p-4 dark:border-zinc-800/80">
           <h2 className="text-lg font-bold text-text-light-primary dark:text-text-dark-primary">
-            {block.id}. {block.name}
+            {block.number}. {block.name}
           </h2>
           <div className="flex items-center gap-2">
             {showSaveAndNext && onSaveAndNext && (
@@ -147,6 +147,11 @@ export function BlockEditModal({
             <p className="mt-1 text-sm text-text-light-secondary dark:text-text-dark-secondary">
               {block.objective}
             </p>
+            {block.note && (
+              <p className="mt-2 rounded-lg border border-zinc-200/80 bg-zinc-50 p-3 text-xs italic text-text-light-secondary dark:border-zinc-800/80 dark:bg-zinc-800/60 dark:text-text-dark-secondary">
+                {block.note}
+              </p>
+            )}
             <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-text-light-secondary dark:text-text-dark-secondary">
               {block.questions.map((question) => (
                 <li key={question}>{question}</li>
