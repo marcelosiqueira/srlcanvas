@@ -12,6 +12,7 @@ import { Radar } from "react-chartjs-2";
 import { SRL_BLOCKS } from "../data/srlBlocks";
 import { useDialogA11y } from "../hooks/useDialogA11y";
 import { maturityStageFromTotal } from "../utils/score";
+import { detectInterdependencyAlerts } from "../utils/interdependency";
 import type { ScoreMetrics } from "../types";
 
 ChartJS.register(RadialLinearScale, PointElement, LineElement, Filler, Tooltip, Legend);
@@ -140,6 +141,8 @@ export function ResultsModal({
       }),
     [scores]
   );
+
+  const interdependencyAlerts = useMemo(() => detectInterdependencyAlerts(scores), [scores]);
 
   const exportPng = async () => {
     if (!cardRef.current) return;
@@ -295,6 +298,26 @@ export function ResultsModal({
             <p className="text-xs text-text-light-secondary dark:text-text-dark-secondary">
               Fórmula: Scorecard = Pontuação Total x (1 - Coeficiente de Variação).
             </p>
+
+            {interdependencyAlerts.length > 0 && (
+              <div className="space-y-2">
+                <h3 className="text-sm font-semibold text-text-light-primary dark:text-text-dark-primary">
+                  Protocolo de Interdependência
+                </h3>
+                <p className="text-xs text-text-light-secondary dark:text-text-dark-secondary">
+                  Análise não-linear (guia, seção 7): pontuações altas em blocos avançados devem ser
+                  questionadas quando os blocos de base estão imaturos. Aviso consultivo.
+                </p>
+                {interdependencyAlerts.map((alert) => (
+                  <p
+                    key={alert.blockId}
+                    className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800 dark:border-amber-700/40 dark:bg-amber-900/20 dark:text-amber-300"
+                  >
+                    {alert.message}
+                  </p>
+                ))}
+              </div>
+            )}
 
             <div className="space-y-3">
               <h3 className="text-sm font-semibold text-text-light-primary dark:text-text-dark-primary">
