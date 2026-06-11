@@ -30,6 +30,8 @@ export interface CanvasTemporalComparison {
   cvDelta: number;
   completionDelta: number;
   filledBlocksDelta: number;
+  /** Pontos de maturidade por mês (guia, seção 5.3); null se o intervalo for menor que 1 dia. */
+  maturityVelocity: number | null;
 }
 
 const toTimestamp = (value: string | null): number | null => {
@@ -97,15 +99,23 @@ export function buildCanvasHistoryEntries(canvases: CanvasHistoryInput[]): Canva
   });
 }
 
+const MS_PER_DAY = 86_400_000;
+const DAYS_PER_MONTH = 30.44;
+
 export function compareCanvasHistoryEntries(
-  current: Pick<CanvasHistoryEntry, "metrics" | "filledBlocks">,
-  previous: Pick<CanvasHistoryEntry, "metrics" | "filledBlocks">
+  current: Pick<CanvasHistoryEntry, "metrics" | "filledBlocks" | "timelineTimestamp">,
+  previous: Pick<CanvasHistoryEntry, "metrics" | "filledBlocks" | "timelineTimestamp">
 ): CanvasTemporalComparison {
+  const totalDelta = current.metrics.total - previous.metrics.total;
+  const elapsedDays = (current.timelineTimestamp - previous.timelineTimestamp) / MS_PER_DAY;
+  const maturityVelocity = elapsedDays >= 1 ? totalDelta / (elapsedDays / DAYS_PER_MONTH) : null;
+
   return {
-    totalDelta: current.metrics.total - previous.metrics.total,
+    totalDelta,
     riskScoreDelta: current.metrics.riskScore - previous.metrics.riskScore,
     cvDelta: current.metrics.cv - previous.metrics.cv,
     completionDelta: current.metrics.completion - previous.metrics.completion,
-    filledBlocksDelta: current.filledBlocks - previous.filledBlocks
+    filledBlocksDelta: current.filledBlocks - previous.filledBlocks,
+    maturityVelocity
   };
 }

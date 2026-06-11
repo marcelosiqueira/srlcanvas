@@ -89,11 +89,13 @@ describe("canvasHistory utilities", () => {
     const comparison = compareCanvasHistoryEntries(
       {
         metrics: makeMetrics({ total: 60, riskScore: 52.45, cv: 0.12, completion: 100 }),
-        filledBlocks: 12
+        filledBlocks: 12,
+        timelineTimestamp: Date.UTC(2026, 5, 1)
       },
       {
         metrics: makeMetrics({ total: 36, riskScore: 29.25, cv: 0.22, completion: 75 }),
-        filledBlocks: 9
+        filledBlocks: 9,
+        timelineTimestamp: Date.UTC(2026, 2, 1)
       }
     );
 
@@ -102,5 +104,40 @@ describe("canvasHistory utilities", () => {
     expect(comparison.cvDelta).toBeCloseTo(-0.1, 4);
     expect(comparison.completionDelta).toBe(25);
     expect(comparison.filledBlocksDelta).toBe(3);
+  });
+
+  it("calcula a velocidade de maturidade em pontos por mês", () => {
+    const comparison = compareCanvasHistoryEntries(
+      {
+        metrics: makeMetrics({ total: 60 }),
+        filledBlocks: 12,
+        timelineTimestamp: Date.UTC(2026, 5, 1) // 2026-06-01
+      },
+      {
+        metrics: makeMetrics({ total: 36 }),
+        filledBlocks: 12,
+        timelineTimestamp: Date.UTC(2026, 2, 1) // 2026-03-01, 92 dias antes
+      }
+    );
+
+    // 24 pontos em 92 dias = 24 / (92 / 30,44) ≈ 7,94 pts/mês
+    expect(comparison.maturityVelocity).toBeCloseTo(24 / (92 / 30.44), 4);
+  });
+
+  it("retorna velocidade nula quando o intervalo é menor que um dia", () => {
+    const comparison = compareCanvasHistoryEntries(
+      {
+        metrics: makeMetrics({ total: 60 }),
+        filledBlocks: 12,
+        timelineTimestamp: Date.UTC(2026, 5, 1, 12)
+      },
+      {
+        metrics: makeMetrics({ total: 36 }),
+        filledBlocks: 12,
+        timelineTimestamp: Date.UTC(2026, 5, 1, 0)
+      }
+    );
+
+    expect(comparison.maturityVelocity).toBeNull();
   });
 });

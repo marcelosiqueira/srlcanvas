@@ -363,6 +363,17 @@ export function DashboardPage() {
                               {formatSignedNumber(temporalComparison.filledBlocksDelta, 0)}
                             </strong>
                           </p>
+                          {temporalComparison.maturityVelocity !== null && (
+                            <p className="text-text-light-secondary dark:text-text-dark-secondary sm:col-span-2">
+                              Velocidade de Maturidade:{" "}
+                              <strong className="text-text-light-primary dark:text-text-dark-primary">
+                                {formatSignedNumber(temporalComparison.maturityVelocity, 2)} pts/mês
+                              </strong>{" "}
+                              <span className="text-[11px]">
+                                (reaplicação recomendada a cada 3-6 meses)
+                              </span>
+                            </p>
+                          )}
                         </div>
                       )}
                     </div>
