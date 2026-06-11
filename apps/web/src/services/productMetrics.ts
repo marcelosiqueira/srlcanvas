@@ -32,6 +32,7 @@ interface BaseProductMetricsPayload {
 interface ProductMetricsPayloadMap {
   canvas_started: BaseProductMetricsPayload & {
     scopeType: "guest" | "authenticated";
+    // nome historico; indica backend remoto habilitado
     supabaseEnabled: boolean;
     advancedMode: boolean;
   };

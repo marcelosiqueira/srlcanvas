@@ -1,10 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 
 const hasRemoteAuthEnv = Boolean(
-  process.env.VITE_SUPABASE_URL &&
-  process.env.VITE_SUPABASE_ANON_KEY &&
-  process.env.E2E_REMOTE_EMAIL &&
-  process.env.E2E_REMOTE_PASSWORD
+  process.env.VITE_API_URL && process.env.E2E_REMOTE_EMAIL && process.env.E2E_REMOTE_PASSWORD
 );
 
 async function openCanvas(page: Page): Promise<void> {
@@ -203,10 +200,10 @@ test("uses advanced mode quick actions and shortcuts", async ({ page }) => {
   await expect(page.getByRole("button", { name: /1\. Problema \/ Oportunidade/ })).toBeHidden();
 });
 
-test("syncs canvas remotely for authenticated user when Supabase is configured", async ({
+test("syncs canvas remotely for authenticated user when the API is configured", async ({
   page
 }) => {
-  test.skip(!hasRemoteAuthEnv, "requires Supabase URL/key and remote test account credentials");
+  test.skip(!hasRemoteAuthEnv, "requires VITE_API_URL and remote test account credentials");
 
   await page.goto("/auth/login");
 

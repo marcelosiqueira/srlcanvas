@@ -55,11 +55,11 @@ Falta uma ferramenta simples e estruturada que force evidencias e destaque deseq
 13. Exibir landing page publica em `/` com CTA para login/cadastro (ou entrada direta quando auth estiver desabilitado), incluindo blocos de "Sobre o Projeto" e "Material de Apoio".
 14. Disponibilizar logout rapido no header das telas autenticadas, com redirecionamento para `/`.
 15. Exigir TCLE antes do questionario academico e permitir revogacao de consentimento.
-16. Salvar resposta de pesquisa em Supabase (quando habilitado) ou localStorage (modo local).
+16. Salvar resposta de pesquisa no servidor (quando habilitado) ou localStorage (modo local).
 17. Organizar o questionario academico em etapas navegaveis com indicador de progresso e rascunho persistente da etapa atual.
 18. Permitir governanca do questionario academico via configuracao (`enabled` e `activeVersion`) sem alterar o instrumento aprovado.
 19. Disponibilizar modo avancado opcional no canvas com atalhos e acoes rapidas para reduzir cliques em avaliacoes recorrentes.
-20. Para usuario autenticado com Supabase habilitado, sincronizar canvas remoto automaticamente durante a edicao, sem etapa manual de confirmacao na dashboard.
+20. Para usuario autenticado com a API habilitada, sincronizar canvas remoto automaticamente durante a edicao, sem etapa manual de confirmacao na dashboard.
 21. Exibir historico remoto de aplicacoes na dashboard e permitir comparativo temporal basico da avaliacao mais recente contra uma avaliacao anterior (delta de total, scorecard, CV e blocos preenchidos).
 22. Instrumentar eventos essenciais de produto (inicio, conclusao e abandono por etapa) sem dados sensiveis, com relatorio agregado minimo disponivel para iteracao.
 23. No cadastro autenticado, coletar `nome`, `email` e `senha`, salvando o nome no metadata da conta em `name` para identificacao basica do usuario.
@@ -83,7 +83,7 @@ Falta uma ferramenta simples e estruturada que force evidencias e destaque deseq
 - Scorecard: `Total * (1 - CV)`.
 - CV: `Desvio-padrao / Media`; quando media = 0, CV = 0.
 - Recomendacao metodologica: notas > 3 devem ter evidencia minima registrada.
-- Ao autenticar com Supabase, rascunho local legado (pre-auth) deve ser associado ao primeiro usuario logado e removido do escopo `guest`.
+- Ao autenticar no servidor, rascunho local legado (pre-auth) deve ser associado ao primeiro usuario logado e removido do escopo `guest`.
 - Fluxo da survey academica deve permitir continuidade por etapa sem perda de resposta ja preenchida.
 - Perguntas do instrumento aprovado no comite de etica devem permanecer congeladas ate nova aprovacao formal.
 

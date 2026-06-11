@@ -1,6 +1,6 @@
 # LGPD Playbook - SRL Canvas (Pesquisa Academica)
 
-Ultima atualizacao: 2026-02-13
+Ultima atualizacao: 2026-06-11
 
 Este documento define os controles de privacidade e protecao de dados para o projeto SRL Canvas,
 com foco no questionario quantitativo usado na dissertacao de mestrado.
@@ -12,7 +12,7 @@ com foco no questionario quantitativo usado na dissertacao de mestrado.
 Aplica-se a:
 
 - aplicacao web (`apps/web`)
-- armazenamento no Supabase
+- API propria (`apps/api`) e armazenamento em MySQL na infraestrutura do pesquisador (VPS)
 - coleta de dados do survey de pesquisa
 - exportacoes e analises da dissertacao
 
@@ -21,7 +21,8 @@ Nao cobre dados de terceiros inseridos indevidamente pelo participante (devem se
 ## 2. Papéis e responsabilidades
 
 - Controlador: responsavel pelo estudo (pesquisador/autor da dissertacao).
-- Operador: infraestrutura de nuvem contratada (Supabase e provedores subjacentes).
+- Operador: infraestrutura propria do pesquisador (VPS contratada, com MySQL local a VPS);
+  o provedor de hospedagem da VPS atua como suboperador de infraestrutura.
 - Encarregado (DPO): definir contato institucional para titulares (e-mail oficial do projeto).
 
 ## 3. Base legal e principios
@@ -45,12 +46,16 @@ Principios aplicados (art. 6):
 
 ### 4.1 Dados de conta (app)
 
-- `auth.users.id` (UUID)
-- e-mail de autenticacao (Supabase Auth)
+Tabela `users` (MySQL, API propria):
+
+- `id` (UUID)
+- e-mail de autenticacao
+- nome
+- hash de senha (argon2id — a senha em claro nunca e armazenada)
 
 ### 4.2 Dados do survey
 
-Tabela `public.research_survey_responses`:
+Tabela `research_survey_responses`:
 
 - triagem e elegibilidade (18+, atuacao no ecossistema, visualizacao de material)
 - perfil profissional (papel, experiencia, setor, estagio, localidade, tamanho de equipe)
@@ -105,12 +110,16 @@ Fluxo recomendado:
 4. Executar acao solicitada.
 5. Responder em prazo razoavel e registrar evidencias da acao.
 
+Revogacao de consentimento: o proprio participante pode revogar pelo app, que aciona o
+endpoint `POST /research/consent/revoke` (registra `revoked_at` no banco).
+
 ## 8. Retencao e descarte
 
 Politica sugerida para o estudo:
 
 - Base ativa de pesquisa: durante o periodo da dissertacao.
-- Base arquivada: somente dados necessarios para auditoria/metodologia.
+- Base arquivada: somente dados necessarios para auditoria/metodologia, com retencao de
+  6 anos para dados de pesquisa (incluindo backups), seguida de descarte seguro.
 - Contato para follow-up: remover apos conclusao das entrevistas ou pedido do titular.
 
 Implementacao tecnica recomendada:
@@ -122,9 +131,12 @@ Implementacao tecnica recomendada:
 
 ### 9.1 Banco e acesso
 
-- RLS habilitado nas tabelas (`research_survey_responses`, `canvases`, etc.).
-- Politicas por proprietario (`auth.uid() = user_id`).
-- sem uso de chave `service_role` no frontend.
+- MySQL escutando apenas em `127.0.0.1` (sem exposicao externa do banco).
+- Acesso administrativo ao servidor apenas por SSH (chaves, sem senha quando possivel).
+- Usuario MySQL dedicado para a API (sem `root`).
+- Autorizacao por proprietario aplicada na API: todas as rotas de dados filtram por
+  `user_id` do JWT autenticado.
+- Backups cifrados e com acesso restrito, retencao de 6 anos para dados de pesquisa.
 
 ### 9.2 Aplicacao
 
@@ -136,9 +148,10 @@ Implementacao tecnica recomendada:
 
 ### 9.3 Infra
 
-- preferir regiao de dados no Brasil (Supabase `sa-east-1`) para reduzir riscos de transferencia.
-- manter DPA do fornecedor aceito e arquivado.
-- MFA em contas administrativas.
+- a VPS deve preferencialmente estar hospedada no Brasil, para reduzir riscos de
+  transferencia internacional de dados.
+- manter contrato/termos do provedor de hospedagem arquivados.
+- MFA em contas administrativas (painel do provedor da VPS).
 
 ## 10. Incidentes de seguranca
 
@@ -162,11 +175,11 @@ Plano minimo:
 Antes de publicar nova versao:
 
 - [ ] termo de consentimento atualizado e versionado
-- [ ] RLS validado para todas as tabelas de dados pessoais
+- [ ] autorizacao por `user_id` validada nas rotas da API para todas as tabelas de dados pessoais
 - [ ] politica de retencao revisada
 - [ ] fluxo de atendimento ao titular testado
 - [ ] sem chaves/segredos no repositorio
-- [ ] documentacao (`README`, `docs/supabase-setup.md`) atualizada
+- [ ] documentacao (`README`, `docs/backend-setup.md`) atualizada
 
 Antes de usar dados na dissertacao:
 

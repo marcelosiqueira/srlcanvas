@@ -34,7 +34,7 @@ Padroes para organizar conteudo complexo sem sobrecarregar usuario ou IA.
    - navegacao `Etapa anterior` / `Proxima etapa`.
 3. Camada 3 - Consolidacao:
    - envio final e protocolo.
-   - mensagem de armazenamento (Supabase/local).
+   - mensagem de armazenamento (servidor/local).
 
 ## 2. Camadas de Informacao (Documentacao)
 

@@ -78,7 +78,7 @@ com rastreabilidade entre requisito, implementacao, validacao e evidencia academ
 
 - [x] P2.2 Expansao de testes E2E
   - Escopo: cobrir onboarding, TCLE/survey completo, persistencia remota e exportacao.
-  - Evidencias: `apps/web/e2e/canvas-flow.spec.ts` expandido para 9 cenarios (onboarding guiado, avaliacao e resultados, persistencia apos reload, exportacao PNG/PDF, acessibilidade de foco no modal, survey com TCLE e envio, navegacao por etapas, modo avancado e cenario remoto opcional autenticado com Supabase via variaveis de ambiente); `playwright.config.ts` ajustado para permitir ativacao remota sem quebrar execucao local/CI.
+  - Evidencias: `apps/web/e2e/canvas-flow.spec.ts` expandido para 9 cenarios (onboarding guiado, avaliacao e resultados, persistencia apos reload, exportacao PNG/PDF, acessibilidade de foco no modal, survey com TCLE e envio, navegacao por etapas, modo avancado e cenario remoto opcional autenticado com o backend remoto via variaveis de ambiente); `playwright.config.ts` ajustado para permitir ativacao remota sem quebrar execucao local/CI.
   - Criterio de pronto: fluxos criticos protegidos contra regressao.
 
 - [x] P2.3 Pacote de evidencias para dissertacao
@@ -104,6 +104,6 @@ com rastreabilidade entre requisito, implementacao, validacao e evidencia academ
 
 ## 7. Dependencias e Riscos
 
-- Dependencia de configuracao Supabase para cenarios remotos.
+- Dependencia de API + MySQL configurados para cenarios remotos.
 - Risco de crescimento de escopo em survey e onboarding.
 - Risco de regressao UX em mobile se mudancas nao forem incrementalmente validadas.
