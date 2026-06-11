@@ -29,7 +29,7 @@ export const GROUPS: GroupMeta[] = [
     detailTitle: "I. FUNDAÇÃO",
     conceptualFocus:
       "Problema/Solução Fit: Garante que a startup está construída sobre uma dor real e que a equipe tem capacidade de iniciar a execução.",
-    includedBlocks: "1. Problema/Oportunidade, 2. Proposta de Valor, 7. Equipe",
+    includedBlocks: "P1. Problema/Oportunidade, P2. Proposta de Valor, P5. Equipe",
     dotClass: "bg-blue-500",
     badgeClass: "text-blue-500 dark:text-blue-400",
     iconTextClass: "text-blue-500 dark:text-blue-400",
@@ -41,8 +41,9 @@ export const GROUPS: GroupMeta[] = [
     subtitle: "II. Product/Market Fit",
     detailTitle: "II. PRODUTO & MERCADO",
     conceptualFocus:
-      "Product/Market Fit: Analisa a interação do produto com o mercado, focando na geração de tração e canais de crescimento.",
-    includedBlocks: "3. Produto/Tecnologia, 4. Clientes/Tração, 5. PLG, 9. Marketing/Canais",
+      "Product/Market Fit: Analisa a interação da solução com o mercado, focando na entrega de valor, tração, adoção, crescimento e canais de aquisição.",
+    includedBlocks:
+      "P3. Produto/Tecnologia, P4. Clientes/Tração, P7. Adoção e Crescimento, P8. Marketing/Canais",
     dotClass: "bg-green-500",
     badgeClass: "text-green-500 dark:text-green-400",
     iconTextClass: "text-green-500 dark:text-green-400",
@@ -54,8 +55,8 @@ export const GROUPS: GroupMeta[] = [
     subtitle: "III. Scalability Fit",
     detailTitle: "III. SUSTENTABILIDADE & ESCALA",
     conceptualFocus:
-      "Scalability Fit: Foca na saúde do modelo de receita, na eficiência operacional e na capacidade financeira de manter e acelerar o crescimento.",
-    includedBlocks: "6. Modelo de Negócio, 8. Operações/Execução, 10. Sustentação Financeira",
+      "Scalability Fit: Foca na eficiência operacional, no modelo de receita e na capacidade financeira de manter e acelerar o crescimento.",
+    includedBlocks: "P6. Operações/Execução, P9. Modelo de Negócio, P10. Sustentação Financeira",
     dotClass: "bg-orange-500",
     badgeClass: "text-orange-500 dark:text-orange-400",
     iconTextClass: "text-orange-500 dark:text-orange-400",
@@ -67,8 +68,8 @@ export const GROUPS: GroupMeta[] = [
     subtitle: "IV. Futuro & Governança",
     detailTitle: "IV. FUTURO & GOVERNANÇA",
     conceptualFocus:
-      "Direcionamento e Proteção: Garante que o negócio tem uma visão estratégica clara e está legalmente protegido para escalar sem riscos.",
-    includedBlocks: "11. Estratégia/Visão, 12. Governança & Compliance",
+      "Direcionamento e Proteção: Garante que o negócio tem uma visão estratégica clara e está legalmente protegido para escalar com segurança.",
+    includedBlocks: "P11. Estratégia/Visão, P12. Governança e Compliance",
     dotClass: "bg-purple-500",
     badgeClass: "text-purple-500 dark:text-purple-400",
     iconTextClass: "text-purple-500 dark:text-purple-400",
@@ -117,10 +118,10 @@ const INTERPRETIVE_SUMMARY_BY_BLOCK_KEY: Record<string, BlockInterpretiveSummary
     "Tração Inicial: Foco em converter usuários em clientes pagantes e estabelecer a recorrência.",
     "Crescimento Sustentável: Foco em otimizar a retenção e escalar o crescimento de forma previsível."
   ),
-  plg: makeInterpretiveSummary(
-    "PLG Hipotético: Foco em desenhar e testar as primeiras funcionalidades de PLG.",
-    "Validação do PLG: Foco em validar o onboarding, a viralidade e a conversão.",
-    "Maturidade PLG: Foco em otimizar o PLG como principal motor de crescimento."
+  "adocao-crescimento": makeInterpretiveSummary(
+    "Adoção Inicial: Desenhar e testar primeiros mecanismos de adoção ou recomendação.",
+    "Validação da Adoção: Validar ativação, recorrência e retenção inicial.",
+    "Crescimento Replicável: Otimizar crescimento replicável, expansão e adoção contínua."
   ),
   "modelo-de-negocio": makeInterpretiveSummary(
     "Modelo Hipotético: Foco em definir e testar o modelo de receita e a precificação.",
@@ -163,6 +164,7 @@ export const SRL_BLOCKS: CanvasBlockDefinition[] = [
   {
     id: 1,
     key: "problema",
+    number: 1,
     interpretiveSummary: INTERPRETIVE_SUMMARY_BY_BLOCK_KEY.problema,
     name: "Problema / Oportunidade",
     shortLabel: "Problema",
@@ -196,7 +198,8 @@ export const SRL_BLOCKS: CanvasBlockDefinition[] = [
       },
       {
         description: "Realização de entrevistas ou conversas com público-alvo.",
-        evidence: "Transcrições, gravações ou notas estruturadas de entrevistas com clientes/usuários."
+        evidence:
+          "Transcrições, gravações ou notas estruturadas de entrevistas com clientes/usuários."
       },
       {
         description: "Feedback estruturado de potenciais clientes.",
@@ -208,7 +211,8 @@ export const SRL_BLOCKS: CanvasBlockDefinition[] = [
       },
       {
         description: "Validação quantitativa do problema com dados ou pesquisas.",
-        evidence: "Pesquisa de satisfação (NPS/CSAT) ou survey quantitativo com amostra mínima relevante."
+        evidence:
+          "Pesquisa de satisfação (NPS/CSAT) ou survey quantitativo com amostra mínima relevante."
       },
       {
         description: "Evidência ampla de que o problema é real e relevante no mercado.",
@@ -225,6 +229,7 @@ export const SRL_BLOCKS: CanvasBlockDefinition[] = [
   {
     id: 2,
     key: "proposta-de-valor",
+    number: 2,
     interpretiveSummary: INTERPRETIVE_SUMMARY_BY_BLOCK_KEY["proposta-de-valor"],
     name: "Proposta de Valor",
     shortLabel: "Valor",
@@ -283,13 +288,15 @@ export const SRL_BLOCKS: CanvasBlockDefinition[] = [
   {
     id: 3,
     key: "produto-tecnologia",
+    number: 3,
     interpretiveSummary: INTERPRETIVE_SUMMARY_BY_BLOCK_KEY["produto-tecnologia"],
     name: "Produto / Tecnologia",
     shortLabel: "Produto",
     group: "produtoMercado",
     icon: "inventory_2",
     color: "green",
-    objective: "Avaliar a maturidade da solução técnica e sua capacidade de entregar a proposta de valor.",
+    objective:
+      "Avaliar a maturidade da solução técnica e sua capacidade de entregar a proposta de valor.",
     questions: [
       "O produto/tecnologia é robusto e escalável?",
       "O processo de desenvolvimento é ágil e orientado a feedback?"
@@ -341,13 +348,14 @@ export const SRL_BLOCKS: CanvasBlockDefinition[] = [
   {
     id: 4,
     key: "clientes-tracao",
+    number: 4,
     interpretiveSummary: INTERPRETIVE_SUMMARY_BY_BLOCK_KEY["clientes-tracao"],
     name: "Clientes / Tração",
     shortLabel: "Clientes",
     group: "produtoMercado",
     icon: "person_search",
     color: "green",
-    objective: "Medir o engajamento com o mercado real, com ênfase na Retenção (complementando o Bloco 9).",
+    objective: "Medir o engajamento real no mercado, com foco em retenção.",
     questions: ["Existem clientes pagantes e satisfeitos?", "A tração é crescente e sustentável?"],
     exampleTips: [
       "Funil: Monitore as taxas de conversão de cada etapa do funil (AARRR: Aquisição, Ativação, Retenção, Receita, Recomendação) [4].",
@@ -394,124 +402,9 @@ export const SRL_BLOCKS: CanvasBlockDefinition[] = [
     ])
   },
   {
-    id: 5,
-    key: "plg",
-    interpretiveSummary: INTERPRETIVE_SUMMARY_BY_BLOCK_KEY.plg,
-    name: "Product-Led Growth (PLG)",
-    shortLabel: "PLG",
-    group: "produtoMercado",
-    icon: "rocket_launch",
-    color: "green",
-    objective: "Avaliar a capacidade do produto de gerar crescimento de forma autônoma.",
-    questions: [
-      "O produto em si é um motor de aquisição e retenção?",
-      "Existem mecanismos de viralidade ou recomendação no produto?"
-    ],
-    exampleTips: [
-      "Onboarding: Crie um processo de onboarding que guie o usuário até o “momento aha!” (percepção de valor) o mais rápido possível.",
-      "Viralidade: Implemente funcionalidades de compartilhamento ou recompensa por indicação.",
-      "Métricas: Acompanhe a Taxa de Ativação, o K-fator e a Taxa de Conversão Freemium-Premium."
-    ],
-    levels: toLevels([
-      {
-        description: "Crescimento totalmente dependente de vendas/marketing.",
-        evidence: "N/A"
-      },
-      {
-        description: "Ideias iniciais de como o produto pode gerar crescimento.",
-        evidence: "Brainstorming sobre PLG."
-      },
-      {
-        description: "Primeiros testes de funcionalidades de PLG.",
-        evidence: "Testes A/B de funcionalidades de onboarding."
-      },
-      {
-        description: "Onboarding automatizado e intuitivo.",
-        evidence: "Taxa de Ativação."
-      },
-      {
-        description: "Mecanismos de recomendação ou viralidade implementados.",
-        evidence: "K-fator ou taxa de recomendação."
-      },
-      {
-        description: "Modelo Freemium ou Trial com conversão validada.",
-        evidence: "Taxa de conversão Freemium-Premium."
-      },
-      {
-        description: "Ciclo de feedback do produto automatizado.",
-        evidence: "Pesquisas de satisfação in-app."
-      },
-      {
-        description: "Produto como principal canal de aquisição.",
-        evidence: "% de clientes adquiridos via PLG."
-      },
-      {
-        description: "PLG como cultura, com otimização contínua.",
-        evidence: "OKRs de PLG."
-      }
-    ])
-  },
-  {
-    id: 6,
-    key: "modelo-de-negocio",
-    interpretiveSummary: INTERPRETIVE_SUMMARY_BY_BLOCK_KEY["modelo-de-negocio"],
-    name: "Modelo de Negócio",
-    shortLabel: "Modelo",
-    group: "escala",
-    icon: "monetization_on",
-    color: "orange",
-    objective: "Validar a forma como a startup captura valor e gera receita.",
-    questions: [
-      "O modelo de receita é claro e validado?",
-      "Os unit economics (LTV/CAC) são saudáveis?"
-    ],
-    exampleTips: [
-      "Precificação: Teste diferentes modelos de precificação (assinatura, transacional, freemium) para encontrar o ideal.",
-      "Unit Economics: Calcule o LTV (Lifetime Value) e o CAC (Custo de Aquisição de Clientes) e garanta que o LTV seja pelo menos 3x maior que o CAC.",
-      "Escala: Analise a escalabilidade do modelo de negócio e identifique possíveis gargalos."
-    ],
-    levels: toLevels([
-      {
-        description: "Modelo de negócio indefinido.",
-        evidence: "N/A"
-      },
-      {
-        description: "Ideias de como gerar receita.",
-        evidence: "Brainstorming sobre modelos de receita."
-      },
-      {
-        description: "Modelo de receita definido, mas não testado.",
-        evidence: "Descrição do modelo de receita no pitch."
-      },
-      {
-        description: "Primeiros testes de precificação.",
-        evidence: "Testes A/B de preços."
-      },
-      {
-        description: "Receita recorrente inicial.",
-        evidence: "Primeiros contratos de assinatura."
-      },
-      {
-        description: "Unit economics (LTV/CAC) calculados.",
-        evidence: "Planilha de cálculo de LTV e CAC."
-      },
-      {
-        description: "LTV > 3x CAC.",
-        evidence: "Relatório de unit economics."
-      },
-      {
-        description: "Modelo de receita escalável e otimizado.",
-        evidence: "Projeção de receita com base em dados."
-      },
-      {
-        description: "Múltiplas fontes de receita ou modelo de negócio inovador.",
-        evidence: "Diversificação de fontes de receita."
-      }
-    ])
-  },
-  {
     id: 7,
     key: "equipe",
+    number: 5,
     interpretiveSummary: INTERPRETIVE_SUMMARY_BY_BLOCK_KEY.equipe,
     name: "Equipe",
     shortLabel: "Equipe",
@@ -570,13 +463,15 @@ export const SRL_BLOCKS: CanvasBlockDefinition[] = [
   {
     id: 8,
     key: "operacoes",
+    number: 6,
     interpretiveSummary: INTERPRETIVE_SUMMARY_BY_BLOCK_KEY.operacoes,
     name: "Operações / Execução",
     shortLabel: "Operações",
     group: "escala",
     icon: "engineering",
     color: "orange",
-    objective: "Avaliar a capacidade da startup de entregar valor de forma consistente e eficiente.",
+    objective:
+      "Avaliar a capacidade da startup de entregar valor de forma consistente e eficiente.",
     questions: [
       "Os processos internos são eficientes e escaláveis?",
       "A execução é ágil e orientada a dados?"
@@ -627,8 +522,52 @@ export const SRL_BLOCKS: CanvasBlockDefinition[] = [
     ])
   },
   {
+    id: 5,
+    key: "adocao-crescimento",
+    number: 7,
+    interpretiveSummary: INTERPRETIVE_SUMMARY_BY_BLOCK_KEY["adocao-crescimento"],
+    name: "Adoção e Crescimento",
+    shortLabel: "Adoção",
+    group: "produtoMercado",
+    icon: "cached",
+    color: "green",
+    objective:
+      "Avaliar a capacidade da solução gerar adoção, retenção, recomendação, expansão ou crescimento replicável.",
+    note: "Em startups SaaS ou digitais, este bloco pode ser analisado pela ótica de Product-Led Growth. Em outros modelos, deve ser interpretado como capacidade de adoção, ativação, recorrência, recomendação, expansão ou replicabilidade da solução.",
+    questions: [
+      "A solução possui mecanismos claros de adoção, retenção ou recomendação?",
+      "O processo de entrada, ativação ou uso inicial é simples, eficiente e replicável?"
+    ],
+    exampleTips: [
+      "Jornada: Estruture a jornada inicial de adoção do usuário/cliente.",
+      "Ativação: Facilite a ativação e o uso recorrente da solução.",
+      "Métricas: Acompanhe métricas de retenção, recomendação e expansão."
+    ],
+    levels: toLevels([
+      { description: "Crescimento dependente de esforço manual.", evidence: "N/A" },
+      { description: "Ideias iniciais de adoção ou crescimento.", evidence: "Brainstorming." },
+      { description: "Primeiros testes de adoção ou indicação.", evidence: "Testes piloto." },
+      { description: "Processo de ativação estruturado.", evidence: "Jornada do usuário/cliente." },
+      {
+        description: "Mecanismos de recorrência ou recomendação implementados.",
+        evidence: "Taxa de recorrência."
+      },
+      {
+        description: "Adoção ou retenção inicial validada.",
+        evidence: "Taxa de ativação ou retenção."
+      },
+      { description: "Ciclo de feedback e melhoria em uso.", evidence: "NPS ou CSAT." },
+      {
+        description: "Crescimento orgânico ou expansão relevante.",
+        evidence: "% de clientes por indicação."
+      },
+      { description: "Crescimento replicável e otimizado.", evidence: "Playbook de crescimento." }
+    ])
+  },
+  {
     id: 9,
     key: "marketing-canais",
+    number: 8,
     interpretiveSummary: INTERPRETIVE_SUMMARY_BY_BLOCK_KEY["marketing-canais"],
     name: "Marketing / Canais",
     shortLabel: "Marketing",
@@ -685,8 +624,68 @@ export const SRL_BLOCKS: CanvasBlockDefinition[] = [
     ])
   },
   {
+    id: 6,
+    key: "modelo-de-negocio",
+    number: 9,
+    interpretiveSummary: INTERPRETIVE_SUMMARY_BY_BLOCK_KEY["modelo-de-negocio"],
+    name: "Modelo de Negócio",
+    shortLabel: "Modelo",
+    group: "escala",
+    icon: "monetization_on",
+    color: "orange",
+    objective: "Validar a forma como a startup captura valor e gera receita.",
+    questions: [
+      "O modelo de receita é claro e validado?",
+      "Os unit economics (LTV/CAC) são saudáveis?"
+    ],
+    exampleTips: [
+      "Precificação: Teste diferentes modelos de precificação (assinatura, transacional, freemium) para encontrar o ideal.",
+      "Unit Economics: Calcule o LTV (Lifetime Value) e o CAC (Custo de Aquisição de Clientes) e garanta que o LTV seja pelo menos 3x maior que o CAC.",
+      "Escala: Analise a escalabilidade do modelo de negócio e identifique possíveis gargalos."
+    ],
+    levels: toLevels([
+      {
+        description: "Modelo de negócio indefinido.",
+        evidence: "N/A"
+      },
+      {
+        description: "Ideias de como gerar receita.",
+        evidence: "Brainstorming sobre modelos de receita."
+      },
+      {
+        description: "Modelo de receita definido, mas não testado.",
+        evidence: "Descrição do modelo de receita no pitch."
+      },
+      {
+        description: "Primeiros testes de precificação.",
+        evidence: "Testes A/B de preços."
+      },
+      {
+        description: "Receita recorrente inicial.",
+        evidence: "Primeiros contratos de assinatura."
+      },
+      {
+        description: "Unit economics (LTV/CAC) calculados.",
+        evidence: "Planilha de cálculo de LTV e CAC."
+      },
+      {
+        description: "LTV > 3x CAC.",
+        evidence: "Relatório de unit economics."
+      },
+      {
+        description: "Modelo de receita escalável e otimizado.",
+        evidence: "Projeção de receita com base em dados."
+      },
+      {
+        description: "Múltiplas fontes de receita ou modelo de negócio inovador.",
+        evidence: "Diversificação de fontes de receita."
+      }
+    ])
+  },
+  {
     id: 10,
     key: "sustentacao-financeira",
+    number: 10,
     interpretiveSummary: INTERPRETIVE_SUMMARY_BY_BLOCK_KEY["sustentacao-financeira"],
     name: "Sustentação Financeira",
     shortLabel: "Financeiro",
@@ -745,6 +744,7 @@ export const SRL_BLOCKS: CanvasBlockDefinition[] = [
   {
     id: 11,
     key: "estrategia-visao",
+    number: 11,
     interpretiveSummary: INTERPRETIVE_SUMMARY_BY_BLOCK_KEY["estrategia-visao"],
     name: "Estratégia / Visão",
     shortLabel: "Estratégia",
@@ -803,6 +803,7 @@ export const SRL_BLOCKS: CanvasBlockDefinition[] = [
   {
     id: 12,
     key: "governanca-compliance",
+    number: 12,
     interpretiveSummary: INTERPRETIVE_SUMMARY_BY_BLOCK_KEY["governanca-compliance"],
     name: "Governança & Compliance",
     shortLabel: "Governança",

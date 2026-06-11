@@ -21,14 +21,19 @@ export interface BlockInterpretiveSummary {
 }
 
 export interface CanvasBlockDefinition {
+  /** Chave estável de armazenamento (localStorage/Supabase). NUNCA renumerar. */
   id: number;
   key: string;
+  /** Numeração de exibição P1-P12 do guia oficial (matriz 3x4). */
+  number: number;
   name: string;
   shortLabel: string;
   group: GroupKey;
   icon: string;
   color: "blue" | "green" | "orange" | "purple";
   objective: string;
+  /** Nota metodológica do bloco (ex.: lente PLG no bloco Adoção e Crescimento). */
+  note?: string;
   questions: string[];
   exampleTips?: string[];
   levels: MaturityLevel[];
