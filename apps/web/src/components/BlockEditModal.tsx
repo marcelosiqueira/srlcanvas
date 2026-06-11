@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useDialogA11y } from "../hooks/useDialogA11y";
 import type { CanvasBlockDefinition, CanvasBlockState } from "../types";
+import { EVIDENCE_STRENGTH_LEVELS } from "../data/evidenceStrength";
 
 interface BlockEditModalProps {
   block: CanvasBlockDefinition;
@@ -242,6 +243,22 @@ export function BlockEditModal({
               className="mt-2 w-full rounded-lg border-zinc-300 bg-zinc-50 p-3 text-sm text-text-light-primary focus:border-primary focus:ring-primary dark:border-zinc-700 dark:bg-zinc-800 dark:text-text-dark-primary"
             />
           </label>
+
+          <details className="rounded-lg border border-zinc-200/80 bg-zinc-50 p-3 dark:border-zinc-800/80 dark:bg-zinc-800/60">
+            <summary className="cursor-pointer text-xs font-semibold text-text-light-secondary dark:text-text-dark-secondary">
+              Qual a força da sua evidência?
+            </summary>
+            <ul className="mt-2 space-y-2 text-xs text-text-light-secondary dark:text-text-dark-secondary">
+              {EVIDENCE_STRENGTH_LEVELS.map((item) => (
+                <li key={item.level}>
+                  <strong>
+                    {item.level}. {item.name}:
+                  </strong>{" "}
+                  {item.type}. <em>Ex.: {item.example}.</em>
+                </li>
+              ))}
+            </ul>
+          </details>
 
           <label className="block">
             <span className="text-sm font-semibold text-text-light-primary dark:text-text-dark-primary">
