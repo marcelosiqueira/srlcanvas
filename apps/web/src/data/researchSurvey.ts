@@ -1,4 +1,4 @@
-export const RESEARCH_SURVEY_VERSION = "questionario_quantitativo_srl_canvas_revisado_2025-11-28";
+export const RESEARCH_SURVEY_VERSION = "questionario_quantitativo_srl_canvas_guia_v2_2026-06-11";
 export const RESEARCH_CONSENT_VERSION = "tcle_v1_2025-11-28";
 
 export const LIKERT_SCALE_OPTIONS = [1, 2, 3, 4, 5] as const;
@@ -16,11 +16,11 @@ export const SURVEY_DIMENSIONS = [
   { key: "proposta_valor", label: "Proposta de Valor" },
   { key: "produto_tecnologia", label: "Produto/Tecnologia" },
   { key: "clientes_tracao", label: "Clientes/Tracao" },
-  { key: "plg", label: "Product-Led Growth (PLG)" },
-  { key: "modelo_negocio", label: "Modelo de Negocio" },
   { key: "equipe", label: "Equipe" },
   { key: "operacoes_execucao", label: "Operacoes/Execucao" },
+  { key: "plg", label: "Adocao e Crescimento" },
   { key: "marketing_canais", label: "Marketing/Canais" },
+  { key: "modelo_negocio", label: "Modelo de Negocio" },
   { key: "sustentacao_financeira", label: "Sustentacao Financeira" },
   { key: "estrategia_visao", label: "Estrategia/Visao" },
   { key: "governanca_compliance", label: "Governanca & Compliance" }

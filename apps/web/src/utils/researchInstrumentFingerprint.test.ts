@@ -4,7 +4,7 @@ import { buildResearchSurveyEthicsFingerprint } from "./researchInstrumentFinger
 describe("research instrument ethics fingerprint", () => {
   it("matches the approved ethics-committee questionnaire", () => {
     expect(buildResearchSurveyEthicsFingerprint()).toMatchInlineSnapshot(
-      `"ethics-questionario_quantitativo_srl_canvas_revisado_2025-11-28:0caed5bb"`
+      `"ethics-questionario_quantitativo_srl_canvas_guia_v2_2026-06-11:a2233896"`
     );
   });
 });
