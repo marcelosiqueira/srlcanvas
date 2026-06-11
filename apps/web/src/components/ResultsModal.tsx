@@ -13,6 +13,7 @@ import { SRL_BLOCKS } from "../data/srlBlocks";
 import { useDialogA11y } from "../hooks/useDialogA11y";
 import { maturityStageFromTotal } from "../utils/score";
 import { detectInterdependencyAlerts } from "../utils/interdependency";
+import { detectRadarPatterns } from "../utils/radarPatterns";
 import type { ScoreMetrics } from "../types";
 
 ChartJS.register(RadialLinearScale, PointElement, LineElement, Filler, Tooltip, Legend);
@@ -143,6 +144,7 @@ export function ResultsModal({
   );
 
   const interdependencyAlerts = useMemo(() => detectInterdependencyAlerts(scores), [scores]);
+  const radarPatterns = useMemo(() => detectRadarPatterns(scores), [scores]);
 
   const exportPng = async () => {
     if (!cardRef.current) return;
@@ -252,6 +254,33 @@ export function ResultsModal({
 
             <div className="h-[340px] w-full">
               <Radar data={radarData} options={radarOptions} />
+            </div>
+
+            <div className="space-y-2">
+              <h3 className="text-sm font-semibold text-text-light-primary dark:text-text-dark-primary">
+                Padrões Comuns de Leitura do Radar
+              </h3>
+              <div className="grid grid-cols-1 gap-2 lg:grid-cols-2">
+                {radarPatterns.map((pattern) => (
+                  <div
+                    key={pattern.key}
+                    className={`rounded-lg border p-3 text-xs ${
+                      pattern.applies
+                        ? "border-amber-300 bg-amber-50 text-amber-900 dark:border-amber-700/50 dark:bg-amber-900/20 dark:text-amber-200"
+                        : "border-zinc-200/80 bg-zinc-50 text-text-light-secondary dark:border-zinc-800/80 dark:bg-zinc-800/60 dark:text-text-dark-secondary"
+                    }`}
+                  >
+                    <p className="font-semibold">
+                      {pattern.applies ? "⚠ " : ""}
+                      {pattern.title}
+                    </p>
+                    <p className="mt-1">{pattern.description}</p>
+                  </div>
+                ))}
+              </div>
+              <p className="text-[11px] text-text-light-secondary dark:text-text-dark-secondary">
+                Use esses padrões como guia, combinando sempre com evidências e contexto real.
+              </p>
             </div>
 
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
