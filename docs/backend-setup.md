@@ -98,7 +98,20 @@ pnpm --filter @srl/api test
   pnpm --filter @srl/api exec prisma migrate deploy
   ```
 
-- Rodar a API como servico `systemd` (ver `infra/systemd/`, unit `srlcanvas-api.service`).
+- Rodar a API como servico `systemd` (ver `infra/systemd/srlcanvas-api.service`).
+  A unit pressupoe:
+  - codigo publicado em `/opt/srlcanvas` (com `apps/api/dist` ja buildado:
+    `pnpm --filter @srl/api build`);
+  - variaveis de ambiente (`DATABASE_URL`, `JWT_SECRET`, `PORT`...) em
+    `/etc/srlcanvas/api.env` (arquivo com permissao restrita, ex.: `chmod 600`);
+  - usuario de sistema dedicado `srlcanvas`
+    (`useradd --system --home /opt/srlcanvas srlcanvas`).
+
+  ```bash
+  sudo cp infra/systemd/srlcanvas-api.service /etc/systemd/system/
+  sudo systemctl daemon-reload
+  sudo systemctl enable --now srlcanvas-api
+  ```
 
 ### 5.3 nginx
 
