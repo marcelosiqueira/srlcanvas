@@ -18,7 +18,7 @@ sem capturar dados sensiveis ou texto livre de participantes.
 
 1. `canvas_started`
    - Quando: ao iniciar sessao no `CanvasPage`.
-   - Payload: `sessionId`, `scopeType`, `supabaseEnabled`, `advancedMode`.
+   - Payload: `sessionId`, `scopeType`, `supabaseEnabled` (nome historico; indica backend remoto habilitado), `advancedMode`.
 
 2. `canvas_completed`
    - Quando: ao atingir 12 blocos pontuados no `CanvasPage`.

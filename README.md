@@ -5,8 +5,8 @@ Aplicacao web para diagnostico de maturidade de startups com base no framework *
 O projeto esta estruturado como monorepo e inclui:
 
 - Frontend web (React + Vite + TypeScript)
-- API backend (Fastify + TypeScript)
-- Base para auth e banco com Supabase (opcional)
+- API backend (Fastify + TypeScript + Prisma/MySQL + JWT)
+- Auth e persistencia remota via API propria (opcional — o app funciona em modo local sem conta)
 
 ## Visao Geral
 
@@ -26,15 +26,13 @@ Formula do scorecard:
 .
 ├── apps/
 │   ├── web/          # SPA React (dashboard, canvas, conta, auth)
-│   └── api/          # API Fastify (healthcheck e base backend)
+│   └── api/          # API Fastify (auth JWT, canvases, pesquisa) + Prisma/MySQL
 ├── packages/
 │   └── shared/       # tipos e utilitarios compartilhados
-├── docs/             # PRD, workflows, checklist, setup Supabase
+├── docs/             # PRD, workflows, checklist, setup do backend
 ├── infra/
-│   ├── nginx/        # exemplo de server block para deploy da SPA
-│   │   └── srl-canvas.conf
-│   └── supabase/
-│       └── migrations/
+│   └── nginx/        # exemplo de server block para deploy da SPA + proxy /api
+│       └── srlcanvas.conf
 └── .github/workflows/
 ```
 
@@ -55,6 +53,8 @@ Formula do scorecard:
 
 - Fastify
 - TypeScript
+- Prisma + MySQL 8
+- JWT (`@fastify/jwt`) + argon2id para senhas
 - Zod
 
 ### Qualidade
@@ -66,8 +66,9 @@ Formula do scorecard:
 
 ## Requisitos
 
-- Node.js 20+
+- Node.js 22+
 - pnpm 9+ (obrigatorio)
+- MySQL 8 (apenas para auth/persistencia remota — ver `docs/backend-setup.md`)
 
 ## Setup Local
 
@@ -108,29 +109,27 @@ pnpm format:check
 
 ### E2E remoto (opcional)
 
-Para habilitar o cenario E2E de persistencia remota autenticada (Supabase), defina:
+Para habilitar o cenario E2E de persistencia remota autenticada (API propria), defina:
 
 ```env
-VITE_SUPABASE_URL=https://YOUR_PROJECT.supabase.co
-VITE_SUPABASE_ANON_KEY=YOUR_ANON_KEY
+VITE_API_URL=/api
 E2E_REMOTE_EMAIL=usuario_teste@example.com
 E2E_REMOTE_PASSWORD=senha_do_usuario_teste
 ```
 
 Sem essas variaveis, o cenario remoto fica `skip` e os demais testes E2E locais continuam executando.
 
-## Supabase (Auth + Banco)
+## Backend (Auth + Banco)
 
-O frontend funciona em modo local mesmo sem Supabase configurado.
+O frontend funciona em modo local mesmo sem backend configurado.
 
 Para habilitar auth e persistencia remota:
 
-1. Criar projeto no Supabase.
+1. Subir a API + MySQL conforme `docs/backend-setup.md`.
 2. Criar `apps/web/.env.local`:
 
 ```env
-VITE_SUPABASE_URL=https://YOUR_PROJECT.supabase.co
-VITE_SUPABASE_ANON_KEY=YOUR_ANON_KEY
+VITE_API_URL=/api
 VITE_RESEARCH_SURVEY_ENABLED=true
 VITE_RESEARCH_SURVEY_ACTIVE_VERSION=questionario_quantitativo_srl_canvas_revisado_2025-11-28
 VITE_PRODUCT_METRICS_ENABLED=true
@@ -148,21 +147,28 @@ Variaveis da pesquisa academica:
   - `true`: habilita instrumentacao local de eventos de produto (inicio/conclusao/abandono).
   - `false`: desabilita coleta local de metricas.
 
-3. Aplicar migracao SQL:
+3. Aplicar migracoes do Prisma:
 
-- `infra/supabase/migrations/0001_init.sql`
+```bash
+pnpm --filter @srl/api exec prisma migrate dev
+```
 
-Guia detalhado: `docs/supabase-setup.md`.
+Guia detalhado: `docs/backend-setup.md`.
 
 ## API
 
 Com a API rodando localmente:
 
 - `GET /health` -> status do servico
+- `POST /auth/register`, `POST /auth/login` -> autenticacao (JWT)
+- `GET /me`, `PATCH /me` -> perfil do usuario autenticado
+- `GET /canvases`, `PUT /canvases` -> persistencia remota de canvases
+- `GET/POST /research/consent`, `POST /research/consent/revoke`, `POST /research/survey-responses` -> pesquisa academica
 
 ## Documentacao do Projeto
 
 - `docs/PRD.md`
+- `docs/backend-setup.md`
 - `docs/workflows.md`
 - `docs/output-patterns.md`
 - `docs/progressive-disclosure-patterns.md`
@@ -180,15 +186,14 @@ Implementado:
 - Meu Canvas funcional
 - Dashboard / Novo Canvas / Minha Conta
 - Auth UI e guard de rotas
-- Base de schema Supabase com RLS
+- API propria (Fastify + MySQL/Prisma + JWT) com persistencia remota de canvases
+- Migracao automatica localStorage -> banco no primeiro login
 - Survey academico nativo em `/survey` (baseado no questionario quantitativo)
 - Fluxo de TCLE em `/survey/consent` com aceite e revogacao
 - Pipeline de qualidade (lint, test, build, e2e)
 
 Em andamento:
 
-- Persistencia remota completa de canvases
-- Migracao automatica localStorage -> banco
 - Evolucao de dashboard multi-canvas
 
 ## Open Source

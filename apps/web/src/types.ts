@@ -21,7 +21,7 @@ export interface BlockInterpretiveSummary {
 }
 
 export interface CanvasBlockDefinition {
-  /** Chave estável de armazenamento (localStorage/Supabase). NUNCA renumerar. */
+  /** Chave estável de armazenamento (localStorage/banco remoto). NUNCA renumerar. */
   id: number;
   key: string;
   /** Numeração de exibição P1-P12 do guia oficial (matriz 3x4). */

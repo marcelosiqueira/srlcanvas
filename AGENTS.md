@@ -16,4 +16,5 @@ Use `docs/` as the primary source of truth for product and execution guidance.
 - If business rules conflict with implementation, follow `docs/PRD.md` and flag the mismatch.
 - Keep responses concise, action-oriented, and include file references for any code/doc changes.
 - Repository uses pnpm workspaces (`apps/web`, `apps/api`, `packages/*`).
+- Backend stack: Fastify + MySQL/Prisma + JWT (`apps/api`); setup guide in `docs/backend-setup.md`.
 - Run `pnpm check` for default validation when changing app behavior.

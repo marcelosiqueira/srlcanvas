@@ -5,7 +5,6 @@ import { AboutSrlCanvasModal } from "../components/AboutSrlCanvasModal";
 import { FooterNav } from "../components/FooterNav";
 import { ResearchOpinionPanel } from "../components/ResearchOpinionPanel";
 import { useAuth } from "../auth/AuthProvider";
-import { supabase } from "../lib/supabase";
 import { useCanvasStore } from "../store/useCanvasStore";
 import {
   buildProductMetricsReport,
@@ -13,25 +12,13 @@ import {
   PRODUCT_METRICS_EVENT_DICTIONARY
 } from "../services/productMetrics";
 
-function getNameFromMetadata(metadata: unknown): string {
-  if (!metadata || typeof metadata !== "object") {
-    return "";
-  }
-
-  const metadataRecord = metadata as Record<string, unknown>;
-  const rawName = metadataRecord.name;
-  return typeof rawName === "string" ? rawName.trim() : "";
-}
-
 export function AccountPage() {
   const { darkMode, toggleDarkMode } = useCanvasStore();
-  const { user, isEnabled, signOut } = useAuth();
+  const { user, isEnabled, signOut, updateProfile } = useAuth();
   const [isAboutOpen, setIsAboutOpen] = useState(false);
   const [metricsReport, setMetricsReport] = useState(() => buildProductMetricsReport());
-  const [profileName, setProfileName] = useState(() => getNameFromMetadata(user?.user_metadata));
-  const [savedProfileName, setSavedProfileName] = useState(() =>
-    getNameFromMetadata(user?.user_metadata)
-  );
+  const [profileName, setProfileName] = useState(() => user?.name ?? "");
+  const [savedProfileName, setSavedProfileName] = useState(() => user?.name ?? "");
   const [isProfileSaving, setIsProfileSaving] = useState(false);
   const [profileFeedback, setProfileFeedback] = useState<{
     type: "success" | "error";
@@ -39,7 +26,7 @@ export function AccountPage() {
   } | null>(null);
   const navigate = useNavigate();
   const metricsEventCount = Object.keys(PRODUCT_METRICS_EVENT_DICTIONARY).length;
-  const metadataName = getNameFromMetadata(user?.user_metadata);
+  const accountName = user?.name ?? "";
 
   const logout = async () => {
     const { error } = await signOut();
@@ -51,22 +38,21 @@ export function AccountPage() {
   useEffect(() => {
     let isActive = true;
 
-    const syncProfileFromMetadata = async () => {
+    const syncProfileFromAccount = async () => {
       if (!isActive) return;
-      setProfileName(metadataName);
-      setSavedProfileName(metadataName);
+      setProfileName(accountName);
+      setSavedProfileName(accountName);
     };
 
-    void syncProfileFromMetadata();
+    void syncProfileFromAccount();
 
     return () => {
       isActive = false;
     };
-  }, [metadataName, user?.id]);
+  }, [accountName, user?.id]);
 
   const saveProfile = async () => {
-    const supabaseClient = supabase;
-    if (!isEnabled || !user || !supabaseClient) {
+    if (!isEnabled || !user) {
       setProfileFeedback({
         type: "error",
         message: "Autenticação não disponível para atualizar perfil."
@@ -95,24 +81,14 @@ export function AccountPage() {
     setIsProfileSaving(true);
     setProfileFeedback(null);
 
-    const metadataWithoutLegacyFullName = {
-      ...((user.user_metadata ?? {}) as Record<string, unknown>)
-    };
-    delete metadataWithoutLegacyFullName.full_name;
-
-    const { error: userError } = await supabaseClient.auth.updateUser({
-      data: {
-        ...metadataWithoutLegacyFullName,
-        name: normalizedName
-      }
-    });
+    const { error: profileError } = await updateProfile(normalizedName);
 
     setIsProfileSaving(false);
 
-    if (userError) {
+    if (profileError) {
       setProfileFeedback({
         type: "error",
-        message: `Falha ao salvar nome da conta: ${userError.message}`
+        message: `Falha ao salvar nome da conta: ${profileError}`
       });
       return;
     }
@@ -137,7 +113,7 @@ export function AccountPage() {
 
           {!isEnabled && (
             <p className="mt-2 text-sm text-text-light-secondary dark:text-text-dark-secondary">
-              Supabase não configurado. O app está em modo local/visitante.
+              O aplicativo está em modo local (sem conta).
             </p>
           )}
 

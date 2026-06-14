@@ -161,7 +161,7 @@ const INTERPRETIVE_SUMMARY_BY_BLOCK_KEY: Record<string, BlockInterpretiveSummary
 };
 
 // Ordem do array = numeração de exibição P1-P12 (`number`, guia v2).
-// `id` é chave de armazenamento (localStorage/Supabase) e NUNCA muda — por isso
+// `id` é chave de armazenamento (localStorage/banco remoto) e NUNCA muda — por isso
 // alguns ids aparecem "fora de ordem" aqui. Ver srlBlocks.test.ts.
 export const SRL_BLOCKS: CanvasBlockDefinition[] = [
   {

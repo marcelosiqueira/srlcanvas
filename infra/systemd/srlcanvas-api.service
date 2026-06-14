@@ -1,0 +1,21 @@
+# Unit systemd da API do SRL Canvas (ver docs/backend-setup.md, secao 5.2).
+# Pressupoe:
+# - codigo publicado em /opt/srlcanvas (build da API ja feito: apps/api/dist)
+# - variaveis de ambiente (DATABASE_URL, JWT_SECRET, PORT...) em /etc/srlcanvas/api.env
+# - usuario de sistema dedicado: useradd --system --home /opt/srlcanvas srlcanvas
+
+[Unit]
+Description=SRL Canvas API (Fastify)
+After=network.target mysql.service
+
+[Service]
+Type=simple
+User=srlcanvas
+WorkingDirectory=/opt/srlcanvas/apps/api
+EnvironmentFile=/etc/srlcanvas/api.env
+ExecStart=/usr/bin/node dist/server.js
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

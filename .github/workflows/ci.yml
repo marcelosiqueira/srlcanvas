@@ -9,6 +9,22 @@ jobs:
   quality:
     runs-on: ubuntu-latest
 
+    # MySQL para os testes de integracao da API (@srl/api). Mapeado para 3307
+    # no host para casar com o default do script test da API
+    # (mysql://root:root@127.0.0.1:3307/srlcanvas_test); ainda assim passamos
+    # TEST_DATABASE_URL explicito no step de testes para ficar autodocumentado.
+    services:
+      mysql:
+        image: mysql:8
+        env:
+          MYSQL_DATABASE: srlcanvas_test
+          MYSQL_ROOT_PASSWORD: root
+        ports:
+          - 3307:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -proot"
+          --health-interval=10s --health-timeout=5s --health-retries=10
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -30,8 +46,15 @@ jobs:
       - name: Lint
         run: pnpm lint
 
+      # `pnpm test` e recursivo (pnpm -r --if-present): cobre @srl/web e
+      # @srl/api. O script test da API roda `prisma migrate deploy` contra
+      # TEST_DATABASE_URL antes do vitest. JWT_SECRET dummy (32+ chars) cobre
+      # qualquer caminho que valide src/env.ts fora dos helpers de teste.
       - name: Unit and integration tests
         run: pnpm test
+        env:
+          TEST_DATABASE_URL: mysql://root:root@127.0.0.1:3307/srlcanvas_test
+          JWT_SECRET: ci-dummy-secret-0123456789abcdef-0123456789abcdef
 
       - name: Build
         run: pnpm build

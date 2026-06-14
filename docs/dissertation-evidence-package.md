@@ -1,6 +1,6 @@
 # Pacote de Evidencias Metodologicas - Dissertacao SRL Canvas
 
-Ultima atualizacao: 2026-02-15
+Ultima atualizacao: 2026-06-11
 
 ## 1. Objetivo
 
@@ -56,10 +56,10 @@ Consolidar, em um unico artefato versionado, as evidencias tecnicas e metodologi
 
 ### 4.2 Metricas do estudo (dataset da pesquisa)
 
-- Tabelas:
-  - `public.research_consents`
-  - `public.research_survey_responses`
-- Fonte tecnica: `infra/supabase/migrations/0001_init.sql`
+- Tabelas (MySQL, API propria):
+  - `research_consents`
+  - `research_survey_responses`
+- Fonte tecnica: `apps/api/prisma/schema.prisma` (+ migracoes em `apps/api/prisma/migrations/`)
 - Campos-chave para analise:
   - `consent_version`, `survey_version`
   - `is_eligible`
@@ -80,18 +80,20 @@ Consolidar, em um unico artefato versionado, as evidencias tecnicas e metodologi
 
 ## 5. SQL Base para Extracao Reprodutivel
 
+> Nota (2026-06): consultas adaptadas de PostgreSQL (Supabase) para MySQL 8 (API propria).
+
 ### 5.1 Conversao TCLE -> submit da survey
 
 ```sql
 with consented as (
   select distinct user_id
-  from public.research_consents
+  from research_consents
   where accepted = true
     and revoked_at is null
 ),
 submitted as (
   select distinct user_id
-  from public.research_survey_responses
+  from research_survey_responses
 )
 select
   (select count(*) from consented) as users_consented,
@@ -107,27 +109,26 @@ select
 
 ```sql
 select
-  (adoption_feedback ->> 'nps_score')::int as nps_score,
+  cast(adoption_feedback ->> '$.nps_score' as unsigned) as nps_score,
   count(*) as responses
-from public.research_survey_responses
-where adoption_feedback ? 'nps_score'
-  and (adoption_feedback ->> 'nps_score') ~ '^[0-9]+$'
-group by 1
-order by 1;
+from research_survey_responses
+where adoption_feedback ->> '$.nps_score' regexp '^[0-9]+$'
+group by nps_score
+order by nps_score;
 ```
 
 ### 5.3 Tempo de conclusao da survey
 
 ```sql
 select
-  percentile_cont(0.5) within group (
-    order by (metadata ->> 'completion_seconds')::numeric
-  ) as median_completion_seconds,
-  avg((metadata ->> 'completion_seconds')::numeric) as avg_completion_seconds
-from public.research_survey_responses
-where metadata ? 'completion_seconds'
-  and (metadata ->> 'completion_seconds') ~ '^[0-9]+$';
+  avg(cast(metadata ->> '$.completion_seconds' as decimal(12, 2))) as avg_completion_seconds
+from research_survey_responses
+where metadata ->> '$.completion_seconds' regexp '^[0-9]+$';
 ```
+
+> Nota: MySQL 8 nao possui `percentile_cont`; calcular a mediana (`median_completion_seconds`)
+> na etapa de analise estatistica (ex.: R/pandas) a partir do extrato pseudonimizado, ou
+> adaptar com window functions (`row_number()` sobre a ordenacao do campo).
 
 ## 6. Trilha de Decisao (ADR) para Banca
 
@@ -161,6 +162,6 @@ Fonte completa: `docs/technical-context.md`.
    - `RESEARCH_SURVEY_VERSION`, `RESEARCH_TCLE_VERSION`, fingerprint.
 2. Executar qualidade tecnica:
    - `pnpm check`
-3. Extrair agregados do Supabase com SQL da Secao 5.
+3. Extrair agregados do MySQL (API propria) com SQL da Secao 5.
 4. Exportar resultados em formato pseudonimizado para analise estatistica.
 5. Registrar snapshot da analise (data, commit e consultas usadas) em apendice da dissertacao.

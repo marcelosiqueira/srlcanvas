@@ -16,7 +16,6 @@
     "check": "npm run lint && npm run test && npm run build"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.95.3",
     "chart.js": "^4.4.8",
     "html2canvas": "^1.4.1",
     "jspdf": "^3.0.1",
