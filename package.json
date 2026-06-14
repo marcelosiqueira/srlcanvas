@@ -5,6 +5,7 @@
   "type": "module",
   "packageManager": "pnpm@9.15.4",
   "scripts": {
+    "postinstall": "pnpm prisma:generate",
     "dev": "pnpm --filter @srl/web dev",
     "dev:web": "pnpm --filter @srl/web dev",
     "dev:api": "pnpm --filter @srl/api dev",
@@ -19,7 +20,10 @@
     "check": "pnpm lint && pnpm test && pnpm build",
     "format": "prettier . --write",
     "format:check": "prettier . --check",
-    "prepare": "husky || true"
+    "prepare": "husky || true",
+    "prisma:generate": "pnpm --filter @srl/api prisma generate",
+    "prisma:dbpush": "pnpm --filter @srl/api prisma db push --schema apps/api/prisma/schema.prisma ",
+    "prisma:migrate": "pnpm --filter @srl/api prisma migrate dev"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.2",
