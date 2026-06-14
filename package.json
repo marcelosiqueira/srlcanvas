@@ -21,9 +21,9 @@
     "format": "prettier . --write",
     "format:check": "prettier . --check",
     "prepare": "husky || true",
-    "prisma:generate": "pnpm --filter @srl/api prisma generate",
-    "prisma:dbpush": "pnpm --filter @srl/api prisma db push --schema apps/api/prisma/schema.prisma ",
-    "prisma:migrate": "pnpm --filter @srl/api prisma migrate dev"
+    "prisma:generate": "pnpm --filter @srl/api exec prisma generate",
+    "prisma:dbpush": "pnpm --filter @srl/api exec prisma db push",
+    "prisma:migrate": "pnpm --filter @srl/api exec prisma migrate dev"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.2",
