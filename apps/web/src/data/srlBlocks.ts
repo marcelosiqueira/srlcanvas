@@ -12,6 +12,8 @@ export interface GroupMeta {
   detailTitle: string;
   conceptualFocus: string;
   includedBlocks: string;
+  /** Hex da categoria (igual nos dois temas) — base de tints rgba. */
+  color: string;
   dotClass: string;
   badgeClass: string;
   iconTextClass: string;
@@ -30,6 +32,7 @@ export const GROUPS: GroupMeta[] = [
     conceptualFocus:
       "Problema/Solução Fit: Garante que a startup está construída sobre uma dor real e que a equipe tem capacidade de iniciar a execução.",
     includedBlocks: "P1. Problema/Oportunidade, P2. Proposta de Valor, P5. Equipe",
+    color: "#1E5BC6",
     dotClass: "bg-blue-500",
     badgeClass: "text-blue-500 dark:text-blue-400",
     iconTextClass: "text-blue-500 dark:text-blue-400",
@@ -44,6 +47,7 @@ export const GROUPS: GroupMeta[] = [
       "Product/Market Fit: Analisa a interação da solução com o mercado, focando na entrega de valor, tração, adoção, crescimento e canais de aquisição.",
     includedBlocks:
       "P3. Produto/Tecnologia, P4. Clientes/Tração, P7. Adoção e Crescimento, P8. Marketing/Canais",
+    color: "#2C9B46",
     dotClass: "bg-green-500",
     badgeClass: "text-green-500 dark:text-green-400",
     iconTextClass: "text-green-500 dark:text-green-400",
@@ -57,6 +61,7 @@ export const GROUPS: GroupMeta[] = [
     conceptualFocus:
       "Scalability Fit: Foca na eficiência operacional, no modelo de receita e na capacidade financeira de manter e acelerar o crescimento.",
     includedBlocks: "P6. Operações/Execução, P9. Modelo de Negócio, P10. Sustentação Financeira",
+    color: "#EA8520",
     dotClass: "bg-orange-500",
     badgeClass: "text-orange-500 dark:text-orange-400",
     iconTextClass: "text-orange-500 dark:text-orange-400",
@@ -70,6 +75,7 @@ export const GROUPS: GroupMeta[] = [
     conceptualFocus:
       "Direcionamento e Proteção: Garante que o negócio tem uma visão estratégica clara e está legalmente protegido para escalar com segurança.",
     includedBlocks: "P11. Estratégia/Visão, P12. Governança e Compliance",
+    color: "#4A2D7E",
     dotClass: "bg-purple-500",
     badgeClass: "text-purple-500 dark:text-purple-400",
     iconTextClass: "text-purple-500 dark:text-purple-400",
