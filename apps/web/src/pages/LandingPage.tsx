@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthProvider";
 import { AboutSrlCanvasModal } from "../components/AboutSrlCanvasModal";
+import { BrandLockup } from "../components/BrandLockup";
 import { useCanvasStore } from "../store/useCanvasStore";
 
 const SRL_DOWNLOADS = [
@@ -99,10 +100,8 @@ export function LandingPage() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background-light dark:bg-background-dark">
-        <p className="text-sm text-text-light-secondary dark:text-text-dark-secondary">
-          Carregando...
-        </p>
+      <div className="flex min-h-screen items-center justify-center bg-app">
+        <p className="text-sm text-ink-2">Carregando...</p>
       </div>
     );
   }
@@ -112,119 +111,113 @@ export function LandingPage() {
   }
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-background-light font-display dark:bg-background-dark">
-      <div className="pointer-events-none absolute -top-24 -left-24 h-64 w-64 rounded-full bg-primary/20 blur-3xl dark:bg-primary/25" />
-      <div className="pointer-events-none absolute right-0 bottom-0 h-72 w-72 rounded-full bg-sky-300/20 blur-3xl dark:bg-sky-500/20" />
-
-      <header className="relative mx-auto flex w-full max-w-6xl items-center justify-between px-4 pt-6">
-        <div className="inline-flex items-center gap-2 rounded-full border border-zinc-300/80 bg-card-light px-3 py-1 text-xs font-semibold text-text-light-secondary dark:border-zinc-700/80 dark:bg-card-dark dark:text-text-dark-secondary">
-          <span className="material-symbols-outlined text-base">analytics</span>
-          SRL Canvas
-        </div>
+    <div className="min-h-screen bg-app font-sans text-ink">
+      <header className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 pt-6">
+        <BrandLockup />
 
         <button
           type="button"
           onClick={toggleDarkMode}
-          className="inline-flex items-center gap-2 rounded-full border border-zinc-300/80 bg-card-light px-3 py-1 text-xs font-medium text-text-light-secondary transition hover:bg-zinc-100 dark:border-zinc-700/80 dark:bg-card-dark dark:text-text-dark-secondary dark:hover:bg-zinc-800"
+          className="flex size-[38px] items-center justify-center rounded-[10px] border border-stroke text-ink-2 transition hover:bg-surface-2"
           aria-label="Alternar tema"
         >
-          <span className="material-symbols-outlined text-base">
+          <span className="material-symbols-outlined" aria-hidden="true">
             {darkMode ? "light_mode" : "dark_mode"}
           </span>
-          Tema
         </button>
       </header>
 
-      <main className="relative mx-auto flex w-full max-w-6xl flex-col gap-10 px-4 pt-12 pb-12 md:pt-20">
-        <section className="max-w-3xl">
-          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary">
-            Ferramenta Visual para Diagnóstico e Orientação Estratégica de Startups
-          </p>
-          <h1 className="mt-3 text-4xl font-bold tracking-tight text-text-light-primary dark:text-text-dark-primary md:text-6xl">
-            Avalie os 12 blocos do SRL Canvas com evidências e score comparável.
-          </h1>
-          <p className="mt-5 max-w-2xl text-base text-text-light-secondary dark:text-text-dark-secondary md:text-lg">
-            Esta plataforma foi criada para facilitar a aplicação do SRL Canvas na prática: organize
-            a avaliação, visualize desequilíbrios no radar e gere um scorecard com consistência
-            metodológica.
-          </p>
+      <main className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 pb-12 pt-10 md:pt-12">
+        <section className="relative overflow-hidden rounded-hero bg-hero px-7 py-10 text-white md:px-10 md:py-14">
+          <div
+            className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full blur-3xl"
+            style={{ backgroundColor: "rgba(45, 199, 182, 0.18)" }}
+          />
+          <div className="relative max-w-3xl">
+            <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-white/60">
+              Ferramenta Visual para Diagnóstico e Orientação Estratégica de Startups
+            </p>
+            <h1 className="mt-3 font-display text-4xl font-extrabold leading-tight tracking-tight md:text-[52px]">
+              Avalie os 12 blocos do SRL Canvas com evidências e score comparável.
+            </h1>
+            <p className="mt-5 max-w-2xl text-[15px] text-white/70 md:text-base">
+              Esta plataforma foi criada para facilitar a aplicação do SRL Canvas na prática:
+              organize a avaliação, visualize desequilíbrios no radar e gere um scorecard com
+              consistência metodológica.
+            </p>
 
-          <div className="mt-8 flex flex-wrap gap-3">
-            <Link
-              className="rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-white transition hover:brightness-110"
-              to={isEnabled ? "/auth/login" : "/canvas"}
-            >
-              {isEnabled ? "Entrar" : "Abrir app"}
-            </Link>
-            {isEnabled && (
+            <div className="mt-8 flex flex-wrap gap-3">
               <Link
-                className="rounded-lg border border-zinc-300 bg-card-light px-5 py-2.5 text-sm font-semibold text-text-light-primary transition hover:bg-zinc-100 dark:border-zinc-700 dark:bg-card-dark dark:text-text-dark-primary dark:hover:bg-zinc-800"
-                to="/auth/signup"
+                className="rounded-[10px] bg-white px-5 py-2.5 text-sm font-semibold text-hero transition hover:brightness-95"
+                to={isEnabled ? "/auth/login" : "/canvas"}
               >
-                Criar conta
+                {isEnabled ? "Entrar" : "Abrir app"}
               </Link>
+              {isEnabled && (
+                <Link
+                  className="rounded-[10px] border border-white/30 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-white/10"
+                  to="/auth/signup"
+                >
+                  Criar conta
+                </Link>
+              )}
+            </div>
+
+            {!isEnabled && (
+              <p className="mt-4 text-xs text-white/60">
+                Modo local ativo. Autenticação e persistência remota estão desabilitadas nesta
+                configuração.
+              </p>
             )}
           </div>
-
-          {!isEnabled && (
-            <p className="mt-4 text-xs text-text-light-secondary dark:text-text-dark-secondary">
-              Modo local ativo. Autenticação e persistência remota estão desabilitadas nesta
-              configuração.
-            </p>
-          )}
         </section>
 
         <section className="grid gap-4 md:grid-cols-3">
-          <article className="rounded-2xl border border-zinc-200/80 bg-card-light p-5 dark:border-zinc-800/80 dark:bg-card-dark">
-            <h2 className="text-sm font-semibold text-text-light-primary dark:text-text-dark-primary">
-              Escala guiada
-            </h2>
-            <p className="mt-2 text-sm text-text-light-secondary dark:text-text-dark-secondary">
-              Aplique notas de 1 a 9 com registro de evidência por bloco para sustentar cada
-              avaliação.
-            </p>
-          </article>
-          <article className="rounded-2xl border border-zinc-200/80 bg-card-light p-5 dark:border-zinc-800/80 dark:bg-card-dark">
-            <h2 className="text-sm font-semibold text-text-light-primary dark:text-text-dark-primary">
-              Análise visual
-            </h2>
-            <p className="mt-2 text-sm text-text-light-secondary dark:text-text-dark-secondary">
-              Enxergue lacunas com radar de 12 dimensões e priorize os pontos de maior risco.
-            </p>
-          </article>
-          <article className="rounded-2xl border border-zinc-200/80 bg-card-light p-5 dark:border-zinc-800/80 dark:bg-card-dark">
-            <h2 className="text-sm font-semibold text-text-light-primary dark:text-text-dark-primary">
-              Exportação pronta
-            </h2>
-            <p className="mt-2 text-sm text-text-light-secondary dark:text-text-dark-secondary">
-              Gere PNG e PDF para compartilhar resultados com equipe, mentores e comitês.
-            </p>
-          </article>
+          {[
+            {
+              title: "Escala guiada",
+              body: "Aplique notas de 1 a 9 com registro de evidência por bloco para sustentar cada avaliação."
+            },
+            {
+              title: "Análise visual",
+              body: "Enxergue lacunas com radar de 12 dimensões e priorize os pontos de maior risco."
+            },
+            {
+              title: "Exportação pronta",
+              body: "Gere PNG e PDF para compartilhar resultados com equipe, mentores e comitês."
+            }
+          ].map((feature) => (
+            <article
+              key={feature.title}
+              className="rounded-card border border-stroke bg-surface p-5 shadow-sm"
+            >
+              <h2 className="font-display text-[14.5px] font-bold text-ink">{feature.title}</h2>
+              <p className="mt-2 text-sm text-ink-2">{feature.body}</p>
+            </article>
+          ))}
         </section>
 
-        <section className="rounded-xl border border-zinc-200/80 bg-card-light p-4 dark:border-zinc-800/80 dark:bg-card-dark">
-          <h2 className="text-sm font-semibold text-text-light-primary dark:text-text-dark-primary">
-            Sobre o Projeto
-          </h2>
-          <p className="mt-2 text-sm text-text-light-secondary dark:text-text-dark-secondary">
+        <section className="rounded-card border border-stroke bg-surface p-5 shadow-sm">
+          <h2 className="font-display text-[14.5px] font-bold text-ink">Sobre o Projeto</h2>
+          <p className="mt-2 text-sm text-ink-2">
             O nome oficial da ferramenta é{" "}
-            <strong>SRL Canvas (Startup Readiness Level Canvas)</strong>. Aqui você encontra o
-            contexto, propósito e público-alvo do framework.
+            <strong className="text-ink">SRL Canvas (Startup Readiness Level Canvas)</strong>. Aqui
+            você encontra o contexto, propósito e público-alvo do framework.
           </p>
           <button
             type="button"
             onClick={() => setIsAboutOpen(true)}
-            className="mt-3 rounded-lg border border-zinc-300 px-4 py-2 text-sm font-semibold text-text-light-secondary hover:bg-zinc-100 dark:border-zinc-700 dark:text-text-dark-secondary dark:hover:bg-zinc-800"
+            className="mt-3 rounded-[10px] border border-stroke px-4 py-2 text-sm font-semibold text-ink-2 transition hover:bg-surface-2"
           >
             Ler: Por que o SRL Canvas?
           </button>
         </section>
 
-        <section className="rounded-xl border border-zinc-200/80 bg-card-light p-4 dark:border-zinc-800/80 dark:bg-card-dark">
-          <h3 className="text-sm font-semibold text-text-light-primary dark:text-text-dark-primary">
+        <section className="rounded-card border border-stroke bg-surface p-5 shadow-sm">
+          <h3 className="font-display text-[14.5px] font-bold text-ink">
             Material de Apoio (Uso Offline)
           </h3>
-          <p className="mt-2 text-sm text-text-light-secondary dark:text-text-dark-secondary">
+          <p className="mt-2 text-sm text-ink-2">
             Não é obrigatório usar esta plataforma para aplicar o SRL Canvas. O método foi desenhado
             para ser simples e ágil: você pode baixar o guia de aplicação, o modelo do SRL Canvas e
             o gráfico radar para preenchimento manual.
@@ -237,7 +230,7 @@ export function LandingPage() {
                 download
                 target="_blank"
                 rel="noreferrer"
-                className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-semibold text-text-light-secondary hover:bg-zinc-100 dark:border-zinc-700 dark:text-text-dark-secondary dark:hover:bg-zinc-800"
+                className="rounded-[10px] border border-stroke px-4 py-2 text-sm font-semibold text-ink-2 transition hover:bg-surface-2"
               >
                 {item.label}
               </a>

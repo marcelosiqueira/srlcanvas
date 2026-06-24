@@ -2,6 +2,7 @@ import { useState } from "react";
 import type { FormEvent } from "react";
 import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthProvider";
+import { AuthLayout } from "../components/AuthLayout";
 
 export function LoginPage() {
   const navigate = useNavigate();
@@ -38,21 +39,17 @@ export function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background-light px-4 font-display dark:bg-background-dark">
-      <form
-        className="w-full max-w-md rounded-xl border border-zinc-200/80 bg-card-light p-6 dark:border-zinc-800/80 dark:bg-card-dark"
-        onSubmit={submit}
-      >
-        <h1 className="text-xl font-bold text-text-light-primary dark:text-text-dark-primary">
-          Entrar
-        </h1>
+    <AuthLayout>
+      <form onSubmit={submit}>
+        <h1 className="font-display text-[26px] font-extrabold text-ink">Entrar</h1>
+        <p className="mt-1 text-[14px] text-ink-2">
+          Acesse sua conta para continuar o diagnóstico.
+        </p>
 
-        <label className="mt-4 block">
-          <span className="text-xs font-medium text-text-light-secondary dark:text-text-dark-secondary">
-            Email
-          </span>
+        <label className="mt-6 block">
+          <span className="text-[12px] font-semibold text-ink-2">Email</span>
           <input
-            className="mt-1 block w-full rounded-md border-zinc-300 bg-zinc-50 p-2 text-sm text-text-light-primary shadow-sm focus:border-primary focus:ring-primary dark:border-zinc-700 dark:bg-zinc-800 dark:text-text-dark-primary"
+            className="mt-1 block w-full rounded-[10px] border border-stroke bg-inset px-3 py-2.5 text-[14px] text-ink outline-none transition focus:border-brand"
             value={email}
             onChange={(event) => setEmail(event.target.value)}
             type="email"
@@ -60,12 +57,10 @@ export function LoginPage() {
           />
         </label>
 
-        <label className="mt-3 block">
-          <span className="text-xs font-medium text-text-light-secondary dark:text-text-dark-secondary">
-            Senha
-          </span>
+        <label className="mt-4 block">
+          <span className="text-[12px] font-semibold text-ink-2">Senha</span>
           <input
-            className="mt-1 block w-full rounded-md border-zinc-300 bg-zinc-50 p-2 text-sm text-text-light-primary shadow-sm focus:border-primary focus:ring-primary dark:border-zinc-700 dark:bg-zinc-800 dark:text-text-dark-primary"
+            className="mt-1 block w-full rounded-[10px] border border-stroke bg-inset px-3 py-2.5 text-[14px] text-ink outline-none transition focus:border-brand"
             value={password}
             onChange={(event) => setPassword(event.target.value)}
             type="password"
@@ -73,23 +68,23 @@ export function LoginPage() {
           />
         </label>
 
-        {error && <p className="mt-3 text-xs text-red-500">{error}</p>}
+        {error && <p className="mt-4 text-[13px] text-red-500">{error}</p>}
 
         <button
-          className="mt-4 w-full rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:brightness-110 disabled:opacity-70"
+          className="mt-6 w-full rounded-[10px] bg-brand px-4 py-2.5 text-[14px] font-semibold text-brand-fg transition hover:brightness-110 disabled:opacity-70"
           disabled={loading}
           type="submit"
         >
           {loading ? "Entrando..." : "Entrar"}
         </button>
 
-        <p className="mt-4 text-xs text-text-light-secondary dark:text-text-dark-secondary">
+        <p className="mt-6 text-[13px] text-ink-2">
           Não tem conta?{" "}
-          <Link className="font-semibold text-primary" to="/auth/signup">
+          <Link className="font-semibold text-brand" to="/auth/signup">
             Criar conta
           </Link>
         </p>
       </form>
-    </div>
+    </AuthLayout>
   );
 }
