@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800;900&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200");
 
 @tailwind base;
@@ -10,6 +10,46 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  --bg: #edf0f4;
+  --surface: #ffffff;
+  --surface-2: #f5f7fa;
+  --inset: #f0f3f7;
+  --border: #e4e8ee;
+  --line: #edf0f4;
+  --text: #16202e;
+  --text-2: #586271;
+  --text-3: #8a95a4;
+  --teal: #0f7e7c;
+  --navy: #16224f;
+  --hero: #16224f;
+  --primary: #16224f;
+  --primary-text: #ffffff;
+
+  --shadow: 0 1px 2px rgba(16, 24, 40, 0.04), 0 4px 14px rgba(16, 24, 40, 0.05);
+  --shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.06);
+  --shadow-lg: 0 18px 50px rgba(16, 24, 40, 0.18);
+}
+
+.dark {
+  --bg: #070b16;
+  --surface: #101829;
+  --surface-2: #0c1322;
+  --inset: #0b1322;
+  --border: #22304a;
+  --line: #1b2740;
+  --text: #e9eef6;
+  --text-2: #9daac0;
+  --text-3: #67748c;
+  --teal: #2dc7b6;
+  --navy: #ffffff;
+  --hero: #0e1733;
+  --primary: #15b8a6;
+  --primary-text: #05221e;
+
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 24px 60px rgba(0, 0, 0, 0.6);
 }
 
 * {
@@ -19,6 +59,9 @@
 body {
   margin: 0;
   min-height: max(884px, 100dvh);
+  font-family: "IBM Plex Sans", system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
 }
 
 .material-symbols-outlined {
@@ -27,4 +70,21 @@ body {
     "wght" 400,
     "GRAD" 0,
     "opsz" 24;
+}
+
+@keyframes pop {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@layer utilities {
+  .animate-pop {
+    animation: pop 0.26s cubic-bezier(0.2, 0.8, 0.3, 1);
+  }
 }
