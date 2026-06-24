@@ -29,12 +29,18 @@ export function ResultsPage() {
   );
   const metrics = useMemo(() => calculateScoreMetrics(scores), [scores]);
   const projectTitle = snapshot?.projectTitle ?? buildCanvasTitle(meta);
+  const updatedLabel = snapshot?.updatedAt ? formatDateTime(snapshot.updatedAt) : null;
   const editingBlock = editingBlockId ? SRL_BLOCKS_BY_ID[editingBlockId] : null;
 
   return (
     <AppShell title="Resultados">
       <div ref={captureRef} className="mx-auto flex max-w-[1160px] flex-col gap-[18px]">
-        <p className="font-display text-[16px] font-bold text-ink">{projectTitle}</p>
+        <div>
+          <p className="font-display text-[16px] font-bold text-ink">{projectTitle}</p>
+          {updatedLabel && (
+            <p className="mt-0.5 text-[12px] text-ink-3">Atualizado {updatedLabel}</p>
+          )}
+        </div>
 
         <div className="grid grid-cols-1 gap-[18px] lg:grid-cols-[1.05fr_1fr]">
           {/* Card radar */}
@@ -132,6 +138,12 @@ export function ResultsPage() {
       )}
     </AppShell>
   );
+}
+
+function formatDateTime(value: string): string {
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return value;
+  return parsed.toLocaleString("pt-BR");
 }
 
 function MiniCard({ label, value }: { label: string; value: string }) {
