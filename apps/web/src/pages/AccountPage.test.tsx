@@ -18,5 +18,7 @@ describe("AccountPage", () => {
     expect(screen.getByRole("heading", { name: "Minha Conta" })).toBeInTheDocument();
     expect(screen.getByText("Perfil")).toBeInTheDocument();
     expect(screen.getByText("Tema")).toBeInTheDocument();
+    // Marcador exclusivo do AppShell (ausente no layout antigo AppHeader/FooterNav)
+    expect(screen.getByRole("link", { name: /Novo SRL Canvas/i })).toBeInTheDocument();
   });
 });
