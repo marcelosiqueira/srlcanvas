@@ -189,7 +189,9 @@ export function CanvasPage() {
             onClick={() => setIsResultsOpen(true)}
             className="flex items-center gap-1.5 rounded-lg bg-brand px-4 py-2 text-[14px] font-semibold text-brand-fg"
           >
-            <span className="material-symbols-outlined text-base">insights</span>
+            <span className="material-symbols-outlined text-base" aria-hidden="true">
+              insights
+            </span>
             Ver Resultados
           </button>
         </div>
