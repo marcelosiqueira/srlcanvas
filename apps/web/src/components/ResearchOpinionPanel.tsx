@@ -88,24 +88,20 @@ export function ResearchOpinionPanel({
 
   return (
     <Component
-      className={
-        className ??
-        "rounded-xl border border-zinc-200/80 bg-card-light p-4 dark:border-zinc-800/80 dark:bg-card-dark"
-      }
+      className={className ?? "rounded-card border border-stroke bg-surface p-5 shadow-sm"}
     >
-      <h2 className="text-sm font-semibold text-text-light-primary dark:text-text-dark-primary">
-        Pesquisa Acadêmica
-      </h2>
-      <p className="mt-2 text-sm text-text-light-secondary dark:text-text-dark-secondary">
+      <h2 className="font-display text-[14.5px] font-bold text-ink">Pesquisa Acadêmica</h2>
+      <p className="mt-2 text-sm text-ink-2">
         Este projeto faz parte de uma dissertação de mestrado. Sua opinião é essencial para medir
         impacto, clareza e utilidade do SRL Canvas.
       </p>
-      <p className="mt-1 text-sm text-text-light-secondary dark:text-text-dark-secondary">
-        Tempo estimado de resposta: <strong>10 a 12 minutos</strong>. As respostas são fundamentais
-        para a validação científica do trabalho.
+      <p className="mt-1 text-sm text-ink-2">
+        Tempo estimado de resposta: <strong className="text-ink">10 a 12 minutos</strong>. As
+        respostas são fundamentais para a validação científica do trabalho.
       </p>
-      <p className="mt-1 text-xs text-text-light-secondary dark:text-text-dark-secondary">
-        Instrumento ativo: <strong>{RESEARCH_SURVEY_CONFIG.activeVersion}</strong>
+      <p className="mt-1 text-xs text-ink-3">
+        Instrumento ativo:{" "}
+        <strong className="text-ink-2">{RESEARCH_SURVEY_CONFIG.activeVersion}</strong>
       </p>
 
       {surveyEnabled ? (
@@ -113,34 +109,31 @@ export function ResearchOpinionPanel({
           <button
             type="button"
             onClick={goToConsent}
-            className="inline-flex rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:brightness-110"
+            className="inline-flex rounded-[10px] bg-brand px-4 py-2 text-sm font-semibold text-brand-fg transition hover:brightness-110"
           >
             Ler e aceitar TCLE
           </button>
           <button
             type="button"
             onClick={goToSurvey}
-            className="inline-flex rounded-lg border border-zinc-300 px-4 py-2 text-sm font-semibold text-text-light-secondary hover:bg-zinc-100 dark:border-zinc-700 dark:text-text-dark-secondary dark:hover:bg-zinc-800"
+            className="inline-flex rounded-[10px] border border-stroke px-4 py-2 text-sm font-semibold text-ink-2 transition hover:bg-surface-2"
           >
             Abrir questionário
           </button>
         </div>
       ) : (
-        <p className="mt-3 rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800 dark:border-amber-700/40 dark:bg-amber-900/20 dark:text-amber-300">
+        <p className="mt-3 rounded-[10px] border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800 dark:border-amber-700/40 dark:bg-amber-900/20 dark:text-amber-300">
           Questionário temporariamente desativado por configuração.
         </p>
       )}
 
       {surveyEnabled && (
         <div className="mt-3 space-y-1 text-xs">
-          {consentLoading && (
-            <p className="text-text-light-secondary dark:text-text-dark-secondary">
-              Carregando status do TCLE...
-            </p>
-          )}
+          {consentLoading && <p className="text-ink-2">Carregando status do TCLE...</p>}
           {!consentLoading && (
-            <p className="text-text-light-secondary dark:text-text-dark-secondary">
-              Status do consentimento: <strong>{consentActive ? "ativo" : "não ativo"}</strong>
+            <p className="text-ink-2">
+              Status do consentimento:{" "}
+              <strong className="text-ink">{consentActive ? "ativo" : "não ativo"}</strong>
             </p>
           )}
           {consentMessage && (
@@ -155,7 +148,7 @@ export function ResearchOpinionPanel({
           type="button"
           onClick={handleRevokeConsent}
           disabled={isRevoking}
-          className="mt-3 rounded-lg border border-red-300 px-4 py-2 text-sm font-semibold text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-red-700/50 dark:text-red-300 dark:hover:bg-red-900/20"
+          className="mt-3 rounded-[10px] border border-red-300 px-4 py-2 text-sm font-semibold text-red-700 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-red-700/50 dark:text-red-300 dark:hover:bg-red-900/20"
         >
           {isRevoking ? "Revogando..." : "Revogar consentimento"}
         </button>

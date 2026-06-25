@@ -1,9 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../auth/AuthProvider";
-import { AppHeader } from "../components/AppHeader";
+import { AppShell } from "../components/AppShell";
 import { RESEARCH_SURVEY_CONFIG } from "../config/researchSurveyConfig";
-import { FooterNav } from "../components/FooterNav";
 import {
   RESEARCH_TCLE_META,
   RESEARCH_TCLE_SECTIONS,
@@ -125,38 +124,40 @@ export function ResearchConsentPage() {
   };
 
   return (
-    <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden bg-background-light font-display dark:bg-background-dark">
-      <AppHeader title="TCLE - Pesquisa Acadêmica" backTo={nextPath} />
-
-      <main className="flex-grow space-y-4 px-4 pb-28 pt-6">
-        <section className="rounded-xl border border-zinc-200/80 bg-card-light p-4 dark:border-zinc-800/80 dark:bg-card-dark">
-          <h2 className="text-base font-semibold text-text-light-primary dark:text-text-dark-primary">
+    <AppShell title="TCLE — Pesquisa Acadêmica">
+      <div className="mx-auto flex max-w-[760px] flex-col gap-[18px]">
+        <section className="rounded-card border border-stroke bg-surface p-5 shadow-sm">
+          <h2 className="font-display text-base font-bold text-ink">
             Termo de Consentimento Livre e Esclarecido (TCLE)
           </h2>
-          <p className="mt-2 text-sm text-text-light-secondary dark:text-text-dark-secondary">
-            Versão de consentimento: <strong>{RESEARCH_TCLE_VERSION}</strong>
+          <p className="mt-2 text-sm text-ink-2">
+            Versão de consentimento: <strong className="text-ink">{RESEARCH_TCLE_VERSION}</strong>
           </p>
-          <p className="mt-1 text-sm text-text-light-secondary dark:text-text-dark-secondary">
-            Versão do questionário: <strong>{RESEARCH_SURVEY_CONFIG.activeVersion}</strong>
+          <p className="mt-1 text-sm text-ink-2">
+            Versão do questionário:{" "}
+            <strong className="text-ink">{RESEARCH_SURVEY_CONFIG.activeVersion}</strong>
           </p>
-          <div className="mt-3 space-y-1 text-sm text-text-light-secondary dark:text-text-dark-secondary">
+          <div className="mt-3 space-y-1 text-sm text-ink-2">
             <p>
-              <strong>Título da pesquisa:</strong> {RESEARCH_TCLE_META.title}
+              <strong className="text-ink">Título da pesquisa:</strong> {RESEARCH_TCLE_META.title}
             </p>
             <p>
-              <strong>Pesquisador responsável:</strong> {RESEARCH_TCLE_META.researcher}
+              <strong className="text-ink">Pesquisador responsável:</strong>{" "}
+              {RESEARCH_TCLE_META.researcher}
             </p>
             <p>
-              <strong>Contato do pesquisador:</strong> {RESEARCH_TCLE_META.researcherContact}
+              <strong className="text-ink">Contato do pesquisador:</strong>{" "}
+              {RESEARCH_TCLE_META.researcherContact}
             </p>
             <p>
-              <strong>Orientador:</strong> {RESEARCH_TCLE_META.advisor}
+              <strong className="text-ink">Orientador:</strong> {RESEARCH_TCLE_META.advisor}
             </p>
             <p>
-              <strong>Instituição proponente:</strong> {RESEARCH_TCLE_META.institution}
+              <strong className="text-ink">Instituição proponente:</strong>{" "}
+              {RESEARCH_TCLE_META.institution}
             </p>
             <p>
-              <strong>Programa:</strong> {RESEARCH_TCLE_META.program}
+              <strong className="text-ink">Programa:</strong> {RESEARCH_TCLE_META.program}
             </p>
           </div>
         </section>
@@ -164,12 +165,12 @@ export function ResearchConsentPage() {
         {RESEARCH_TCLE_SECTIONS.map((section) => (
           <section
             key={section.id}
-            className="rounded-xl border border-zinc-200/80 bg-card-light p-4 dark:border-zinc-800/80 dark:bg-card-dark"
+            className="rounded-card border border-stroke bg-surface p-5 shadow-sm"
           >
-            <h3 className="text-sm font-semibold text-text-light-primary dark:text-text-dark-primary">
+            <h3 className="font-display text-sm font-bold text-ink">
               {section.id}. {section.title}
             </h3>
-            <div className="mt-2 space-y-2 text-sm text-text-light-secondary dark:text-text-dark-secondary">
+            <div className="mt-2 space-y-2 text-sm text-ink-2">
               {section.paragraphs.map((paragraph, index) => (
                 <p key={`${section.id}_${index}`}>{paragraph}</p>
               ))}
@@ -177,22 +178,25 @@ export function ResearchConsentPage() {
           </section>
         ))}
 
-        <section className="rounded-xl border border-zinc-200/80 bg-card-light p-4 dark:border-zinc-800/80 dark:bg-card-dark">
-          <h3 className="text-sm font-semibold text-text-light-primary dark:text-text-dark-primary">
+        <section className="rounded-card border border-stroke bg-surface p-5 shadow-sm">
+          <h3 className="font-display text-sm font-bold text-ink">
             Informações éticas e de proteção de dados
           </h3>
-          <div className="mt-2 space-y-2 text-sm text-text-light-secondary dark:text-text-dark-secondary">
+          <div className="mt-2 space-y-2 text-sm text-ink-2">
             <p>
-              <strong>Comitê de Ética:</strong> {RESEARCH_TCLE_META.ethicsCommittee.name}
+              <strong className="text-ink">Comitê de Ética:</strong>{" "}
+              {RESEARCH_TCLE_META.ethicsCommittee.name}
             </p>
             <p>
-              <strong>Contato CEP:</strong> {RESEARCH_TCLE_META.ethicsCommittee.contact}
+              <strong className="text-ink">Contato CEP:</strong>{" "}
+              {RESEARCH_TCLE_META.ethicsCommittee.contact}
             </p>
             <p>
-              <strong>Endereço CEP:</strong> {RESEARCH_TCLE_META.ethicsCommittee.address}
+              <strong className="text-ink">Endereço CEP:</strong>{" "}
+              {RESEARCH_TCLE_META.ethicsCommittee.address}
             </p>
             <p>
-              <strong>DPO/Encarregada IFMS:</strong> {RESEARCH_TCLE_META.dpo}
+              <strong className="text-ink">DPO/Encarregada IFMS:</strong> {RESEARCH_TCLE_META.dpo}
             </p>
             <p>
               Ao continuar, você declara que leu e compreendeu o TCLE e concorda em participar da
@@ -202,28 +206,27 @@ export function ResearchConsentPage() {
         </section>
 
         {isLoadingStatus && (
-          <section className="rounded-xl border border-zinc-200/80 bg-card-light p-4 text-sm text-text-light-secondary dark:border-zinc-800/80 dark:bg-card-dark dark:text-text-dark-secondary">
+          <section className="rounded-card border border-stroke bg-surface p-5 text-sm text-ink-2 shadow-sm">
             Carregando status do consentimento...
           </section>
         )}
 
         {!isLoadingStatus && (
-          <section className="rounded-xl border border-zinc-200/80 bg-card-light p-4 dark:border-zinc-800/80 dark:bg-card-dark">
-            <h3 className="text-sm font-semibold text-text-light-primary dark:text-text-dark-primary">
-              Declaracao de aceite
-            </h3>
+          <section className="rounded-card border border-stroke bg-surface p-5 shadow-sm">
+            <h3 className="font-display text-sm font-bold text-ink">Declaracao de aceite</h3>
 
-            <div className="mt-2 space-y-1 text-sm text-text-light-secondary dark:text-text-dark-secondary">
+            <div className="mt-2 space-y-1 text-sm text-ink-2">
               <p>
-                <strong>Status atual:</strong>{" "}
+                <strong className="text-ink">Status atual:</strong>{" "}
                 {hasConsent ? "Consentimento ativo" : "Sem consentimento ativo"}
               </p>
               <p>
-                <strong>Registrado em:</strong> {formatDateTime(acceptedAt)}
+                <strong className="text-ink">Registrado em:</strong> {formatDateTime(acceptedAt)}
               </p>
               {consentResult && (
                 <p>
-                  <strong>Protocolo:</strong> {consentResult.id} ({consentResult.storage})
+                  <strong className="text-ink">Protocolo:</strong> {consentResult.id} (
+                  {consentResult.storage})
                 </p>
               )}
             </div>
@@ -244,7 +247,7 @@ export function ResearchConsentPage() {
                 type="button"
                 onClick={handleAccept}
                 disabled={isSubmitting}
-                className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
+                className="rounded-[10px] bg-brand px-4 py-2 text-sm font-semibold text-brand-fg transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {isSubmitting ? "Registrando..." : "Concordo e continuar para pesquisa"}
               </button>
@@ -252,7 +255,7 @@ export function ResearchConsentPage() {
               <button
                 type="button"
                 onClick={() => navigate(nextPath)}
-                className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-semibold text-text-light-secondary hover:bg-zinc-100 dark:border-zinc-700 dark:text-text-dark-secondary dark:hover:bg-zinc-800"
+                className="rounded-[10px] border border-stroke px-4 py-2 text-sm font-semibold text-ink-2 transition hover:bg-surface-2"
               >
                 Não concordo
               </button>
@@ -262,7 +265,7 @@ export function ResearchConsentPage() {
                   type="button"
                   onClick={handleRevoke}
                   disabled={isRevoking}
-                  className="rounded-lg border border-red-300 px-4 py-2 text-sm font-semibold text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-red-700/50 dark:text-red-300 dark:hover:bg-red-900/20"
+                  className="rounded-[10px] border border-red-300 px-4 py-2 text-sm font-semibold text-red-700 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-red-700/50 dark:text-red-300 dark:hover:bg-red-900/20"
                 >
                   {isRevoking ? "Revogando..." : "Revogar consentimento"}
                 </button>
@@ -270,9 +273,7 @@ export function ResearchConsentPage() {
             </div>
           </section>
         )}
-      </main>
-
-      <FooterNav />
-    </div>
+      </div>
+    </AppShell>
   );
 }

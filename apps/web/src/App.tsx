@@ -114,10 +114,8 @@ function App() {
 
 function RouteLoadingFallback() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background-light dark:bg-background-dark">
-      <p className="text-sm text-text-light-secondary dark:text-text-dark-secondary">
-        Carregando...
-      </p>
+    <div className="flex min-h-screen items-center justify-center bg-app">
+      <p className="text-sm text-ink-2">Carregando...</p>
     </div>
   );
 }

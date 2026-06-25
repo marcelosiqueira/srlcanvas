@@ -1,9 +1,8 @@
 import { type FormEvent, type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../auth/AuthProvider";
-import { AppHeader } from "../components/AppHeader";
+import { AppShell } from "../components/AppShell";
 import { RESEARCH_SURVEY_CONFIG } from "../config/researchSurveyConfig";
-import { FooterNav } from "../components/FooterNav";
 import {
   ACCEPTABLE_TIME_OPTIONS,
   DIMENSION_ASSERTIONS,
@@ -145,9 +144,7 @@ function RadioGroup<T extends string | number>({
 }) {
   return (
     <fieldset className="space-y-2">
-      <legend className="text-sm font-medium text-text-light-primary dark:text-text-dark-primary">
-        {legend}
-      </legend>
+      <legend className="text-sm font-medium text-ink">{legend}</legend>
       <div className={`flex flex-wrap gap-2 ${dense ? "gap-1.5" : ""}`}>
         {options.map((option) => {
           const checked = value === option.value;
@@ -157,8 +154,8 @@ function RadioGroup<T extends string | number>({
               key={String(option.value)}
               className={`inline-flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-sm transition ${
                 checked
-                  ? "border-primary bg-primary/10 text-text-light-primary dark:text-text-dark-primary"
-                  : "border-zinc-300 text-text-light-secondary hover:bg-zinc-100 dark:border-zinc-700 dark:text-text-dark-secondary dark:hover:bg-zinc-800"
+                  ? "border-brand bg-surface-2 text-ink"
+                  : "border-stroke text-ink-2 hover:bg-surface-2"
               }`}
             >
               <input
@@ -202,10 +199,8 @@ function LikertGroup({
 
 function SectionCard({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <section className="rounded-xl border border-zinc-200/80 bg-card-light p-4 dark:border-zinc-800/80 dark:bg-card-dark">
-      <h2 className="text-base font-semibold text-text-light-primary dark:text-text-dark-primary">
-        {title}
-      </h2>
+    <section className="rounded-card border border-stroke bg-surface p-4">
+      <h2 className="font-display text-base font-bold text-ink">{title}</h2>
       <div className="mt-3 space-y-4">{children}</div>
     </section>
   );
@@ -638,27 +633,21 @@ export function ResearchSurveyPage() {
 
   if (consentLoading) {
     return (
-      <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden bg-background-light font-display dark:bg-background-dark">
-        <AppHeader title="Questionário Quantitativo SRL Canvas" backTo={nextPath} />
-
-        <main className="flex-grow px-4 pb-28 pt-6">
-          <section className="rounded-xl border border-zinc-200/80 bg-card-light p-4 text-sm text-text-light-secondary dark:border-zinc-800/80 dark:bg-card-dark dark:text-text-dark-secondary">
+      <AppShell title="Questionário Quantitativo SRL Canvas">
+        <div className="mx-auto flex max-w-[820px] flex-col gap-[18px]">
+          <section className="rounded-card border border-stroke bg-surface p-4 text-sm text-ink-2">
             Carregando status do consentimento (TCLE)...
           </section>
-        </main>
-
-        <FooterNav />
-      </div>
+        </div>
+      </AppShell>
     );
   }
 
   if (!hasConsent) {
     return (
-      <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden bg-background-light font-display dark:bg-background-dark">
-        <AppHeader title="Questionário Quantitativo SRL Canvas" backTo={nextPath} />
-
-        <main className="flex-grow space-y-4 px-4 pb-28 pt-6">
-          <section className="rounded-xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-700/40 dark:bg-amber-900/20">
+      <AppShell title="Questionário Quantitativo SRL Canvas">
+        <div className="mx-auto flex max-w-[820px] flex-col gap-[18px]">
+          <section className="rounded-card border border-amber-200 bg-amber-50 p-4 dark:border-amber-700/40 dark:bg-amber-900/20">
             <h2 className="text-sm font-semibold text-amber-800 dark:text-amber-300">
               Consentimento obrigatório
             </h2>
@@ -672,33 +661,29 @@ export function ResearchSurveyPage() {
               <button
                 type="button"
                 onClick={() => navigate(`/survey/consent?next=${encodeURIComponent(nextPath)}`)}
-                className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:brightness-110"
+                className="rounded-[10px] bg-brand px-4 py-2 text-sm font-semibold text-brand-fg hover:brightness-110"
               >
                 Ler e aceitar TCLE
               </button>
               <button
                 type="button"
                 onClick={() => navigate(nextPath)}
-                className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-semibold text-text-light-secondary hover:bg-zinc-100 dark:border-zinc-700 dark:text-text-dark-secondary dark:hover:bg-zinc-800"
+                className="rounded-[10px] border border-stroke px-4 py-2 text-sm font-semibold text-ink-2 hover:bg-surface-2"
               >
                 Responder depois
               </button>
             </div>
           </section>
-        </main>
-
-        <FooterNav />
-      </div>
+        </div>
+      </AppShell>
     );
   }
 
   if (result) {
     return (
-      <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden bg-background-light font-display dark:bg-background-dark">
-        <AppHeader title="Pesquisa Acadêmica" backTo={nextPath} />
-
-        <main className="flex-grow px-4 pb-28 pt-6">
-          <section className="rounded-xl border border-emerald-300/80 bg-emerald-50 p-4 dark:border-emerald-700/70 dark:bg-emerald-900/20">
+      <AppShell title="Pesquisa Acadêmica">
+        <div className="mx-auto flex max-w-[820px] flex-col gap-[18px]">
+          <section className="rounded-card border border-emerald-300/80 bg-emerald-50 p-4 dark:border-emerald-700/70 dark:bg-emerald-900/20">
             <h2 className="text-base font-semibold text-emerald-900 dark:text-emerald-200">
               Obrigado pela sua contribuição
             </h2>
@@ -718,7 +703,7 @@ export function ResearchSurveyPage() {
               <button
                 type="button"
                 onClick={() => navigate(nextPath)}
-                className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:brightness-110"
+                className="rounded-[10px] bg-brand px-4 py-2 text-sm font-semibold text-brand-fg hover:brightness-110"
               >
                 Voltar
               </button>
@@ -735,70 +720,58 @@ export function ResearchSurveyPage() {
                   setErrors([]);
                   setSubmitError(null);
                 }}
-                className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-semibold text-text-light-secondary hover:bg-zinc-100 dark:border-zinc-700 dark:text-text-dark-secondary dark:hover:bg-zinc-800"
+                className="rounded-[10px] border border-stroke px-4 py-2 text-sm font-semibold text-ink-2 hover:bg-surface-2"
               >
                 Enviar nova resposta
               </button>
             </div>
           </section>
-        </main>
-
-        <FooterNav />
-      </div>
+        </div>
+      </AppShell>
     );
   }
 
   return (
-    <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden bg-background-light font-display dark:bg-background-dark">
-      <AppHeader title="Questionário Quantitativo SRL Canvas" backTo={nextPath} />
-
-      <main className="flex-grow space-y-4 px-4 pb-28 pt-6">
-        <section className="rounded-xl border border-zinc-200/80 bg-card-light p-4 dark:border-zinc-800/80 dark:bg-card-dark">
-          <h2 className="text-base font-semibold text-text-light-primary dark:text-text-dark-primary">
-            Antes de começar
-          </h2>
-          <p className="mt-2 text-sm text-text-light-secondary dark:text-text-dark-secondary">
+    <AppShell title="Questionário Quantitativo SRL Canvas">
+      <div className="mx-auto flex max-w-[820px] flex-col gap-[18px]">
+        <section className="rounded-card border border-stroke bg-surface p-4">
+          <h2 className="font-display text-base font-bold text-ink">Antes de começar</h2>
+          <p className="mt-2 text-sm text-ink-2">
             Tempo estimado de resposta: <strong>10 a 12 minutos</strong>.
           </p>
-          <p className="mt-1 text-sm text-text-light-secondary dark:text-text-dark-secondary">
+          <p className="mt-1 text-sm text-ink-2">
             Sua participação é essencial para esta pesquisa de mestrado e para validar
             cientificamente o SRL Canvas.
           </p>
-          <p className="mt-1 text-sm text-text-light-secondary dark:text-text-dark-secondary">
+          <p className="mt-1 text-sm text-ink-2">
             O questionário foi dividido em etapas curtas para facilitar a conclusão.
           </p>
-          <p className="mt-1 text-xs text-text-light-secondary dark:text-text-dark-secondary">
+          <p className="mt-1 text-xs text-ink-2">
             Versão ativa do instrumento: <strong>{RESEARCH_SURVEY_CONFIG.activeVersion}</strong>
           </p>
         </section>
 
-        <section className="rounded-xl border border-zinc-200/80 bg-card-light p-4 dark:border-zinc-800/80 dark:bg-card-dark">
+        <section className="rounded-card border border-stroke bg-surface p-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <p className="text-xs font-semibold uppercase tracking-wide text-primary">
+            <p className="text-xs font-semibold uppercase tracking-wide text-brand">
               Etapa {currentStepIndex + 1} de {surveySteps.length}
             </p>
-            <p className="text-xs text-text-light-secondary dark:text-text-dark-secondary">
-              {progressPercent}% concluído
-            </p>
+            <p className="text-xs text-ink-2">{progressPercent}% concluído</p>
           </div>
           <div
             role="progressbar"
             aria-valuemin={0}
             aria-valuemax={100}
             aria-valuenow={progressPercent}
-            className="mt-2 h-2 w-full overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-800"
+            className="mt-2 h-2 w-full overflow-hidden rounded-full bg-inset"
           >
             <div
-              className="h-full rounded-full bg-primary transition-[width] duration-300"
+              className="h-full rounded-full bg-brand transition-[width] duration-300"
               style={{ width: `${progressPercent}%` }}
             />
           </div>
-          <h3 className="mt-3 text-sm font-semibold text-text-light-primary dark:text-text-dark-primary">
-            {currentStep.title}
-          </h3>
-          <p className="mt-1 text-xs text-text-light-secondary dark:text-text-dark-secondary">
-            {currentStep.description}
-          </p>
+          <h3 className="mt-3 text-sm font-semibold text-ink">{currentStep.title}</h3>
+          <p className="mt-1 text-xs text-ink-2">{currentStep.description}</p>
         </section>
 
         {currentStepKey === "triage" && (
@@ -849,11 +822,9 @@ export function ResearchSurveyPage() {
 
             {values.primaryRole === "outro" && (
               <label className="block">
-                <span className="text-xs font-medium text-text-light-secondary dark:text-text-dark-secondary">
-                  Especifique seu papel
-                </span>
+                <span className="text-xs font-medium text-ink-2">Especifique seu papel</span>
                 <input
-                  className="mt-1 block w-full rounded-md border-zinc-300 bg-zinc-50 p-2 text-sm text-text-light-primary shadow-sm focus:border-primary focus:ring-primary dark:border-zinc-700 dark:bg-zinc-800 dark:text-text-dark-primary"
+                  className="mt-1 block w-full rounded-[10px] border border-stroke bg-inset p-2 text-sm text-ink outline-none focus:border-brand"
                   type="text"
                   value={values.primaryRoleOther}
                   onChange={(event) => setField("primaryRoleOther", event.target.value)}
@@ -885,11 +856,9 @@ export function ResearchSurveyPage() {
 
             {values.sector === "outro" && (
               <label className="block">
-                <span className="text-xs font-medium text-text-light-secondary dark:text-text-dark-secondary">
-                  Especifique o setor
-                </span>
+                <span className="text-xs font-medium text-ink-2">Especifique o setor</span>
                 <input
-                  className="mt-1 block w-full rounded-md border-zinc-300 bg-zinc-50 p-2 text-sm text-text-light-primary shadow-sm focus:border-primary focus:ring-primary dark:border-zinc-700 dark:bg-zinc-800 dark:text-text-dark-primary"
+                  className="mt-1 block w-full rounded-[10px] border border-stroke bg-inset p-2 text-sm text-ink outline-none focus:border-brand"
                   type="text"
                   value={values.sectorOther}
                   onChange={(event) => setField("sectorOther", event.target.value)}
@@ -909,11 +878,11 @@ export function ResearchSurveyPage() {
             />
 
             <label className="block">
-              <span className="text-sm font-medium text-text-light-primary dark:text-text-dark-primary">
+              <span className="text-sm font-medium text-ink">
                 3.5 Qual a sua localidade/país de atuação?
               </span>
               <input
-                className="mt-1 block w-full rounded-md border-zinc-300 bg-zinc-50 p-2 text-sm text-text-light-primary shadow-sm focus:border-primary focus:ring-primary dark:border-zinc-700 dark:bg-zinc-800 dark:text-text-dark-primary"
+                className="mt-1 block w-full rounded-[10px] border border-stroke bg-inset p-2 text-sm text-ink outline-none focus:border-brand"
                 type="text"
                 value={values.locationCountry}
                 onChange={(event) => setField("locationCountry", event.target.value)}
@@ -936,9 +905,7 @@ export function ResearchSurveyPage() {
 
         {isEligible && isDimensionStepKey(currentStepKey) && (
           <SectionCard title={DIMENSION_STEP_CONFIG[currentStepKey].title}>
-            <p className="text-xs text-text-light-secondary dark:text-text-dark-secondary">
-              Escala Likert: {likertHelp}
-            </p>
+            <p className="text-xs text-ink-2">Escala Likert: {likertHelp}</p>
 
             <div className="space-y-4">
               {DIMENSION_STEP_CONFIG[currentStepKey].dimensions.map((dimension, index) => {
@@ -947,11 +914,8 @@ export function ResearchSurveyPage() {
                   DIMENSION_STEP_CONFIG[currentStepKey].startQuestionNumber + index;
 
                 return (
-                  <article
-                    key={dimension.key}
-                    className="rounded-xl border border-zinc-200/80 p-3 dark:border-zinc-800/80"
-                  >
-                    <h3 className="text-sm font-semibold text-text-light-primary dark:text-text-dark-primary">
+                  <article key={dimension.key} className="rounded-card border border-stroke p-3">
+                    <h3 className="text-sm font-semibold text-ink">
                       5.{questionNumber}. {dimension.label}
                     </h3>
 
@@ -981,11 +945,11 @@ export function ResearchSurveyPage() {
                       ))}
 
                       <label className="block">
-                        <span className="text-xs font-medium text-text-light-secondary dark:text-text-dark-secondary">
+                        <span className="text-xs font-medium text-ink-2">
                           Comentario breve (opcional)
                         </span>
                         <textarea
-                          className="mt-1 block min-h-20 w-full rounded-md border-zinc-300 bg-zinc-50 p-2 text-sm text-text-light-primary shadow-sm focus:border-primary focus:ring-primary dark:border-zinc-700 dark:bg-zinc-800 dark:text-text-dark-primary"
+                          className="mt-1 block min-h-20 w-full rounded-[10px] border border-stroke bg-inset p-2 text-sm text-ink outline-none focus:border-brand"
                           value={answer.comment}
                           onChange={(event) =>
                             setValues((prev) => ({
@@ -1037,11 +1001,9 @@ export function ResearchSurveyPage() {
 
               {values.preferredScale === "outro" && (
                 <label className="block">
-                  <span className="text-xs font-medium text-text-light-secondary dark:text-text-dark-secondary">
-                    Qual escala preferida?
-                  </span>
+                  <span className="text-xs font-medium text-ink-2">Qual escala preferida?</span>
                   <input
-                    className="mt-1 block w-full rounded-md border-zinc-300 bg-zinc-50 p-2 text-sm text-text-light-primary shadow-sm focus:border-primary focus:ring-primary dark:border-zinc-700 dark:bg-zinc-800 dark:text-text-dark-primary"
+                    className="mt-1 block w-full rounded-[10px] border border-stroke bg-inset p-2 text-sm text-ink outline-none focus:border-brand"
                     type="text"
                     value={values.preferredScaleOther}
                     onChange={(event) => setField("preferredScaleOther", event.target.value)}
@@ -1051,11 +1013,9 @@ export function ResearchSurveyPage() {
 
               {values.preferredScale !== "nao" && values.preferredScale !== "" && (
                 <label className="block">
-                  <span className="text-xs font-medium text-text-light-secondary dark:text-text-dark-secondary">
-                    Por que?
-                  </span>
+                  <span className="text-xs font-medium text-ink-2">Por que?</span>
                   <textarea
-                    className="mt-1 block min-h-20 w-full rounded-md border-zinc-300 bg-zinc-50 p-2 text-sm text-text-light-primary shadow-sm focus:border-primary focus:ring-primary dark:border-zinc-700 dark:bg-zinc-800 dark:text-text-dark-primary"
+                    className="mt-1 block min-h-20 w-full rounded-[10px] border border-stroke bg-inset p-2 text-sm text-ink outline-none focus:border-brand"
                     value={values.preferredScaleReason}
                     onChange={(event) => setField("preferredScaleReason", event.target.value)}
                   />
@@ -1064,9 +1024,7 @@ export function ResearchSurveyPage() {
             </SectionCard>
 
             <SectionCard title="7. Usabilidade (SUS - System Usability Scale)">
-              <p className="text-xs text-text-light-secondary dark:text-text-dark-secondary">
-                Escala Likert: {likertHelp}
-              </p>
+              <p className="text-xs text-ink-2">Escala Likert: {likertHelp}</p>
               <div className="space-y-3">
                 {SUS_ITEMS.map((item) => (
                   <LikertGroup
@@ -1094,7 +1052,7 @@ export function ResearchSurveyPage() {
           <>
             <SectionCard title="8. Aplicação, utilidade e adoção">
               <fieldset className="space-y-2">
-                <legend className="text-sm font-medium text-text-light-primary dark:text-text-dark-primary">
+                <legend className="text-sm font-medium text-ink">
                   8.1 Em quais contextos você usaria o SRL Canvas? (Marque todas as opções)
                 </legend>
                 <div className="flex flex-wrap gap-2">
@@ -1105,8 +1063,8 @@ export function ResearchSurveyPage() {
                         key={option.value}
                         className={`inline-flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-sm transition ${
                           checked
-                            ? "border-primary bg-primary/10 text-text-light-primary dark:text-text-dark-primary"
-                            : "border-zinc-300 text-text-light-secondary hover:bg-zinc-100 dark:border-zinc-700 dark:text-text-dark-secondary dark:hover:bg-zinc-800"
+                            ? "border-brand bg-surface-2 text-ink"
+                            : "border-stroke text-ink-2 hover:bg-surface-2"
                         }`}
                       >
                         <input
@@ -1124,11 +1082,11 @@ export function ResearchSurveyPage() {
 
               {values.usageContexts.includes("outro") && (
                 <label className="block">
-                  <span className="text-xs font-medium text-text-light-secondary dark:text-text-dark-secondary">
+                  <span className="text-xs font-medium text-ink-2">
                     Especifique o contexto em "Outro"
                   </span>
                   <input
-                    className="mt-1 block w-full rounded-md border-zinc-300 bg-zinc-50 p-2 text-sm text-text-light-primary shadow-sm focus:border-primary focus:ring-primary dark:border-zinc-700 dark:bg-zinc-800 dark:text-text-dark-primary"
+                    className="mt-1 block w-full rounded-[10px] border border-stroke bg-inset p-2 text-sm text-ink outline-none focus:border-brand"
                     type="text"
                     value={values.usageContextOther}
                     onChange={(event) => setField("usageContextOther", event.target.value)}
@@ -1160,22 +1118,22 @@ export function ResearchSurveyPage() {
               />
 
               <label className="block">
-                <span className="text-sm font-medium text-text-light-primary dark:text-text-dark-primary">
+                <span className="text-sm font-medium text-ink">
                   8.4 Quais barreiras de adoção você enxerga para o SRL Canvas?
                 </span>
                 <textarea
-                  className="mt-1 block min-h-24 w-full rounded-md border-zinc-300 bg-zinc-50 p-2 text-sm text-text-light-primary shadow-sm focus:border-primary focus:ring-primary dark:border-zinc-700 dark:bg-zinc-800 dark:text-text-dark-primary"
+                  className="mt-1 block min-h-24 w-full rounded-[10px] border border-stroke bg-inset p-2 text-sm text-ink outline-none focus:border-brand"
                   value={values.adoptionBarriers}
                   onChange={(event) => setField("adoptionBarriers", event.target.value)}
                 />
               </label>
 
               <label className="block">
-                <span className="text-sm font-medium text-text-light-primary dark:text-text-dark-primary">
+                <span className="text-sm font-medium text-ink">
                   8.5 Quais as 1-3 principais melhorias que você sugeriria para o SRL Canvas?
                 </span>
                 <textarea
-                  className="mt-1 block min-h-24 w-full rounded-md border-zinc-300 bg-zinc-50 p-2 text-sm text-text-light-primary shadow-sm focus:border-primary focus:ring-primary dark:border-zinc-700 dark:bg-zinc-800 dark:text-text-dark-primary"
+                  className="mt-1 block min-h-24 w-full rounded-[10px] border border-stroke bg-inset p-2 text-sm text-ink outline-none focus:border-brand"
                   value={values.suggestedImprovements}
                   onChange={(event) => setField("suggestedImprovements", event.target.value)}
                 />
@@ -1201,11 +1159,11 @@ export function ResearchSurveyPage() {
 
               {values.acceptsInterview === "sim" && (
                 <label className="block">
-                  <span className="text-sm font-medium text-text-light-primary dark:text-text-dark-primary">
+                  <span className="text-sm font-medium text-ink">
                     9.3 Contato preferido (e-mail ou WhatsApp)
                   </span>
                   <input
-                    className="mt-1 block w-full rounded-md border-zinc-300 bg-zinc-50 p-2 text-sm text-text-light-primary shadow-sm focus:border-primary focus:ring-primary dark:border-zinc-700 dark:bg-zinc-800 dark:text-text-dark-primary"
+                    className="mt-1 block w-full rounded-[10px] border border-stroke bg-inset p-2 text-sm text-ink outline-none focus:border-brand"
                     type="text"
                     value={values.preferredContact}
                     onChange={(event) => setField("preferredContact", event.target.value)}
@@ -1225,7 +1183,7 @@ export function ResearchSurveyPage() {
         )}
 
         {(errors.length > 0 || submitError) && (
-          <section className="rounded-xl border border-red-300/80 bg-red-50 p-4 dark:border-red-700/70 dark:bg-red-900/20">
+          <section className="rounded-card border border-red-300/80 bg-red-50 p-4 dark:border-red-700/70 dark:bg-red-900/20">
             <h3 className="text-sm font-semibold text-red-800 dark:text-red-300">
               Revise os pontos abaixo
             </h3>
@@ -1249,7 +1207,7 @@ export function ResearchSurveyPage() {
                 type="button"
                 onClick={goToPreviousStep}
                 disabled={isSubmitting}
-                className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-semibold text-text-light-secondary hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-60 dark:border-zinc-700 dark:text-text-dark-secondary dark:hover:bg-zinc-800"
+                className="rounded-[10px] border border-stroke px-4 py-2 text-sm font-semibold text-ink-2 hover:bg-surface-2 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 Etapa anterior
               </button>
@@ -1260,7 +1218,7 @@ export function ResearchSurveyPage() {
                 type="button"
                 onClick={goToNextStep}
                 disabled={isSubmitting}
-                className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
+                className="rounded-[10px] bg-brand px-4 py-2 text-sm font-semibold text-brand-fg hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 Próxima etapa
               </button>
@@ -1270,7 +1228,7 @@ export function ResearchSurveyPage() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
+                className="rounded-[10px] bg-brand px-4 py-2 text-sm font-semibold text-brand-fg hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {isSubmitting ? "Enviando..." : isIneligible ? "Enviar triagem" : "Enviar pesquisa"}
               </button>
@@ -1279,21 +1237,19 @@ export function ResearchSurveyPage() {
             <button
               type="button"
               onClick={handleAnswerLater}
-              className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-semibold text-text-light-secondary hover:bg-zinc-100 dark:border-zinc-700 dark:text-text-dark-secondary dark:hover:bg-zinc-800"
+              className="rounded-[10px] border border-stroke px-4 py-2 text-sm font-semibold text-ink-2 hover:bg-surface-2"
             >
               Responder depois
             </button>
           </div>
           {draftSavedAt && (
-            <p className="text-xs text-text-light-secondary dark:text-text-dark-secondary">
+            <p className="text-xs text-ink-2">
               Rascunho salvo automaticamente em {new Date(draftSavedAt).toLocaleString("pt-BR")}
             </p>
           )}
         </form>
-      </main>
-
-      <FooterNav />
-    </div>
+      </div>
+    </AppShell>
   );
 }
 
