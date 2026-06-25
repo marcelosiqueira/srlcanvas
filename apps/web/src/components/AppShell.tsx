@@ -16,16 +16,11 @@ const NAV_ITEMS = [
   { to: "/account", label: "Minha Conta", icon: "person" }
 ];
 
-function getInitials(name?: string, email?: string): string {
-  const trimmedName = name?.trim();
-  if (trimmedName) {
-    const parts = trimmedName.split(/\s+/);
-    const initials = `${parts[0]?.[0] ?? ""}${parts[1]?.[0] ?? ""}`;
-    if (initials) return initials.toUpperCase();
-  }
-  const trimmedEmail = email?.trim();
-  if (trimmedEmail) return trimmedEmail.slice(0, 2).toUpperCase();
-  return "?";
+function getInitials(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return "?";
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
 }
 
 export function AppShell({ title, children }: AppShellProps) {
@@ -35,8 +30,8 @@ export function AppShell({ title, children }: AppShellProps) {
   const toggleDarkMode = useCanvasStore((state) => state.toggleDarkMode);
 
   const accountName = user?.name?.trim() || user?.email || "Convidado";
-  const accountSubtitle = user?.email ?? "Modo local";
-  const accountInitials = getInitials(user?.name, user?.email);
+  const accountSubtitle = "Gratuito";
+  const accountInitials = getInitials(accountName);
 
   const handleLogout = async () => {
     await signOut();
