@@ -75,7 +75,6 @@ export function DashboardPage() {
     (block) => typeof blocks[block.id]?.score === "number"
   ).length;
   const currentCanvasTitle = buildCanvasTitle(meta);
-  const latestHistoryEntry = historyEntries[0] ?? null;
 
   const editCanvas = rawCanvases.find((canvas) => canvas.id === editCanvasId) ?? null;
   const compareBaseEntry = historyEntries.find((entry) => entry.id === compareBaseId) ?? null;
@@ -273,18 +272,6 @@ export function DashboardPage() {
 
               {!historyError && historyEntries.length > 0 && (
                 <>
-                  <div className="rounded-lg border border-stroke bg-inset p-3">
-                    <p className="text-xs font-semibold text-ink-2">Avaliação mais recente</p>
-                    <p className="mt-1 text-sm font-semibold text-ink">
-                      {latestHistoryEntry?.title} (Atualizado{" "}
-                      {formatDateTime(latestHistoryEntry?.updatedAt ?? "")})
-                    </p>
-                    <p className="mt-1 font-mono text-xs text-ink-2">
-                      [{latestHistoryEntry?.metrics.total ?? 0} / 108] -{" "}
-                      {latestHistoryEntry?.filledBlocks ?? 0}/12 blocos preenchidos
-                    </p>
-                  </div>
-
                   <div className="space-y-2">
                     {historyEntries.map((entry, index) => {
                       const previousEntry = historyEntries[index + 1];
@@ -298,6 +285,11 @@ export function DashboardPage() {
                         >
                           <div className="flex items-start justify-between gap-2">
                             <div>
+                              {index === 0 && (
+                                <span className="text-[11px] font-semibold uppercase tracking-wide text-teal">
+                                  Avaliação mais recente
+                                </span>
+                              )}
                               <p className="text-sm font-semibold text-ink">
                                 {entry.title} (Atualizado {formatDateTime(entry.updatedAt)})
                               </p>
