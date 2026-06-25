@@ -174,71 +174,7 @@ export function DashboardPage() {
           </div>
         </section>
 
-        {/* Sobre o Projeto */}
-        <section className="rounded-card bg-surface p-5 shadow-sm">
-          <h2 className="text-sm font-semibold text-ink">Sobre o Projeto</h2>
-          <p className="mt-2 text-sm text-ink-2">
-            O nome oficial da ferramenta é{" "}
-            <strong>SRL Canvas (Startup Readiness Level Canvas)</strong>. Aqui você encontra o
-            contexto, propósito e público-alvo do framework.
-          </p>
-          <button
-            type="button"
-            onClick={() => setIsAboutOpen(true)}
-            className="mt-3 rounded-lg border border-stroke px-4 py-2 text-sm font-semibold text-ink-2 hover:bg-surface-2"
-          >
-            Ler: Por que o SRL Canvas?
-          </button>
-        </section>
-
-        {/* Material de Apoio */}
-        <section className="rounded-card bg-surface p-5 shadow-sm">
-          <h2 className="text-sm font-semibold text-ink">Material de Apoio (Uso Offline)</h2>
-          <p className="mt-2 text-sm text-ink-2">
-            Não é obrigatório usar esta plataforma para aplicar o SRL Canvas. O método foi desenhado
-            para ser simples e ágil: você pode baixar o guia de aplicação, o modelo do SRL Canvas e
-            o gráfico radar para preenchimento manual.
-          </p>
-          <div className="mt-3 flex flex-wrap gap-2">
-            {SRL_DOWNLOADS.map((item) => (
-              <a
-                key={item.href}
-                href={item.href}
-                download
-                target="_blank"
-                rel="noreferrer"
-                className="rounded-lg border border-stroke px-4 py-2 text-sm font-semibold text-ink-2 hover:bg-surface-2"
-              >
-                {item.label}
-              </a>
-            ))}
-          </div>
-        </section>
-
-        {/* Research Opinion Panel */}
-        <ResearchOpinionPanel nextPath="/dashboard" />
-
-        {/* Status de Sincronização */}
-        <section className="rounded-card bg-surface p-5 shadow-sm">
-          <h2 className="text-sm font-semibold text-ink">Status de Sincronização</h2>
-          {!isEnabled && (
-            <p className="mt-2 text-sm text-ink-2">
-              Modo local: dados salvos apenas neste dispositivo.
-            </p>
-          )}
-          {isEnabled && !user && (
-            <p className="mt-2 text-sm text-ink-2">
-              Faça login para habilitar sincronização automática do canvas.
-            </p>
-          )}
-          {isEnabled && user && (
-            <p className="mt-2 text-sm text-ink-2">
-              Sincronização automática ativa durante a edição do canvas.
-            </p>
-          )}
-        </section>
-
-        {/* Histórico e Comparativo Temporal */}
+        {/* Histórico de avaliações */}
         <section className="rounded-card bg-surface p-5 shadow-sm">
           <h2 className="text-sm font-semibold text-ink">Histórico de avaliações</h2>
           <p className="mt-1 text-xs text-ink-2">
@@ -356,6 +292,70 @@ export function DashboardPage() {
                 </>
               )}
             </div>
+          )}
+        </section>
+
+        {/* Sobre o Projeto */}
+        <section className="rounded-card bg-surface p-5 shadow-sm">
+          <h2 className="text-sm font-semibold text-ink">Sobre o Projeto</h2>
+          <p className="mt-2 text-sm text-ink-2">
+            O nome oficial da ferramenta é{" "}
+            <strong>SRL Canvas (Startup Readiness Level Canvas)</strong>. Aqui você encontra o
+            contexto, propósito e público-alvo do framework.
+          </p>
+          <button
+            type="button"
+            onClick={() => setIsAboutOpen(true)}
+            className="mt-3 rounded-lg border border-stroke px-4 py-2 text-sm font-semibold text-ink-2 hover:bg-surface-2"
+          >
+            Ler: Por que o SRL Canvas?
+          </button>
+        </section>
+
+        {/* Material de Apoio */}
+        <section className="rounded-card bg-surface p-5 shadow-sm">
+          <h2 className="text-sm font-semibold text-ink">Material de Apoio (Uso Offline)</h2>
+          <p className="mt-2 text-sm text-ink-2">
+            Não é obrigatório usar esta plataforma para aplicar o SRL Canvas. O método foi desenhado
+            para ser simples e ágil: você pode baixar o guia de aplicação, o modelo do SRL Canvas e
+            o gráfico radar para preenchimento manual.
+          </p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {SRL_DOWNLOADS.map((item) => (
+              <a
+                key={item.href}
+                href={item.href}
+                download
+                target="_blank"
+                rel="noreferrer"
+                className="rounded-lg border border-stroke px-4 py-2 text-sm font-semibold text-ink-2 hover:bg-surface-2"
+              >
+                {item.label}
+              </a>
+            ))}
+          </div>
+        </section>
+
+        {/* Research Opinion Panel */}
+        <ResearchOpinionPanel nextPath="/dashboard" />
+
+        {/* Status de Sincronização */}
+        <section className="rounded-card bg-surface p-5 shadow-sm">
+          <h2 className="text-sm font-semibold text-ink">Status de Sincronização</h2>
+          {!isEnabled && (
+            <p className="mt-2 text-sm text-ink-2">
+              Modo local: dados salvos apenas neste dispositivo.
+            </p>
+          )}
+          {isEnabled && !user && (
+            <p className="mt-2 text-sm text-ink-2">
+              Faça login para habilitar sincronização automática do canvas.
+            </p>
+          )}
+          {isEnabled && user && (
+            <p className="mt-2 text-sm text-ink-2">
+              Sincronização automática ativa durante a edição do canvas.
+            </p>
           )}
         </section>
       </div>
