@@ -37,7 +37,7 @@ describe("detectInterdependencyAlerts", () => {
       score: 7,
       referenceMean: 3
     });
-    expect(alerts[0].message).toContain("P3. Produto / Tecnologia");
+    expect(alerts[0].message).toContain("P3. Produto e Tecnologia");
     expect(alerts[0].message).toContain("nota 7");
   });
 

@@ -12,18 +12,18 @@ export const LIKERT_SCALE_LABELS: Record<(typeof LIKERT_SCALE_OPTIONS)[number], 
 };
 
 export const SURVEY_DIMENSIONS = [
-  { key: "problema_oportunidade", label: "Problema/Oportunidade" },
+  { key: "problema_oportunidade", label: "Problema e Oportunidade" },
   { key: "proposta_valor", label: "Proposta de Valor" },
-  { key: "produto_tecnologia", label: "Produto/Tecnologia" },
-  { key: "clientes_tracao", label: "Clientes/Tracao" },
+  { key: "produto_tecnologia", label: "Produto e Tecnologia" },
+  { key: "clientes_tracao", label: "Clientes e Tração" },
   { key: "equipe", label: "Equipe" },
-  { key: "operacoes_execucao", label: "Operacoes/Execucao" },
-  { key: "plg", label: "Adocao e Crescimento" },
-  { key: "marketing_canais", label: "Marketing/Canais" },
-  { key: "modelo_negocio", label: "Modelo de Negocio" },
-  { key: "sustentacao_financeira", label: "Sustentacao Financeira" },
-  { key: "estrategia_visao", label: "Estrategia/Visao" },
-  { key: "governanca_compliance", label: "Governanca & Compliance" }
+  { key: "operacoes_execucao", label: "Operações e Execução" },
+  { key: "plg", label: "Adoção e Crescimento" },
+  { key: "marketing_canais", label: "Marketing e Canais" },
+  { key: "modelo_negocio", label: "Modelo de Negócio" },
+  { key: "sustentacao_financeira", label: "Sustentação Financeira" },
+  { key: "estrategia_visao", label: "Estratégia e Visão" },
+  { key: "governanca_compliance", label: "Governança e Compliance" }
 ] as const;
 
 export type SurveyDimensionKey = (typeof SURVEY_DIMENSIONS)[number]["key"];

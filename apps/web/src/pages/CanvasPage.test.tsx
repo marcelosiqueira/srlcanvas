@@ -47,7 +47,7 @@ describe("CanvasPage", () => {
 
   it("abre o modal ao clicar num bloco e fecha ao cancelar", () => {
     renderPage();
-    fireEvent.click(screen.getByText(/Problema \/ Oportunidade/).closest("button")!);
+    fireEvent.click(screen.getByText(/Problema e Oportunidade/).closest("button")!);
     const dialog = screen.getByRole("dialog");
     expect(within(dialog).getByText(/P1 ·/)).toBeInTheDocument();
     fireEvent.click(within(dialog).getByRole("button", { name: "Cancelar" }));
