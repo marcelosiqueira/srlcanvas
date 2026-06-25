@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthProvider";
 import { AppShell } from "../components/AppShell";
@@ -12,10 +12,19 @@ export function NewCanvasPage() {
   const { user, isEnabled } = useAuth();
   const { resetCanvas, setMeta, setRemoteCanvasId } = useCanvasStore();
   const [startup, setStartup] = useState("");
-  const [evaluator, setEvaluator] = useState("");
+  const [evaluator, setEvaluator] = useState(() => user?.name?.trim() ?? "");
   const [date, setDate] = useState(formatToday());
   const [attemptedSubmit, setAttemptedSubmit] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
+  const evaluatorEditedRef = useRef(false);
+
+  // Pré-preenche o Avaliador com o nome da conta (default editável). O guard
+  // evita repreencher se o usuário editou/limpou o campo de propósito.
+  useEffect(() => {
+    if (!evaluatorEditedRef.current && !evaluator && user?.name) {
+      setEvaluator(user.name.trim());
+    }
+  }, [user, evaluator]);
 
   const metaValidation = validateCanvasMeta({ startup, evaluator, date });
 
@@ -82,7 +91,10 @@ export function NewCanvasPage() {
             <input
               className={inputClass}
               value={evaluator}
-              onChange={(event) => setEvaluator(event.target.value)}
+              onChange={(event) => {
+                evaluatorEditedRef.current = true;
+                setEvaluator(event.target.value);
+              }}
               aria-invalid={attemptedSubmit && !metaValidation.evaluatorValid}
               type="text"
               placeholder="Nome do Avaliador"

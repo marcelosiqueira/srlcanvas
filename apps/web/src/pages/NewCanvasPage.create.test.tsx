@@ -33,8 +33,10 @@ describe("NewCanvasPage (criação explícita)", () => {
       </MemoryRouter>
     );
 
+    // Avaliador já vem pré-preenchido com o nome da conta (editável).
+    expect(screen.getByLabelText("Avaliador")).toHaveValue("Ana");
+
     fireEvent.change(screen.getByLabelText("Startup"), { target: { value: "Empresa X" } });
-    fireEvent.change(screen.getByLabelText("Avaliador"), { target: { value: "Ana" } });
     fireEvent.click(screen.getByRole("button", { name: /Criar Canvas/i }));
 
     await waitFor(() => expect(mockedSaveCanvas).toHaveBeenCalledTimes(1));
