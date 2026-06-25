@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppShell } from "../components/AppShell";
 import { BlockEditModal } from "../components/BlockEditModal";
@@ -6,8 +6,8 @@ import { CanvasListView } from "../components/CanvasListView";
 import { CanvasMuralView } from "../components/CanvasMuralView";
 import { useAuth } from "../auth/AuthProvider";
 import { SRL_BLOCKS, SRL_BLOCKS_BY_ID } from "../data/srlBlocks";
-import { saveCanvas } from "../services/canvasApi";
-import { hasMeaningfulCanvasData, useCanvasStore } from "../store/useCanvasStore";
+import { useRemoteCanvasSync } from "../hooks/useRemoteCanvasSync";
+import { useCanvasStore } from "../store/useCanvasStore";
 import {
   type CanvasLayout,
   readLayoutPreference,
@@ -20,22 +20,21 @@ const MAX_SCORE = 108;
 export function CanvasPage() {
   const navigate = useNavigate();
   const { user, isEnabled } = useAuth();
-  const { meta, blocks, setMeta, updateBlock, resetCanvas, remoteCanvasId, setRemoteCanvasId } =
-    useCanvasStore();
+  const { meta, blocks, setMeta, updateBlock, resetCanvas, remoteCanvasId } = useCanvasStore();
 
   const [layout, setLayout] = useState<CanvasLayout>(() => readLayoutPreference());
   const [editingBlockId, setEditingBlockId] = useState<number | null>(null);
 
-  const lastSyncedFingerprintRef = useRef<string | null>(null);
-  const initialRemoteCreateInFlightRef = useRef(false);
-
   const scores = useMemo(() => SRL_BLOCKS.map((block) => blocks[block.id]?.score ?? 0), [blocks]);
   const metrics = useMemo(() => calculateScoreMetrics(scores), [scores]);
-  const canvasFingerprint = useMemo(() => JSON.stringify({ meta, blocks }), [meta, blocks]);
   const userId = user?.id ?? null;
 
   const editingBlock = editingBlockId ? SRL_BLOCKS_BY_ID[editingBlockId] : null;
   const completionLabel = `[ ${metrics.total} / ${MAX_SCORE} ]`;
+
+  // Auto-save remoto: apenas ATUALIZA um registro existente; a criação é
+  // explícita no "Novo SRL Canvas". Sem remoteCanvasId, não grava.
+  useRemoteCanvasSync({ enabled: isEnabled, userId, meta, blocks, remoteCanvasId });
 
   const changeLayout = (next: CanvasLayout) => {
     setLayout(next);
@@ -46,38 +45,6 @@ export function CanvasPage() {
     if (!window.confirm("Tem certeza que deseja limpar todo o canvas atual?")) return;
     resetCanvas();
   };
-
-  // gravação remota silenciosa (sem UI de status)
-  useEffect(() => {
-    if (!isEnabled || !userId) return;
-    if (!hasMeaningfulCanvasData({ meta, blocks })) return;
-    if (canvasFingerprint === lastSyncedFingerprintRef.current) return;
-    if (!remoteCanvasId && initialRemoteCreateInFlightRef.current) return;
-
-    let isActive = true;
-    const timer = window.setTimeout(() => {
-      const isCreating = !remoteCanvasId;
-      if (isCreating) initialRemoteCreateInFlightRef.current = true;
-      const requestFingerprint = canvasFingerprint;
-      void saveCanvas({ id: remoteCanvasId ?? undefined, userId, meta, blocks })
-        .then((saved) => {
-          if (!isActive) return;
-          if (saved.id !== remoteCanvasId) setRemoteCanvasId(saved.id);
-          lastSyncedFingerprintRef.current = requestFingerprint;
-        })
-        .catch(() => {
-          /* silencioso */
-        })
-        .finally(() => {
-          if (isCreating) initialRemoteCreateInFlightRef.current = false;
-        });
-    }, 800);
-
-    return () => {
-      isActive = false;
-      window.clearTimeout(timer);
-    };
-  }, [blocks, canvasFingerprint, isEnabled, meta, remoteCanvasId, setRemoteCanvasId, userId]);
 
   return (
     <AppShell title="Meu SRL Canvas">
