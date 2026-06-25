@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { AppHeader } from "../components/AppHeader";
-import { FooterNav } from "../components/FooterNav";
+import { AppShell } from "../components/AppShell";
 import { RESEARCH_SURVEY_CONFIG } from "../config/researchSurveyConfig";
 import { formatToday, useCanvasStore } from "../store/useCanvasStore";
 import { validateCanvasMeta } from "../utils/canvasMeta";
@@ -30,49 +29,47 @@ export function NewCanvasPage() {
     navigate(RESEARCH_SURVEY_CONFIG.enabled ? "/survey/consent?next=/canvas" : "/canvas");
   };
 
-  return (
-    <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden bg-background-light font-display dark:bg-background-dark">
-      <AppHeader title="Novo SRL Canvas" />
+  const inputClass =
+    "mt-1 block w-full rounded-[10px] border border-stroke bg-inset px-3 py-2.5 text-[14px] text-ink outline-none transition focus:border-brand";
 
-      <main className="flex-grow space-y-4 px-4 pb-28 pt-6">
-        <section className="rounded-xl border border-zinc-200/80 bg-card-light p-4 dark:border-zinc-800/80 dark:bg-card-dark">
-          <p className="mb-4 text-sm text-text-light-secondary dark:text-text-dark-secondary">
+  return (
+    <AppShell title="Novo SRL Canvas">
+      <div className="mx-auto max-w-[680px]">
+        <section className="rounded-card border border-stroke bg-surface p-5 shadow-sm">
+          <h2 className="font-display text-[14.5px] font-bold text-ink">Novo SRL Canvas</h2>
+          <p className="mt-1 text-sm text-ink-2">
             Crie um novo SRL Canvas para iniciar uma avaliação do zero.
           </p>
 
-          <div className="space-y-3">
+          <div className="mt-4 space-y-4">
             <label className="block">
-              <span className="text-xs font-medium text-text-light-secondary dark:text-text-dark-secondary">
-                Startup
-              </span>
+              <span className="text-[12px] font-semibold text-ink-2">Startup</span>
               <input
-                className="mt-1 block w-full rounded-md border-zinc-300 bg-zinc-50 p-2 text-sm text-text-light-primary shadow-sm focus:border-primary focus:ring-primary dark:border-zinc-700 dark:bg-zinc-800 dark:text-text-dark-primary"
+                className={inputClass}
                 value={startup}
                 onChange={(event) => setStartup(event.target.value)}
                 aria-invalid={attemptedSubmit && !metaValidation.startupValid}
                 type="text"
+                placeholder="Nome da Startup"
               />
             </label>
 
             <label className="block">
-              <span className="text-xs font-medium text-text-light-secondary dark:text-text-dark-secondary">
-                Avaliador
-              </span>
+              <span className="text-[12px] font-semibold text-ink-2">Avaliador</span>
               <input
-                className="mt-1 block w-full rounded-md border-zinc-300 bg-zinc-50 p-2 text-sm text-text-light-primary shadow-sm focus:border-primary focus:ring-primary dark:border-zinc-700 dark:bg-zinc-800 dark:text-text-dark-primary"
+                className={inputClass}
                 value={evaluator}
                 onChange={(event) => setEvaluator(event.target.value)}
                 aria-invalid={attemptedSubmit && !metaValidation.evaluatorValid}
                 type="text"
+                placeholder="Nome do Avaliador"
               />
             </label>
 
             <label className="block">
-              <span className="text-xs font-medium text-text-light-secondary dark:text-text-dark-secondary">
-                Data
-              </span>
+              <span className="text-[12px] font-semibold text-ink-2">Data</span>
               <input
-                className="mt-1 block w-full rounded-md border-zinc-300 bg-zinc-50 p-2 text-sm text-text-light-primary shadow-sm focus:border-primary focus:ring-primary dark:border-zinc-700 dark:bg-zinc-800 dark:text-text-dark-primary"
+                className={inputClass}
                 value={date}
                 onChange={(event) => setDate(event.target.value)}
                 aria-invalid={attemptedSubmit && !metaValidation.dateValid}
@@ -88,16 +85,14 @@ export function NewCanvasPage() {
           )}
 
           <button
-            className="mt-4 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:brightness-110"
+            className="mt-5 rounded-[10px] bg-brand px-4 py-2.5 text-[14px] font-semibold text-brand-fg transition hover:brightness-110"
             onClick={createCanvas}
             type="button"
           >
             Criar Canvas
           </button>
         </section>
-      </main>
-
-      <FooterNav />
-    </div>
+      </div>
+    </AppShell>
   );
 }
