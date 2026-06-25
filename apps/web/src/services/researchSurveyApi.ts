@@ -230,7 +230,9 @@ export async function saveResearchSurveyResponse(
 ): Promise<SaveResearchSurveyResult> {
   const payload = buildPayload(input);
 
-  if (!isApiConfigured || !input.userId) {
+  // Com API configurada, envia também respostas ANÔNIMAS (input.userId null);
+  // o backend grava userId null. Só cai em local quando não há API.
+  if (!isApiConfigured) {
     return saveLocally(payload);
   }
 

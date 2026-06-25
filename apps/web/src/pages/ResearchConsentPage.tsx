@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../auth/AuthProvider";
-import { AppShell } from "../components/AppShell";
+import { PublicShell } from "../components/PublicShell";
 import { RESEARCH_SURVEY_CONFIG } from "../config/researchSurveyConfig";
 import {
   RESEARCH_TCLE_META,
@@ -29,7 +29,7 @@ export function ResearchConsentPage() {
   const [searchParams] = useSearchParams();
   const { user } = useAuth();
 
-  const nextPath = searchParams.get("next") || "/canvas";
+  const nextPath = searchParams.get("next") || "/";
   const surveyPath = useMemo(() => `/survey?next=${encodeURIComponent(nextPath)}`, [nextPath]);
   const surveyEnabled = RESEARCH_SURVEY_CONFIG.enabled;
 
@@ -124,7 +124,7 @@ export function ResearchConsentPage() {
   };
 
   return (
-    <AppShell title="TCLE — Pesquisa Acadêmica">
+    <PublicShell title="TCLE — Pesquisa Acadêmica">
       <div className="flex flex-col gap-[18px]">
         <section className="rounded-card border border-stroke bg-surface p-5 shadow-sm">
           <h2 className="font-display text-base font-bold text-ink">
@@ -274,6 +274,6 @@ export function ResearchConsentPage() {
           </section>
         )}
       </div>
-    </AppShell>
+    </PublicShell>
   );
 }

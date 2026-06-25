@@ -3,6 +3,7 @@ import { Link, Navigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthProvider";
 import { AboutSrlCanvasModal } from "../components/AboutSrlCanvasModal";
 import { BrandLockup } from "../components/BrandLockup";
+import { RESEARCH_SURVEY_CONFIG } from "../config/researchSurveyConfig";
 import { useCanvasStore } from "../store/useCanvasStore";
 
 const SRL_DOWNLOADS = [
@@ -41,6 +42,7 @@ export function LandingPage() {
   const { user, loading, isEnabled } = useAuth();
   const { darkMode, toggleDarkMode } = useCanvasStore();
   const [isAboutOpen, setIsAboutOpen] = useState(false);
+  const surveyEnabled = RESEARCH_SURVEY_CONFIG.enabled;
 
   useEffect(() => {
     const previousTitle = document.title;
@@ -237,6 +239,25 @@ export function LandingPage() {
             ))}
           </div>
         </section>
+
+        {surveyEnabled && (
+          <section className="rounded-card border border-stroke bg-surface p-5 shadow-sm">
+            <h3 className="font-display text-[14.5px] font-bold text-ink">Pesquisa Acadêmica</h3>
+            <p className="mt-2 text-sm text-ink-2">
+              Este projeto faz parte de uma dissertação de mestrado. Sua opinião ajuda a validar o
+              SRL Canvas — você pode responder mesmo{" "}
+              <strong className="text-ink">sem usar a plataforma</strong> (≈10–12 min, anônimo).
+            </p>
+            <div className="mt-3">
+              <Link
+                to="/survey?next=/"
+                className="inline-flex rounded-[10px] bg-brand px-4 py-2 text-sm font-semibold text-brand-fg transition hover:brightness-110"
+              >
+                Participar da pesquisa
+              </Link>
+            </div>
+          </section>
+        )}
       </main>
 
       <AboutSrlCanvasModal isOpen={isAboutOpen} onClose={() => setIsAboutOpen(false)} />

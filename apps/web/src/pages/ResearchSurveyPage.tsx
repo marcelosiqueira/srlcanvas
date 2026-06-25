@@ -1,7 +1,7 @@
 import { type FormEvent, type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../auth/AuthProvider";
-import { AppShell } from "../components/AppShell";
+import { PublicShell } from "../components/PublicShell";
 import { RESEARCH_SURVEY_CONFIG } from "../config/researchSurveyConfig";
 import {
   ACCEPTABLE_TIME_OPTIONS,
@@ -210,7 +210,7 @@ export function ResearchSurveyPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { user } = useAuth();
-  const nextPath = searchParams.get("next") || "/canvas";
+  const nextPath = searchParams.get("next") || "/";
   const surveyEnabled = RESEARCH_SURVEY_CONFIG.enabled;
 
   const [values, setValues] = useState<ResearchSurveyFormValues>(() =>
@@ -633,19 +633,19 @@ export function ResearchSurveyPage() {
 
   if (consentLoading) {
     return (
-      <AppShell title="Questionário Quantitativo SRL Canvas">
+      <PublicShell title="Questionário Quantitativo SRL Canvas">
         <div className="flex flex-col gap-[18px]">
           <section className="rounded-card border border-stroke bg-surface p-4 text-sm text-ink-2">
             Carregando status do consentimento (TCLE)...
           </section>
         </div>
-      </AppShell>
+      </PublicShell>
     );
   }
 
   if (!hasConsent) {
     return (
-      <AppShell title="Questionário Quantitativo SRL Canvas">
+      <PublicShell title="Questionário Quantitativo SRL Canvas">
         <div className="flex flex-col gap-[18px]">
           <section className="rounded-card border border-amber-200 bg-amber-50 p-4 dark:border-amber-700/40 dark:bg-amber-900/20">
             <h2 className="text-sm font-semibold text-amber-800 dark:text-amber-300">
@@ -675,13 +675,13 @@ export function ResearchSurveyPage() {
             </div>
           </section>
         </div>
-      </AppShell>
+      </PublicShell>
     );
   }
 
   if (result) {
     return (
-      <AppShell title="Pesquisa Acadêmica">
+      <PublicShell title="Pesquisa Acadêmica">
         <div className="flex flex-col gap-[18px]">
           <section className="rounded-card border border-emerald-300/80 bg-emerald-50 p-4 dark:border-emerald-700/70 dark:bg-emerald-900/20">
             <h2 className="text-base font-semibold text-emerald-900 dark:text-emerald-200">
@@ -727,12 +727,12 @@ export function ResearchSurveyPage() {
             </div>
           </section>
         </div>
-      </AppShell>
+      </PublicShell>
     );
   }
 
   return (
-    <AppShell title="Questionário Quantitativo SRL Canvas">
+    <PublicShell title="Questionário Quantitativo SRL Canvas">
       <div className="flex flex-col gap-[18px]">
         <section className="rounded-card border border-stroke bg-surface p-4">
           <h2 className="font-display text-base font-bold text-ink">Antes de começar</h2>
@@ -1249,7 +1249,7 @@ export function ResearchSurveyPage() {
           )}
         </form>
       </div>
-    </AppShell>
+    </PublicShell>
   );
 }
 
