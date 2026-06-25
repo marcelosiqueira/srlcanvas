@@ -16,11 +16,27 @@ const NAV_ITEMS = [
   { to: "/account", label: "Minha Conta", icon: "person" }
 ];
 
+function getInitials(name?: string, email?: string): string {
+  const trimmedName = name?.trim();
+  if (trimmedName) {
+    const parts = trimmedName.split(/\s+/);
+    const initials = `${parts[0]?.[0] ?? ""}${parts[1]?.[0] ?? ""}`;
+    if (initials) return initials.toUpperCase();
+  }
+  const trimmedEmail = email?.trim();
+  if (trimmedEmail) return trimmedEmail.slice(0, 2).toUpperCase();
+  return "?";
+}
+
 export function AppShell({ title, children }: AppShellProps) {
   const navigate = useNavigate();
-  const { signOut } = useAuth();
+  const { signOut, user } = useAuth();
   const darkMode = useCanvasStore((state) => state.darkMode);
   const toggleDarkMode = useCanvasStore((state) => state.toggleDarkMode);
+
+  const accountName = user?.name?.trim() || user?.email || "Convidado";
+  const accountSubtitle = user?.email ?? "Modo local";
+  const accountInitials = getInitials(user?.name, user?.email);
 
   const handleLogout = async () => {
     await signOut();
@@ -52,14 +68,24 @@ export function AppShell({ title, children }: AppShellProps) {
             Novo SRL Canvas
           </NavLink>
         </nav>
-        <div className="mt-auto flex items-center gap-3 border-t border-stroke pt-4">
-          <span className="flex size-9 items-center justify-center rounded-full bg-surface-2 font-display text-[13px] font-bold text-ink">
-            MS
-          </span>
-          <div className="leading-tight">
-            <p className="text-[13px] font-semibold text-ink">Minha Startup</p>
-            <p className="text-[11px] text-ink-3">Plano de avaliação</p>
-          </div>
+        <div className="mt-auto border-t border-stroke pt-4">
+          <NavLink
+            to="/account"
+            aria-label="Abrir Minha Conta"
+            className={({ isActive }) =>
+              `flex items-center gap-3 rounded-lg p-2 transition ${
+                isActive ? "bg-surface-2" : "hover:bg-surface-2"
+              }`
+            }
+          >
+            <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-surface-2 font-display text-[13px] font-bold text-ink">
+              {accountInitials}
+            </span>
+            <div className="min-w-0 leading-tight">
+              <p className="truncate text-[13px] font-semibold text-ink">{accountName}</p>
+              <p className="truncate text-[11px] text-ink-3">{accountSubtitle}</p>
+            </div>
+          </NavLink>
         </div>
       </aside>
 

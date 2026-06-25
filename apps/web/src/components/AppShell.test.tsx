@@ -32,4 +32,11 @@ describe("AppShell", () => {
     expect(screen.getByRole("button", { name: /tema/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /sair/i })).toBeInTheDocument();
   });
+
+  it("o rodapé do menu leva à Minha Conta (com fallback de convidado sem usuário)", () => {
+    renderShell();
+    const accountLink = screen.getByRole("link", { name: /Abrir Minha Conta/i });
+    expect(accountLink).toHaveAttribute("href", "/account");
+    expect(screen.getByText("Convidado")).toBeInTheDocument();
+  });
 });
