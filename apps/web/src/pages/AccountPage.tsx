@@ -240,86 +240,88 @@ export function AccountPage() {
           </button>
         </section>
 
-        {/* Card: Métricas de Produto (Local) */}
-        <section className="rounded-card border border-stroke bg-surface p-5 shadow-sm">
-          <h2 className="font-display text-[15px] font-bold text-ink">
-            Métricas de Produto (Local)
-          </h2>
-          <p className="mt-2 text-sm text-ink-2">
-            Relatório local para iteração de produto (sem dados sensíveis). Eventos monitorados:{" "}
-            <strong className="text-ink">{metricsEventCount}</strong>.
-          </p>
+        {/* Métricas de Produto (Local): instrumentação de dev, oculta quando a API está ativa. */}
+        {!isEnabled && (
+          <section className="rounded-card border border-stroke bg-surface p-5 shadow-sm">
+            <h2 className="font-display text-[15px] font-bold text-ink">
+              Métricas de Produto (Local)
+            </h2>
+            <p className="mt-2 text-sm text-ink-2">
+              Relatório local para iteração de produto (sem dados sensíveis). Eventos monitorados:{" "}
+              <strong className="text-ink">{metricsEventCount}</strong>.
+            </p>
 
-          <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <div className="rounded-[10px] border border-stroke bg-surface-2 p-3">
-              <p className="text-xs font-semibold text-ink">Canvas</p>
-              <p className="mt-1 text-xs text-ink-2">
-                Início: <strong className="text-ink">{metricsReport.canvas.started}</strong>
-              </p>
-              <p className="mt-1 text-xs text-ink-2">
-                Conclusão: <strong className="text-ink">{metricsReport.canvas.completed}</strong>
-              </p>
-              <p className="mt-1 text-xs text-ink-2">
-                Abandono: <strong className="text-ink">{metricsReport.canvas.abandoned}</strong>
-              </p>
-              <p className="mt-1 text-xs text-ink-2">
-                Taxa de conclusão:{" "}
-                <strong className="text-ink">
-                  {metricsReport.canvas.completionRate.toFixed(1)}%
-                </strong>
-              </p>
+            <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div className="rounded-[10px] border border-stroke bg-surface-2 p-3">
+                <p className="text-xs font-semibold text-ink">Canvas</p>
+                <p className="mt-1 text-xs text-ink-2">
+                  Início: <strong className="text-ink">{metricsReport.canvas.started}</strong>
+                </p>
+                <p className="mt-1 text-xs text-ink-2">
+                  Conclusão: <strong className="text-ink">{metricsReport.canvas.completed}</strong>
+                </p>
+                <p className="mt-1 text-xs text-ink-2">
+                  Abandono: <strong className="text-ink">{metricsReport.canvas.abandoned}</strong>
+                </p>
+                <p className="mt-1 text-xs text-ink-2">
+                  Taxa de conclusão:{" "}
+                  <strong className="text-ink">
+                    {metricsReport.canvas.completionRate.toFixed(1)}%
+                  </strong>
+                </p>
+              </div>
+
+              <div className="rounded-[10px] border border-stroke bg-surface-2 p-3">
+                <p className="text-xs font-semibold text-ink">Survey Acadêmica</p>
+                <p className="mt-1 text-xs text-ink-2">
+                  Início: <strong className="text-ink">{metricsReport.survey.started}</strong>
+                </p>
+                <p className="mt-1 text-xs text-ink-2">
+                  Conclusão: <strong className="text-ink">{metricsReport.survey.completed}</strong>
+                </p>
+                <p className="mt-1 text-xs text-ink-2">
+                  Abandono: <strong className="text-ink">{metricsReport.survey.abandoned}</strong>
+                </p>
+                <p className="mt-1 text-xs text-ink-2">
+                  Taxa de conclusão:{" "}
+                  <strong className="text-ink">
+                    {metricsReport.survey.completionRate.toFixed(1)}%
+                  </strong>
+                </p>
+              </div>
             </div>
 
-            <div className="rounded-[10px] border border-stroke bg-surface-2 p-3">
-              <p className="text-xs font-semibold text-ink">Survey Acadêmica</p>
-              <p className="mt-1 text-xs text-ink-2">
-                Início: <strong className="text-ink">{metricsReport.survey.started}</strong>
-              </p>
-              <p className="mt-1 text-xs text-ink-2">
-                Conclusão: <strong className="text-ink">{metricsReport.survey.completed}</strong>
-              </p>
-              <p className="mt-1 text-xs text-ink-2">
-                Abandono: <strong className="text-ink">{metricsReport.survey.abandoned}</strong>
-              </p>
-              <p className="mt-1 text-xs text-ink-2">
-                Taxa de conclusão:{" "}
-                <strong className="text-ink">
-                  {metricsReport.survey.completionRate.toFixed(1)}%
-                </strong>
-              </p>
+            <p className="mt-3 text-xs text-ink-2">
+              Abandono por etapa (survey): triagem {metricsReport.survey.abandonedByStep.triage} |
+              perfil {metricsReport.survey.abandonedByStep.profile} | blocos 1-4{" "}
+              {metricsReport.survey.abandonedByStep.dimensions_1_4} | blocos 5-8{" "}
+              {metricsReport.survey.abandonedByStep.dimensions_5_8} | blocos 9-12{" "}
+              {metricsReport.survey.abandonedByStep.dimensions_9_12} | escala/SUS{" "}
+              {metricsReport.survey.abandonedByStep.scale_and_sus} | adoção/follow-up{" "}
+              {metricsReport.survey.abandonedByStep.adoption_and_followup}
+            </p>
+
+            <div className="mt-3 flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => setMetricsReport(buildProductMetricsReport())}
+                className="rounded-[10px] border border-stroke px-4 py-2 text-sm font-semibold text-ink-2 hover:bg-surface-2"
+              >
+                Atualizar relatório
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  clearProductMetricEvents();
+                  setMetricsReport(buildProductMetricsReport());
+                }}
+                className="rounded-[10px] border border-stroke px-4 py-2 text-sm font-semibold text-ink-2 hover:bg-surface-2"
+              >
+                Limpar métricas locais
+              </button>
             </div>
-          </div>
-
-          <p className="mt-3 text-xs text-ink-2">
-            Abandono por etapa (survey): triagem {metricsReport.survey.abandonedByStep.triage} |
-            perfil {metricsReport.survey.abandonedByStep.profile} | blocos 1-4{" "}
-            {metricsReport.survey.abandonedByStep.dimensions_1_4} | blocos 5-8{" "}
-            {metricsReport.survey.abandonedByStep.dimensions_5_8} | blocos 9-12{" "}
-            {metricsReport.survey.abandonedByStep.dimensions_9_12} | escala/SUS{" "}
-            {metricsReport.survey.abandonedByStep.scale_and_sus} | adoção/follow-up{" "}
-            {metricsReport.survey.abandonedByStep.adoption_and_followup}
-          </p>
-
-          <div className="mt-3 flex flex-wrap gap-2">
-            <button
-              type="button"
-              onClick={() => setMetricsReport(buildProductMetricsReport())}
-              className="rounded-[10px] border border-stroke px-4 py-2 text-sm font-semibold text-ink-2 hover:bg-surface-2"
-            >
-              Atualizar relatório
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                clearProductMetricEvents();
-                setMetricsReport(buildProductMetricsReport());
-              }}
-              className="rounded-[10px] border border-stroke px-4 py-2 text-sm font-semibold text-ink-2 hover:bg-surface-2"
-            >
-              Limpar métricas locais
-            </button>
-          </div>
-        </section>
+          </section>
+        )}
 
         <ResearchOpinionPanel nextPath="/account" />
       </div>
