@@ -1,12 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthProvider";
-import { AppHeader } from "../components/AppHeader";
+import { AppShell } from "../components/AppShell";
 import { AboutSrlCanvasModal } from "../components/AboutSrlCanvasModal";
-import { FooterNav } from "../components/FooterNav";
 import { ResearchOpinionPanel } from "../components/ResearchOpinionPanel";
-import { ResultsModal } from "../components/ResultsModal";
-import type { ScoreMetrics } from "../types";
 import { listCanvasesByUser } from "../services/canvasApi";
 import { useCanvasStore } from "../store/useCanvasStore";
 import { buildCanvasTitle } from "../utils/canvasIdentity";
@@ -35,18 +32,13 @@ const SRL_DOWNLOADS = [
 ] as const;
 
 export function DashboardPage() {
-  const { meta, blocks, darkMode } = useCanvasStore();
+  const { meta, blocks } = useCanvasStore();
   const { isEnabled, user } = useAuth();
+  const navigate = useNavigate();
   const [isAboutOpen, setIsAboutOpen] = useState(false);
   const [historyEntries, setHistoryEntries] = useState<CanvasHistoryEntry[]>([]);
   const [historyError, setHistoryError] = useState<string | null>(null);
   const [comparisonTargetId, setComparisonTargetId] = useState<string | null>(null);
-  const [resultsPayload, setResultsPayload] = useState<{
-    scores: number[];
-    metrics: ScoreMetrics;
-    projectTitle: string;
-    updatedAt: string | null;
-  } | null>(null);
 
   useEffect(() => {
     if (!isEnabled || !user) return;
@@ -112,93 +104,82 @@ export function DashboardPage() {
       : null;
 
   return (
-    <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden bg-background-light font-display dark:bg-background-dark">
-      <AppHeader title="Dashboard" showBackButton={false} />
-
-      <main className="flex-grow space-y-4 px-4 pb-28 pt-6">
-        <section className="rounded-xl border border-zinc-200/80 bg-card-light p-4 dark:border-zinc-800/80 dark:bg-card-dark">
-          <div className="flex items-center justify-between gap-3">
-            <p className="text-xs font-semibold text-text-light-secondary dark:text-text-dark-secondary">
-              Canvas Atual
-            </p>
-            <button
-              type="button"
-              onClick={() =>
-                setResultsPayload({
-                  scores: currentScores,
-                  metrics,
-                  projectTitle: currentCanvasTitle,
-                  updatedAt: latestHistoryEntry?.updatedAt ?? new Date().toISOString()
-                })
-              }
-              className="rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-white hover:brightness-110"
-            >
-              Ver Resultados
-            </button>
-          </div>
-          <h2 className="mt-1 text-lg font-bold text-text-light-primary dark:text-text-dark-primary">
-            {currentCanvasTitle}
-          </h2>
-          {latestHistoryEntry && (
-            <p className="mt-1 text-xs text-text-light-secondary dark:text-text-dark-secondary">
-              (Atualizado {formatDateTime(latestHistoryEntry.updatedAt)})
-            </p>
-          )}
-          <p className="mt-1 text-sm text-text-light-secondary dark:text-text-dark-secondary">
-            Estágio: {maturityStageFromTotal(metrics.total)}
+    <AppShell title="Dashboard">
+      <div className="mx-auto max-w-[1080px] space-y-[18px]">
+        {/* Hero Card */}
+        <section className="rounded-hero bg-hero p-6 text-white">
+          <p className="text-xs font-semibold uppercase tracking-widest text-white/70">
+            CANVAS ATUAL
           </p>
-          <div className="mt-3 h-2.5 w-full overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-700">
+          <h1 className="mt-2 font-display text-2xl font-extrabold leading-tight text-white">
+            {currentCanvasTitle}
+          </h1>
+          <div className="mt-3 flex items-center gap-2">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-white">
+              <span className="size-2 rounded-full bg-teal" />
+              Estágio: {maturityStageFromTotal(metrics.total)}
+            </span>
+          </div>
+          <div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-white/14">
             <div
-              className="h-full rounded-full bg-primary"
-              style={{ width: `${metrics.completion}%` }}
+              className="h-full rounded-full"
+              style={{
+                width: `${metrics.completion}%`,
+                background: "linear-gradient(90deg,var(--teal),#4FE0CE)"
+              }}
             />
           </div>
-          <p className="mt-2 text-xs font-mono text-text-light-secondary dark:text-text-dark-secondary">
-            [{metrics.total} / 108] - {filledBlocks}/12 blocos preenchidos
+          <p className="mt-2 font-mono text-xs text-white/70">
+            [{metrics.total} / 108] — {filledBlocks}/12 blocos
           </p>
-          <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <div className="rounded-lg border border-zinc-200/80 bg-zinc-50 p-3 dark:border-zinc-800/80 dark:bg-zinc-800/70">
-              <p className="text-xs text-text-light-secondary dark:text-text-dark-secondary">
-                Scorecard de Risco
-              </p>
-              <p className="mt-1 text-2xl font-bold text-primary">{metrics.riskScore.toFixed(2)}</p>
-            </div>
-            <div className="rounded-lg border border-zinc-200/80 bg-zinc-50 p-3 dark:border-zinc-800/80 dark:bg-zinc-800/70">
-              <p className="text-xs text-text-light-secondary dark:text-text-dark-secondary">
-                Coeficiente de Variação
-              </p>
-              <p className="mt-1 text-2xl font-bold text-text-light-primary dark:text-text-dark-primary">
-                {metrics.cv.toFixed(2)}
-              </p>
-            </div>
-          </div>
+          <button
+            type="button"
+            onClick={() => navigate("/results")}
+            className="mt-4 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-hero hover:brightness-105"
+          >
+            Ver Resultados
+          </button>
         </section>
 
-        <section className="rounded-xl border border-zinc-200/80 bg-card-light p-4 dark:border-zinc-800/80 dark:bg-card-dark">
-          <h3 className="text-sm font-semibold text-text-light-primary dark:text-text-dark-primary">
-            Ações
-          </h3>
-          <div className="mt-3 flex flex-wrap gap-2">
+        {/* 3 Metric Cards */}
+        <div className="grid grid-cols-1 gap-[18px] sm:grid-cols-3">
+          <div className="rounded-card bg-surface p-4 shadow-sm">
+            <p className="text-xs font-semibold text-ink-2">Scorecard de Risco</p>
+            <p className="mt-1 text-3xl font-bold text-teal">{metrics.riskScore.toFixed(2)}</p>
+          </div>
+          <div className="rounded-card bg-surface p-4 shadow-sm">
+            <p className="text-xs font-semibold text-ink-2">Coeficiente de Variação</p>
+            <p className="mt-1 text-3xl font-bold text-ink">{metrics.cv.toFixed(2)}</p>
+          </div>
+          <div className="rounded-card bg-surface p-4 shadow-sm">
+            <p className="text-xs font-semibold text-ink-2">Progresso</p>
+            <p className="mt-1 text-3xl font-bold text-ink">{filledBlocks}/12</p>
+          </div>
+        </div>
+
+        {/* Ações */}
+        <section className="rounded-card bg-surface p-5 shadow-sm">
+          <h2 className="text-sm font-semibold text-ink">Ações</h2>
+          <div className="mt-3 flex flex-wrap gap-3">
             <Link
               to="/canvas"
-              className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:brightness-110"
+              className="rounded-lg bg-brand px-4 py-2.5 text-sm font-semibold text-brand-fg hover:brightness-105"
             >
               Abrir Meu SRL Canvas
             </Link>
             <Link
               to="/canvas/new"
-              className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-semibold text-text-light-secondary hover:bg-zinc-100 dark:border-zinc-700 dark:text-text-dark-secondary dark:hover:bg-zinc-800"
+              className="rounded-lg border border-stroke px-4 py-2.5 text-sm font-semibold text-ink-2 hover:bg-surface-2"
             >
               Novo SRL Canvas
             </Link>
           </div>
         </section>
 
-        <section className="rounded-xl border border-zinc-200/80 bg-card-light p-4 dark:border-zinc-800/80 dark:bg-card-dark">
-          <h2 className="text-sm font-semibold text-text-light-primary dark:text-text-dark-primary">
-            Sobre o Projeto
-          </h2>
-          <p className="mt-2 text-sm text-text-light-secondary dark:text-text-dark-secondary">
+        {/* Sobre o Projeto */}
+        <section className="rounded-card bg-surface p-5 shadow-sm">
+          <h2 className="text-sm font-semibold text-ink">Sobre o Projeto</h2>
+          <p className="mt-2 text-sm text-ink-2">
             O nome oficial da ferramenta é{" "}
             <strong>SRL Canvas (Startup Readiness Level Canvas)</strong>. Aqui você encontra o
             contexto, propósito e público-alvo do framework.
@@ -206,17 +187,16 @@ export function DashboardPage() {
           <button
             type="button"
             onClick={() => setIsAboutOpen(true)}
-            className="mt-3 rounded-lg border border-zinc-300 px-4 py-2 text-sm font-semibold text-text-light-secondary hover:bg-zinc-100 dark:border-zinc-700 dark:text-text-dark-secondary dark:hover:bg-zinc-800"
+            className="mt-3 rounded-lg border border-stroke px-4 py-2 text-sm font-semibold text-ink-2 hover:bg-surface-2"
           >
             Ler: Por que o SRL Canvas?
           </button>
         </section>
 
-        <section className="rounded-xl border border-zinc-200/80 bg-card-light p-4 dark:border-zinc-800/80 dark:bg-card-dark">
-          <h3 className="text-sm font-semibold text-text-light-primary dark:text-text-dark-primary">
-            Material de Apoio (Uso Offline)
-          </h3>
-          <p className="mt-2 text-sm text-text-light-secondary dark:text-text-dark-secondary">
+        {/* Material de Apoio */}
+        <section className="rounded-card bg-surface p-5 shadow-sm">
+          <h2 className="text-sm font-semibold text-ink">Material de Apoio (Uso Offline)</h2>
+          <p className="mt-2 text-sm text-ink-2">
             Não é obrigatório usar esta plataforma para aplicar o SRL Canvas. O método foi desenhado
             para ser simples e ágil: você pode baixar o guia de aplicação, o modelo do SRL Canvas e
             o gráfico radar para preenchimento manual.
@@ -229,7 +209,7 @@ export function DashboardPage() {
                 download
                 target="_blank"
                 rel="noreferrer"
-                className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-semibold text-text-light-secondary hover:bg-zinc-100 dark:border-zinc-700 dark:text-text-dark-secondary dark:hover:bg-zinc-800"
+                className="rounded-lg border border-stroke px-4 py-2 text-sm font-semibold text-ink-2 hover:bg-surface-2"
               >
                 {item.label}
               </a>
@@ -237,37 +217,34 @@ export function DashboardPage() {
           </div>
         </section>
 
+        {/* Research Opinion Panel */}
         <ResearchOpinionPanel nextPath="/dashboard" />
 
-        <section className="rounded-xl border border-zinc-200/80 bg-card-light p-4 dark:border-zinc-800/80 dark:bg-card-dark">
-          <h3 className="text-sm font-semibold text-text-light-primary dark:text-text-dark-primary">
-            Status de Sincronização
-          </h3>
+        {/* Status de Sincronização */}
+        <section className="rounded-card bg-surface p-5 shadow-sm">
+          <h2 className="text-sm font-semibold text-ink">Status de Sincronização</h2>
           {!isEnabled && (
-            <p className="mt-2 text-sm text-text-light-secondary dark:text-text-dark-secondary">
+            <p className="mt-2 text-sm text-ink-2">
               Modo local: dados salvos apenas neste dispositivo.
             </p>
           )}
           {isEnabled && !user && (
-            <p className="mt-2 text-sm text-text-light-secondary dark:text-text-dark-secondary">
+            <p className="mt-2 text-sm text-ink-2">
               Faça login para habilitar sincronização automática do canvas.
             </p>
           )}
           {isEnabled && user && (
-            <p className="mt-2 text-sm text-text-light-secondary dark:text-text-dark-secondary">
+            <p className="mt-2 text-sm text-ink-2">
               Sincronização automática ativa durante a edição do canvas.
             </p>
           )}
         </section>
 
-        <section className="rounded-xl border border-zinc-200/80 bg-card-light p-4 dark:border-zinc-800/80 dark:bg-card-dark">
-          <h3 className="text-sm font-semibold text-text-light-primary dark:text-text-dark-primary">
-            Histórico e Comparativo Temporal
-          </h3>
-          <div className="mt-2 rounded-lg border border-zinc-200/80 bg-zinc-50 p-3 text-xs text-text-light-secondary dark:border-zinc-800/80 dark:bg-zinc-800/70 dark:text-text-dark-secondary">
-            <p className="font-semibold text-text-light-primary dark:text-text-dark-primary">
-              Como usar este comparativo
-            </p>
+        {/* Histórico e Comparativo Temporal */}
+        <section className="rounded-card bg-surface p-5 shadow-sm">
+          <h2 className="text-sm font-semibold text-ink">Histórico e Comparativo Temporal</h2>
+          <div className="mt-2 rounded-lg border border-stroke bg-inset p-3 text-xs text-ink-2">
+            <p className="font-semibold text-ink">Como usar este comparativo</p>
             <p className="mt-1">
               A avaliação mais recente é a referência. Em <strong>Comparar com</strong>, selecione
               uma avaliação anterior do seu histórico para ver a evolução.
@@ -279,13 +256,13 @@ export function DashboardPage() {
           </div>
 
           {!isEnabled && (
-            <p className="mt-2 text-sm text-text-light-secondary dark:text-text-dark-secondary">
+            <p className="mt-2 text-sm text-ink-2">
               Modo local: histórico disponível apenas com conta.
             </p>
           )}
 
           {isEnabled && !user && (
-            <p className="mt-2 text-sm text-text-light-secondary dark:text-text-dark-secondary">
+            <p className="mt-2 text-sm text-ink-2">
               Faça login para visualizar avaliações anteriores e comparativos de evolução.
             </p>
           )}
@@ -299,33 +276,29 @@ export function DashboardPage() {
               )}
 
               {!historyError && historyEntries.length === 0 && (
-                <p className="text-sm text-text-light-secondary dark:text-text-dark-secondary">
-                  Nenhuma avaliação remota encontrada ainda.
-                </p>
+                <p className="text-sm text-ink-2">Nenhuma avaliação remota encontrada ainda.</p>
               )}
 
               {!historyError && historyEntries.length > 0 && (
                 <>
-                  <div className="rounded-lg border border-zinc-200/80 bg-zinc-50 p-3 dark:border-zinc-800/80 dark:bg-zinc-800/70">
-                    <p className="text-xs font-semibold text-text-light-secondary dark:text-text-dark-secondary">
-                      Avaliação mais recente
-                    </p>
-                    <p className="mt-1 text-sm font-semibold text-text-light-primary dark:text-text-dark-primary">
+                  <div className="rounded-lg border border-stroke bg-inset p-3">
+                    <p className="text-xs font-semibold text-ink-2">Avaliação mais recente</p>
+                    <p className="mt-1 text-sm font-semibold text-ink">
                       {latestHistoryEntry?.title} (Atualizado{" "}
                       {formatDateTime(latestHistoryEntry?.updatedAt ?? "")})
                     </p>
-                    <p className="mt-1 text-xs font-mono text-text-light-secondary dark:text-text-dark-secondary">
+                    <p className="mt-1 font-mono text-xs text-ink-2">
                       [{latestHistoryEntry?.metrics.total ?? 0} / 108] -{" "}
                       {latestHistoryEntry?.filledBlocks ?? 0}/12 blocos preenchidos
                     </p>
                   </div>
 
                   {comparisonCandidates.length > 0 && (
-                    <div className="rounded-lg border border-zinc-200/80 bg-zinc-50 p-3 dark:border-zinc-800/80 dark:bg-zinc-800/70">
-                      <label className="block text-xs font-medium text-text-light-secondary dark:text-text-dark-secondary">
+                    <div className="rounded-lg border border-stroke bg-inset p-3">
+                      <label className="block text-xs font-medium text-ink-2">
                         Comparar com
                         <select
-                          className="mt-1 block w-full rounded-md border-zinc-300 bg-white p-2 text-sm text-text-light-primary focus:border-primary focus:ring-primary dark:border-zinc-700 dark:bg-zinc-900 dark:text-text-dark-primary"
+                          className="mt-1 block w-full rounded-md border border-stroke bg-surface p-2 text-sm text-ink focus:border-brand focus:ring-brand"
                           value={comparisonTargetId ?? ""}
                           onChange={(event) => setComparisonTargetId(event.target.value)}
                         >
@@ -339,34 +312,34 @@ export function DashboardPage() {
 
                       {temporalComparison && comparisonTargetEntry && (
                         <div className="mt-3 grid grid-cols-1 gap-2 text-xs sm:grid-cols-2">
-                          <p className="text-text-light-secondary dark:text-text-dark-secondary">
+                          <p className="text-ink-2">
                             Delta Total:{" "}
-                            <strong className="text-text-light-primary dark:text-text-dark-primary">
+                            <strong className="text-ink">
                               {formatSignedNumber(temporalComparison.totalDelta, 0)}
                             </strong>
                           </p>
-                          <p className="text-text-light-secondary dark:text-text-dark-secondary">
+                          <p className="text-ink-2">
                             Delta Scorecard:{" "}
-                            <strong className="text-text-light-primary dark:text-text-dark-primary">
+                            <strong className="text-ink">
                               {formatSignedNumber(temporalComparison.riskScoreDelta, 2)}
                             </strong>
                           </p>
-                          <p className="text-text-light-secondary dark:text-text-dark-secondary">
+                          <p className="text-ink-2">
                             Delta CV:{" "}
-                            <strong className="text-text-light-primary dark:text-text-dark-primary">
+                            <strong className="text-ink">
                               {formatSignedNumber(temporalComparison.cvDelta, 2)}
                             </strong>
                           </p>
-                          <p className="text-text-light-secondary dark:text-text-dark-secondary">
+                          <p className="text-ink-2">
                             Delta Blocos Preenchidos:{" "}
-                            <strong className="text-text-light-primary dark:text-text-dark-primary">
+                            <strong className="text-ink">
                               {formatSignedNumber(temporalComparison.filledBlocksDelta, 0)}
                             </strong>
                           </p>
                           {temporalComparison.maturityVelocity !== null && (
-                            <p className="text-text-light-secondary dark:text-text-dark-secondary sm:col-span-2">
+                            <p className="text-ink-2 sm:col-span-2">
                               Velocidade de Maturidade:{" "}
-                              <strong className="text-text-light-primary dark:text-text-dark-primary">
+                              <strong className="text-ink">
                                 {formatSignedNumber(temporalComparison.maturityVelocity, 2)} pts/mês
                               </strong>{" "}
                               <span className="text-[11px]">
@@ -379,7 +352,7 @@ export function DashboardPage() {
                     </div>
                   )}
                   {historyEntries.length > 1 && comparisonCandidates.length === 0 && (
-                    <p className="text-xs text-text-light-secondary dark:text-text-dark-secondary">
+                    <p className="text-xs text-ink-2">
                       Nenhuma avaliação anterior com diferença de métricas para comparar.
                     </p>
                   )}
@@ -393,41 +366,42 @@ export function DashboardPage() {
                       return (
                         <article
                           key={entry.id}
-                          className="rounded-lg border border-zinc-200/80 bg-zinc-50 p-3 dark:border-zinc-800/80 dark:bg-zinc-800/70"
+                          className="rounded-lg border border-stroke bg-inset p-3"
                         >
                           <div className="flex items-start justify-between gap-2">
                             <div>
-                              <p className="text-sm font-semibold text-text-light-primary dark:text-text-dark-primary">
+                              <p className="text-sm font-semibold text-ink">
                                 {entry.title} (Atualizado {formatDateTime(entry.updatedAt)})
                               </p>
-                              <p className="text-xs text-text-light-secondary dark:text-text-dark-secondary">
+                              <p className="text-xs text-ink-2">
                                 Estágio: {maturityStageFromTotal(entry.metrics.total)}
                               </p>
                             </div>
                             <button
                               type="button"
                               onClick={() =>
-                                setResultsPayload({
-                                  scores: entry.scores,
-                                  metrics: entry.metrics,
-                                  projectTitle: entry.title,
-                                  updatedAt: entry.updatedAt
+                                navigate("/results", {
+                                  state: {
+                                    scores: entry.scores,
+                                    projectTitle: entry.title,
+                                    updatedAt: entry.updatedAt
+                                  }
                                 })
                               }
-                              className="rounded-md border border-zinc-300 px-2 py-1 text-xs font-semibold text-text-light-secondary hover:bg-zinc-100 dark:border-zinc-700 dark:text-text-dark-secondary dark:hover:bg-zinc-800"
+                              className="rounded-md border border-stroke px-2 py-1 text-xs font-semibold text-ink-2 hover:bg-surface-2"
                             >
                               Ver Resultados
                             </button>
                           </div>
-                          <p className="mt-2 text-xs font-mono text-text-light-secondary dark:text-text-dark-secondary">
+                          <p className="mt-2 font-mono text-xs text-ink-2">
                             [{entry.metrics.total} / 108] - {entry.filledBlocks}/12 blocos
                             preenchidos | Scorecard: {entry.metrics.riskScore.toFixed(2)} | CV:{" "}
                             {entry.metrics.cv.toFixed(2)}
                           </p>
                           {scoreDelta !== null && (
-                            <p className="mt-1 text-xs text-text-light-secondary dark:text-text-dark-secondary">
+                            <p className="mt-1 text-xs text-ink-2">
                               Evolucao do Scorecard vs avaliação anterior:{" "}
-                              <strong className="text-text-light-primary dark:text-text-dark-primary">
+                              <strong className="text-ink">
                                 {formatSignedNumber(scoreDelta, 2)}
                               </strong>
                             </p>
@@ -441,23 +415,10 @@ export function DashboardPage() {
             </div>
           )}
         </section>
-      </main>
-
-      <FooterNav />
-
-      {resultsPayload && (
-        <ResultsModal
-          darkMode={darkMode}
-          metrics={resultsPayload.metrics}
-          scores={resultsPayload.scores}
-          projectTitle={resultsPayload.projectTitle}
-          updatedAt={resultsPayload.updatedAt}
-          onClose={() => setResultsPayload(null)}
-        />
-      )}
+      </div>
 
       <AboutSrlCanvasModal isOpen={isAboutOpen} onClose={() => setIsAboutOpen(false)} />
-    </div>
+    </AppShell>
   );
 }
 

@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { AppHeader } from "../components/AppHeader";
+import { AppShell } from "../components/AppShell";
 import { AboutSrlCanvasModal } from "../components/AboutSrlCanvasModal";
-import { FooterNav } from "../components/FooterNav";
 import { ResearchOpinionPanel } from "../components/ResearchOpinionPanel";
 import { useAuth } from "../auth/AuthProvider";
 import { useCanvasStore } from "../store/useCanvasStore";
@@ -101,36 +100,38 @@ export function AccountPage() {
     });
   };
 
-  return (
-    <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden bg-background-light font-display dark:bg-background-dark">
-      <AppHeader title="Minha Conta" />
+  // Derive avatar initials from user name (up to 2 chars)
+  const avatarInitials =
+    accountName
+      .split(" ")
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((w) => w[0].toUpperCase())
+      .join("") || "?";
 
-      <main className="flex-grow space-y-4 px-4 pb-28 pt-6">
-        <section className="rounded-xl border border-zinc-200/80 bg-card-light p-4 dark:border-zinc-800/80 dark:bg-card-dark">
-          <h2 className="text-sm font-semibold text-text-light-primary dark:text-text-dark-primary">
-            Perfil
-          </h2>
+  return (
+    <AppShell title="Minha Conta">
+      <div className="mx-auto flex max-w-[680px] flex-col gap-[18px]">
+        {/* Card: Perfil */}
+        <section className="rounded-card border border-stroke bg-surface p-5 shadow-sm">
+          <h2 className="font-display text-[15px] font-bold text-ink">Perfil</h2>
 
           {!isEnabled && (
-            <p className="mt-2 text-sm text-text-light-secondary dark:text-text-dark-secondary">
-              O aplicativo está em modo local (sem conta).
-            </p>
+            <p className="mt-3 text-sm text-ink-2">O aplicativo está em modo local (sem conta).</p>
           )}
 
           {isEnabled && !user && (
-            <div className="mt-2 space-y-3">
-              <p className="text-sm text-text-light-secondary dark:text-text-dark-secondary">
-                Faça login para editar seu perfil.
-              </p>
+            <div className="mt-3 space-y-3">
+              <p className="text-sm text-ink-2">Faça login para editar seu perfil.</p>
               <div className="flex gap-2">
                 <Link
-                  className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:brightness-110"
+                  className="rounded-[10px] bg-brand px-4 py-2 text-sm font-semibold text-brand-fg hover:brightness-110"
                   to="/auth/login"
                 >
                   Entrar
                 </Link>
                 <Link
-                  className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-semibold text-text-light-secondary hover:bg-zinc-100 dark:border-zinc-700 dark:text-text-dark-secondary dark:hover:bg-zinc-800"
+                  className="rounded-[10px] border border-stroke px-4 py-2 text-sm font-semibold text-ink-2 hover:bg-surface-2"
                   to="/auth/signup"
                 >
                   Criar conta
@@ -140,13 +141,22 @@ export function AccountPage() {
           )}
 
           {isEnabled && user && (
-            <div className="mt-2 space-y-3">
-              <label className="block">
-                <span className="text-xs font-medium text-text-light-secondary dark:text-text-dark-secondary">
-                  Nome
+            <div className="mt-4 space-y-4">
+              {/* Avatar + identity */}
+              <div className="flex items-center gap-3">
+                <span className="flex size-12 items-center justify-center rounded-full bg-surface-2 font-display text-[15px] font-bold text-ink">
+                  {avatarInitials}
                 </span>
+                <div className="leading-tight">
+                  <p className="text-[14px] font-semibold text-ink">{user.name}</p>
+                  <p className="text-[12px] text-ink-3">{user.email}</p>
+                </div>
+              </div>
+
+              <label className="block">
+                <span className="text-xs font-medium text-ink-2">Nome</span>
                 <input
-                  className="mt-1 block w-full rounded-md border-zinc-300 bg-zinc-50 p-2 text-sm text-text-light-primary shadow-sm focus:border-primary focus:ring-primary disabled:opacity-70 dark:border-zinc-700 dark:bg-zinc-800 dark:text-text-dark-primary"
+                  className="mt-1 block w-full rounded-[10px] border border-stroke bg-inset px-3 py-2 text-sm text-ink shadow-sm focus:border-teal focus:outline-none focus:ring-1 focus:ring-teal disabled:opacity-70"
                   value={profileName}
                   onChange={(event) => setProfileName(event.target.value)}
                   type="text"
@@ -155,30 +165,25 @@ export function AccountPage() {
                 />
               </label>
 
-              <p className="text-xs text-text-light-secondary dark:text-text-dark-secondary">
-                Este nome é usado na sua identificação de conta.
-              </p>
+              <p className="text-xs text-ink-3">Este nome é usado na sua identificação de conta.</p>
 
               <label className="block">
-                <span className="text-xs font-medium text-text-light-secondary dark:text-text-dark-secondary">
-                  Email
-                </span>
+                <span className="text-xs font-medium text-ink-2">Email</span>
                 <input
-                  className="mt-1 block w-full rounded-md border-zinc-300 bg-zinc-100 p-2 text-sm text-text-light-primary shadow-sm disabled:opacity-70 dark:border-zinc-700 dark:bg-zinc-900 dark:text-text-dark-primary"
+                  className="mt-1 block w-full rounded-[10px] border border-stroke bg-inset px-3 py-2 text-sm text-ink shadow-sm disabled:opacity-60"
                   value={user.email ?? ""}
                   type="email"
                   disabled
+                  readOnly
                 />
               </label>
 
-              <p className="text-xs text-text-light-secondary dark:text-text-dark-secondary">
-                Email usado para acessar a plataforma.
-              </p>
+              <p className="text-xs text-ink-3">Email usado para acessar a plataforma.</p>
 
               {profileFeedback && (
                 <p
-                  className={`text-xs ${
-                    profileFeedback.type === "error" ? "text-red-500" : "text-emerald-600"
+                  className={`text-xs font-medium ${
+                    profileFeedback.type === "error" ? "text-red-500" : "text-teal"
                   }`}
                 >
                   {profileFeedback.message}
@@ -190,12 +195,12 @@ export function AccountPage() {
                   type="button"
                   onClick={saveProfile}
                   disabled={isProfileSaving}
-                  className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:brightness-110 disabled:opacity-70"
+                  className="rounded-[10px] bg-brand px-4 py-2 text-sm font-semibold text-brand-fg hover:brightness-110 disabled:opacity-70"
                 >
                   {isProfileSaving ? "Salvando..." : "Salvar"}
                 </button>
                 <button
-                  className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-semibold text-text-light-secondary hover:bg-zinc-100 dark:border-zinc-700 dark:text-text-dark-secondary dark:hover:bg-zinc-800"
+                  className="rounded-[10px] border border-stroke px-4 py-2 text-sm font-semibold text-ink-2 hover:bg-surface-2"
                   onClick={logout}
                   type="button"
                 >
@@ -206,12 +211,11 @@ export function AccountPage() {
           )}
         </section>
 
-        <section className="rounded-xl border border-zinc-200/80 bg-card-light p-4 dark:border-zinc-800/80 dark:bg-card-dark">
-          <h2 className="text-sm font-semibold text-text-light-primary dark:text-text-dark-primary">
-            Tema
-          </h2>
+        {/* Card: Tema */}
+        <section className="rounded-card border border-stroke bg-surface p-5 shadow-sm">
+          <h2 className="font-display text-[15px] font-bold text-ink">Tema</h2>
           <button
-            className="mt-3 rounded-lg border border-zinc-300 px-4 py-2 text-sm font-semibold text-text-light-secondary hover:bg-zinc-100 dark:border-zinc-700 dark:text-text-dark-secondary dark:hover:bg-zinc-800"
+            className="mt-3 rounded-[10px] border border-stroke px-4 py-2 text-sm font-semibold text-ink-2 hover:bg-surface-2"
             onClick={toggleDarkMode}
             type="button"
           >
@@ -219,74 +223,74 @@ export function AccountPage() {
           </button>
         </section>
 
-        <section className="rounded-xl border border-zinc-200/80 bg-card-light p-4 dark:border-zinc-800/80 dark:bg-card-dark">
-          <h2 className="text-sm font-semibold text-text-light-primary dark:text-text-dark-primary">
-            Sobre o Projeto
-          </h2>
-          <p className="mt-2 text-sm text-text-light-secondary dark:text-text-dark-secondary">
+        {/* Card: Sobre o Projeto */}
+        <section className="rounded-card border border-stroke bg-surface p-5 shadow-sm">
+          <h2 className="font-display text-[15px] font-bold text-ink">Sobre o Projeto</h2>
+          <p className="mt-2 text-sm text-ink-2">
             O nome oficial da ferramenta é{" "}
-            <strong>SRL Canvas (Startup Readiness Level Canvas)</strong>. Aqui você encontra o
-            contexto, propósito e público-alvo do framework.
+            <strong className="text-ink">SRL Canvas (Startup Readiness Level Canvas)</strong>. Aqui
+            você encontra o contexto, propósito e público-alvo do framework.
           </p>
           <button
             type="button"
             onClick={() => setIsAboutOpen(true)}
-            className="mt-3 rounded-lg border border-zinc-300 px-4 py-2 text-sm font-semibold text-text-light-secondary hover:bg-zinc-100 dark:border-zinc-700 dark:text-text-dark-secondary dark:hover:bg-zinc-800"
+            className="mt-3 rounded-[10px] border border-stroke px-4 py-2 text-sm font-semibold text-ink-2 hover:bg-surface-2"
           >
             Ler: Por que o SRL Canvas?
           </button>
         </section>
 
-        <section className="rounded-xl border border-zinc-200/80 bg-card-light p-4 dark:border-zinc-800/80 dark:bg-card-dark">
-          <h2 className="text-sm font-semibold text-text-light-primary dark:text-text-dark-primary">
+        {/* Card: Métricas de Produto (Local) */}
+        <section className="rounded-card border border-stroke bg-surface p-5 shadow-sm">
+          <h2 className="font-display text-[15px] font-bold text-ink">
             Métricas de Produto (Local)
           </h2>
-          <p className="mt-2 text-sm text-text-light-secondary dark:text-text-dark-secondary">
+          <p className="mt-2 text-sm text-ink-2">
             Relatório local para iteração de produto (sem dados sensíveis). Eventos monitorados:{" "}
-            <strong>{metricsEventCount}</strong>.
+            <strong className="text-ink">{metricsEventCount}</strong>.
           </p>
 
-          <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <div className="rounded-lg border border-zinc-200/80 bg-zinc-50 p-3 dark:border-zinc-800/80 dark:bg-zinc-800/70">
-              <p className="text-xs text-text-light-secondary dark:text-text-dark-secondary">
-                Canvas
+          <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div className="rounded-[10px] border border-stroke bg-surface-2 p-3">
+              <p className="text-xs font-semibold text-ink">Canvas</p>
+              <p className="mt-1 text-xs text-ink-2">
+                Início: <strong className="text-ink">{metricsReport.canvas.started}</strong>
               </p>
-              <p className="mt-1 text-xs text-text-light-secondary dark:text-text-dark-secondary">
-                Início: <strong>{metricsReport.canvas.started}</strong>
+              <p className="mt-1 text-xs text-ink-2">
+                Conclusão: <strong className="text-ink">{metricsReport.canvas.completed}</strong>
               </p>
-              <p className="mt-1 text-xs text-text-light-secondary dark:text-text-dark-secondary">
-                Conclusão: <strong>{metricsReport.canvas.completed}</strong>
+              <p className="mt-1 text-xs text-ink-2">
+                Abandono: <strong className="text-ink">{metricsReport.canvas.abandoned}</strong>
               </p>
-              <p className="mt-1 text-xs text-text-light-secondary dark:text-text-dark-secondary">
-                Abandono: <strong>{metricsReport.canvas.abandoned}</strong>
-              </p>
-              <p className="mt-1 text-xs text-text-light-secondary dark:text-text-dark-secondary">
+              <p className="mt-1 text-xs text-ink-2">
                 Taxa de conclusão:{" "}
-                <strong>{metricsReport.canvas.completionRate.toFixed(1)}%</strong>
+                <strong className="text-ink">
+                  {metricsReport.canvas.completionRate.toFixed(1)}%
+                </strong>
               </p>
             </div>
 
-            <div className="rounded-lg border border-zinc-200/80 bg-zinc-50 p-3 dark:border-zinc-800/80 dark:bg-zinc-800/70">
-              <p className="text-xs text-text-light-secondary dark:text-text-dark-secondary">
-                Survey Acadêmica
+            <div className="rounded-[10px] border border-stroke bg-surface-2 p-3">
+              <p className="text-xs font-semibold text-ink">Survey Acadêmica</p>
+              <p className="mt-1 text-xs text-ink-2">
+                Início: <strong className="text-ink">{metricsReport.survey.started}</strong>
               </p>
-              <p className="mt-1 text-xs text-text-light-secondary dark:text-text-dark-secondary">
-                Início: <strong>{metricsReport.survey.started}</strong>
+              <p className="mt-1 text-xs text-ink-2">
+                Conclusão: <strong className="text-ink">{metricsReport.survey.completed}</strong>
               </p>
-              <p className="mt-1 text-xs text-text-light-secondary dark:text-text-dark-secondary">
-                Conclusão: <strong>{metricsReport.survey.completed}</strong>
+              <p className="mt-1 text-xs text-ink-2">
+                Abandono: <strong className="text-ink">{metricsReport.survey.abandoned}</strong>
               </p>
-              <p className="mt-1 text-xs text-text-light-secondary dark:text-text-dark-secondary">
-                Abandono: <strong>{metricsReport.survey.abandoned}</strong>
-              </p>
-              <p className="mt-1 text-xs text-text-light-secondary dark:text-text-dark-secondary">
+              <p className="mt-1 text-xs text-ink-2">
                 Taxa de conclusão:{" "}
-                <strong>{metricsReport.survey.completionRate.toFixed(1)}%</strong>
+                <strong className="text-ink">
+                  {metricsReport.survey.completionRate.toFixed(1)}%
+                </strong>
               </p>
             </div>
           </div>
 
-          <p className="mt-3 text-xs text-text-light-secondary dark:text-text-dark-secondary">
+          <p className="mt-3 text-xs text-ink-2">
             Abandono por etapa (survey): triagem {metricsReport.survey.abandonedByStep.triage} |
             perfil {metricsReport.survey.abandonedByStep.profile} | blocos 1-4{" "}
             {metricsReport.survey.abandonedByStep.dimensions_1_4} | blocos 5-8{" "}
@@ -300,7 +304,7 @@ export function AccountPage() {
             <button
               type="button"
               onClick={() => setMetricsReport(buildProductMetricsReport())}
-              className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-semibold text-text-light-secondary hover:bg-zinc-100 dark:border-zinc-700 dark:text-text-dark-secondary dark:hover:bg-zinc-800"
+              className="rounded-[10px] border border-stroke px-4 py-2 text-sm font-semibold text-ink-2 hover:bg-surface-2"
             >
               Atualizar relatório
             </button>
@@ -310,7 +314,7 @@ export function AccountPage() {
                 clearProductMetricEvents();
                 setMetricsReport(buildProductMetricsReport());
               }}
-              className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-semibold text-text-light-secondary hover:bg-zinc-100 dark:border-zinc-700 dark:text-text-dark-secondary dark:hover:bg-zinc-800"
+              className="rounded-[10px] border border-stroke px-4 py-2 text-sm font-semibold text-ink-2 hover:bg-surface-2"
             >
               Limpar métricas locais
             </button>
@@ -318,11 +322,9 @@ export function AccountPage() {
         </section>
 
         <ResearchOpinionPanel nextPath="/account" />
-      </main>
-
-      <FooterNav />
+      </div>
 
       <AboutSrlCanvasModal isOpen={isAboutOpen} onClose={() => setIsAboutOpen(false)} />
-    </div>
+    </AppShell>
   );
 }

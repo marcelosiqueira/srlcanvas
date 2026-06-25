@@ -37,6 +37,14 @@ describe("CanvasPage", () => {
     expect(window.localStorage.getItem("srl-canvas-layout-v1")).toBe("mural");
   });
 
+  it("o botão Ver Resultados aponta para navegação (não abre modal)", () => {
+    renderPage();
+    const botao = screen.getByRole("button", { name: /Ver Resultados/i });
+    expect(botao).toBeInTheDocument();
+    // não deve existir diálogo de resultados aberto na tela inicial
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
   it("abre o modal ao clicar num bloco e fecha ao cancelar", () => {
     renderPage();
     fireEvent.click(screen.getByText(/Problema \/ Oportunidade/).closest("button")!);
