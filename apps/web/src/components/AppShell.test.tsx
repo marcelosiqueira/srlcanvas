@@ -39,6 +39,5 @@ describe("AppShell", () => {
     expect(accountLink).toHaveAttribute("href", "/account");
     expect(screen.getByText("Convidado")).toBeInTheDocument();
     expect(screen.getByText("CO")).toBeInTheDocument(); // iniciais de "Convidado"
-    expect(screen.getByText("Gratuito")).toBeInTheDocument();
   });
 });

@@ -7,6 +7,8 @@ import { BrandLockup } from "./BrandLockup";
 interface AppShellProps {
   title: string;
   children: ReactNode;
+  /** Largura padrão do conteúdo: "wide" (1120px, telas de dados) ou "narrow" (760px, formulários/leitura). */
+  size?: "wide" | "narrow";
 }
 
 const NAV_ITEMS = [
@@ -23,14 +25,14 @@ function getInitials(name: string): string {
   return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
 }
 
-export function AppShell({ title, children }: AppShellProps) {
+export function AppShell({ title, children, size = "wide" }: AppShellProps) {
   const navigate = useNavigate();
   const { signOut, user } = useAuth();
   const darkMode = useCanvasStore((state) => state.darkMode);
   const toggleDarkMode = useCanvasStore((state) => state.toggleDarkMode);
 
   const accountName = user?.name?.trim() || user?.email || "Convidado";
-  const accountSubtitle = "Gratuito";
+  const accountSubtitle = user?.name?.trim() && user?.email ? user.email : null;
   const accountInitials = getInitials(accountName);
 
   const handleLogout = async () => {
@@ -78,7 +80,9 @@ export function AppShell({ title, children }: AppShellProps) {
             </span>
             <div className="min-w-0 leading-tight">
               <p className="truncate text-[13px] font-semibold text-ink">{accountName}</p>
-              <p className="truncate text-[11px] text-ink-3">{accountSubtitle}</p>
+              {accountSubtitle && (
+                <p className="truncate text-[11px] text-ink-3">{accountSubtitle}</p>
+              )}
             </div>
           </NavLink>
         </div>
@@ -116,7 +120,13 @@ export function AppShell({ title, children }: AppShellProps) {
           </div>
         </header>
 
-        <main className="px-4 pb-28 pt-6 lg:pb-10">{children}</main>
+        <main className="px-4 pb-28 pt-6 lg:pb-10">
+          <div
+            className={`mx-auto w-full ${size === "narrow" ? "max-w-[760px]" : "max-w-[1120px]"}`}
+          >
+            {children}
+          </div>
+        </main>
       </div>
 
       {/* Bottom nav mobile */}

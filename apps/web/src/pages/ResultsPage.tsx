@@ -34,7 +34,7 @@ export function ResultsPage() {
 
   return (
     <AppShell title="Resultados">
-      <div ref={captureRef} className="mx-auto flex max-w-[1160px] flex-col gap-[18px]">
+      <div ref={captureRef} className="flex flex-col gap-[18px]">
         <div>
           <p className="font-display text-[16px] font-bold text-ink">{projectTitle}</p>
           {updatedLabel && (

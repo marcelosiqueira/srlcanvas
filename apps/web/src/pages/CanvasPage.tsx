@@ -81,7 +81,7 @@ export function CanvasPage() {
 
   return (
     <AppShell title="Meu SRL Canvas">
-      <div className="mx-auto flex max-w-[1120px] flex-col gap-[18px]">
+      <div className="flex flex-col gap-[18px]">
         {/* Informações Gerais */}
         <section className="rounded-hero border border-stroke bg-surface p-5 shadow-sm">
           <div className="mb-4 flex items-center justify-between">

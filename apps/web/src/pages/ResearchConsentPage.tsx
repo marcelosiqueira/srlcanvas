@@ -124,8 +124,8 @@ export function ResearchConsentPage() {
   };
 
   return (
-    <AppShell title="TCLE — Pesquisa Acadêmica">
-      <div className="mx-auto flex max-w-[760px] flex-col gap-[18px]">
+    <AppShell title="TCLE — Pesquisa Acadêmica" size="narrow">
+      <div className="flex flex-col gap-[18px]">
         <section className="rounded-card border border-stroke bg-surface p-5 shadow-sm">
           <h2 className="font-display text-base font-bold text-ink">
             Termo de Consentimento Livre e Esclarecido (TCLE)
