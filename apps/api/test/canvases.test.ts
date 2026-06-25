@@ -231,4 +231,55 @@ describe("canvases", () => {
     expect(response.statusCode).toBe(400);
     expect(response.json().error).toBe("validation_error");
   });
+
+  it("DELETE remove o proprio canvas (some do GET)", async () => {
+    const created = await app.inject({
+      method: "PUT",
+      url: "/api/canvases",
+      headers: authHeaders(tokenA),
+      payload: { title: "Para excluir", meta: {}, blocks: {} }
+    });
+    const canvasId = created.json().canvas.id;
+
+    const del = await app.inject({
+      method: "DELETE",
+      url: `/api/canvases/${canvasId}`,
+      headers: authHeaders(tokenA)
+    });
+    expect(del.statusCode).toBe(200);
+    expect(del.json()).toEqual({ ok: true });
+
+    const list = await app.inject({
+      method: "GET",
+      url: "/api/canvases",
+      headers: authHeaders(tokenA)
+    });
+    expect(list.json().canvases).toEqual([]);
+  });
+
+  it("DELETE de canvas de outro usuario retorna 404 e nao apaga", async () => {
+    const created = await app.inject({
+      method: "PUT",
+      url: "/api/canvases",
+      headers: authHeaders(tokenB),
+      payload: { title: "Canvas do B", meta: {}, blocks: {} }
+    });
+    const canvasB = created.json().canvas.id;
+
+    const attack = await app.inject({
+      method: "DELETE",
+      url: `/api/canvases/${canvasB}`,
+      headers: authHeaders(tokenA)
+    });
+    expect(attack.statusCode).toBe(404);
+    expect(attack.json()).toEqual({ error: "canvas_not_found" });
+
+    const intact = await app.prisma.canvas.findUnique({ where: { id: canvasB } });
+    expect(intact).not.toBeNull();
+  });
+
+  it("DELETE sem token retorna 401", async () => {
+    const response = await app.inject({ method: "DELETE", url: "/api/canvases/qualquer-id" });
+    expect(response.statusCode).toBe(401);
+  });
 });

@@ -1,23 +1,27 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../auth/AuthProvider";
 import { AppShell } from "../components/AppShell";
 import { RESEARCH_SURVEY_CONFIG } from "../config/researchSurveyConfig";
+import { saveCanvas } from "../services/canvasApi";
 import { formatToday, useCanvasStore } from "../store/useCanvasStore";
 import { validateCanvasMeta } from "../utils/canvasMeta";
 
 export function NewCanvasPage() {
   const navigate = useNavigate();
+  const { user, isEnabled } = useAuth();
   const { resetCanvas, setMeta, setRemoteCanvasId } = useCanvasStore();
   const [startup, setStartup] = useState("");
   const [evaluator, setEvaluator] = useState("");
   const [date, setDate] = useState(formatToday());
   const [attemptedSubmit, setAttemptedSubmit] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
 
   const metaValidation = validateCanvasMeta({ startup, evaluator, date });
 
-  const createCanvas = () => {
+  const createCanvas = async () => {
     setAttemptedSubmit(true);
-    if (!metaValidation.isValid) return;
+    if (!metaValidation.isValid || isCreating) return;
 
     resetCanvas();
     setRemoteCanvasId(null);
@@ -26,6 +30,26 @@ export function NewCanvasPage() {
       evaluator: evaluator.trim(),
       date
     });
+
+    // Criação explícita do registro remoto — só aqui (botão "Novo SRL Canvas").
+    // O auto-save do canvas apenas ATUALIZA; nunca cria.
+    if (isEnabled && user) {
+      setIsCreating(true);
+      try {
+        const state = useCanvasStore.getState();
+        const saved = await saveCanvas({
+          userId: user.id,
+          meta: state.meta,
+          blocks: state.blocks
+        });
+        setRemoteCanvasId(saved.id);
+      } catch {
+        /* sem conexão/erro: segue em modo local, sem registro remoto */
+      } finally {
+        setIsCreating(false);
+      }
+    }
+
     navigate(RESEARCH_SURVEY_CONFIG.enabled ? "/survey/consent?next=/canvas" : "/canvas");
   };
 
@@ -84,11 +108,12 @@ export function NewCanvasPage() {
         )}
 
         <button
-          className="mt-5 rounded-[10px] bg-brand px-4 py-2.5 text-[14px] font-semibold text-brand-fg transition hover:brightness-110"
+          className="mt-5 rounded-[10px] bg-brand px-4 py-2.5 text-[14px] font-semibold text-brand-fg transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-70"
           onClick={createCanvas}
+          disabled={isCreating}
           type="button"
         >
-          Criar Canvas
+          {isCreating ? "Criando..." : "Criar Canvas"}
         </button>
       </section>
     </AppShell>

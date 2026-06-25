@@ -110,7 +110,7 @@ export function AccountPage() {
       .join("") || "?";
 
   return (
-    <AppShell title="Minha Conta" size="narrow">
+    <AppShell title="Minha Conta">
       <div className="flex flex-col gap-[18px]">
         {/* Card: Perfil */}
         <section className="rounded-card border border-stroke bg-surface p-5 shadow-sm">

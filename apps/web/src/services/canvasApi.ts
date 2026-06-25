@@ -46,3 +46,13 @@ export async function saveCanvas(input: SaveCanvasInput): Promise<RemoteCanvas> 
 
   return data.canvas;
 }
+
+export async function deleteCanvas(id: string): Promise<void> {
+  if (!isApiConfigured) {
+    throw new Error("API não configurada");
+  }
+
+  await apiFetch<{ ok: boolean }>(`/canvases/${encodeURIComponent(id)}`, {
+    method: "DELETE"
+  });
+}
