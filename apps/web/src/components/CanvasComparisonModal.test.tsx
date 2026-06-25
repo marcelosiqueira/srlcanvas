@@ -1,5 +1,8 @@
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
+
+vi.mock("react-chartjs-2", () => ({ Radar: () => <div data-testid="radar" /> }));
+
 import { CanvasComparisonModal } from "./CanvasComparisonModal";
 import { SRL_BLOCKS } from "../data/srlBlocks";
 import { buildCanvasHistoryEntries } from "../utils/canvasHistory";

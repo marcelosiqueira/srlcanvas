@@ -51,4 +51,21 @@ export async function canvasesRoutes(app: FastifyInstance): Promise<void> {
     const canvas = await app.prisma.canvas.findUniqueOrThrow({ where: { id: data.id } });
     return { canvas: publicCanvas(canvas) };
   });
+
+  app.delete<{ Params: { id: string } }>(
+    "/canvases/:id",
+    { preHandler: app.authenticate },
+    async (request) => {
+      // deleteMany com {id, userId} garante que um usuario nunca apaga canvas alheio.
+      const result = await app.prisma.canvas.deleteMany({
+        where: { id: request.params.id, userId: request.userId }
+      });
+
+      if (result.count === 0) {
+        throw new AppError(404, "canvas_not_found");
+      }
+
+      return { ok: true };
+    }
+  );
 }

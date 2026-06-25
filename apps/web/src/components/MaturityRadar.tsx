@@ -17,36 +17,72 @@ interface MaturityRadarProps {
   scores: number[];
   darkMode: boolean;
   className?: string;
+  /** Série secundária (comparação) sobreposta, em laranja tracejado. */
+  compareScores?: number[];
+  /** Legendas das séries [base, comparação] (exibe legenda quando há comparação). */
+  seriesLabels?: [string, string];
 }
 
 export function MaturityRadar({
   scores,
   darkMode,
-  className = "h-[340px] w-full"
+  className = "h-[340px] w-full",
+  compareScores,
+  seriesLabels
 }: MaturityRadarProps) {
-  const data = useMemo(
-    () => ({
+  const data = useMemo(() => {
+    const datasets: Array<{
+      label: string;
+      data: number[];
+      borderWidth: number;
+      borderColor: string;
+      pointBackgroundColor: string;
+      pointBorderColor: string;
+      backgroundColor: string;
+      fill: boolean;
+      borderDash?: number[];
+    }> = [
+      {
+        label: seriesLabels?.[0] ?? "Nível SRL",
+        data: scores,
+        borderWidth: 2.5,
+        borderColor: darkMode ? "#2DC7B6" : "#0F7E7C",
+        pointBackgroundColor: darkMode ? "#2DC7B6" : "#0F7E7C",
+        pointBorderColor: darkMode ? "#101829" : "#ffffff",
+        backgroundColor: darkMode ? "rgba(45,199,182,0.22)" : "rgba(15,126,124,0.18)",
+        fill: true
+      }
+    ];
+
+    if (compareScores) {
+      datasets.push({
+        label: seriesLabels?.[1] ?? "Comparação",
+        data: compareScores,
+        borderWidth: 2,
+        borderColor: "#EA8520",
+        pointBackgroundColor: "#EA8520",
+        pointBorderColor: darkMode ? "#101829" : "#ffffff",
+        backgroundColor: "rgba(234,133,32,0.10)",
+        borderDash: [5, 4],
+        fill: true
+      });
+    }
+
+    return {
       labels: SRL_BLOCKS.map((block) => `${block.number}. ${block.shortLabel}`),
-      datasets: [
-        {
-          label: "Nível SRL",
-          data: scores,
-          borderWidth: 2.5,
-          borderColor: darkMode ? "#2DC7B6" : "#0F7E7C",
-          pointBackgroundColor: darkMode ? "#2DC7B6" : "#0F7E7C",
-          pointBorderColor: darkMode ? "#101829" : "#ffffff",
-          backgroundColor: darkMode ? "rgba(45,199,182,0.22)" : "rgba(15,126,124,0.18)",
-          fill: true
-        }
-      ]
-    }),
-    [scores, darkMode]
-  );
+      datasets
+    };
+  }, [scores, compareScores, seriesLabels, darkMode]);
 
   const options = useMemo(
     () => ({
       maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
+      plugins: {
+        legend: {
+          display: Boolean(compareScores),
+          labels: { color: darkMode ? "#E9EEF6" : "#16202E" }
+        }
+      },
       scales: {
         r: {
           min: 0,
@@ -62,7 +98,7 @@ export function MaturityRadar({
         }
       }
     }),
-    [darkMode]
+    [darkMode, compareScores]
   );
 
   return (

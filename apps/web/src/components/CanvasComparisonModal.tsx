@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { SRL_BLOCKS } from "../data/srlBlocks";
 import { useDialogA11y } from "../hooks/useDialogA11y";
+import { useCanvasStore } from "../store/useCanvasStore";
 import { maturityStageFromTotal } from "../utils/score";
 import { compareCanvasHistoryEntries, type CanvasHistoryEntry } from "../utils/canvasHistory";
+import { MaturityRadar } from "./MaturityRadar";
 
 interface CanvasComparisonModalProps {
   baseEntry: CanvasHistoryEntry;
@@ -28,6 +30,7 @@ const deltaClass = (value: number): string =>
 
 export function CanvasComparisonModal({ baseEntry, entries, onClose }: CanvasComparisonModalProps) {
   const { dialogRef, initialFocusRef } = useDialogA11y<HTMLSelectElement>(true);
+  const darkMode = useCanvasStore((state) => state.darkMode);
 
   const others = useMemo(
     () => entries.filter((entry) => entry.id !== baseEntry.id),
@@ -141,6 +144,14 @@ export function CanvasComparisonModal({ baseEntry, entries, onClose }: CanvasCom
 
           {compareEntry && comparison && (
             <>
+              <MaturityRadar
+                scores={baseEntry.scores}
+                compareScores={compareEntry.scores}
+                seriesLabels={[baseEntry.title, compareEntry.title]}
+                darkMode={darkMode}
+                className="mt-4 h-[300px] w-full"
+              />
+
               <div className="mt-4 grid grid-cols-1 gap-2">
                 <div className="grid grid-cols-[1.4fr_1fr_1fr_0.8fr] gap-2 px-1 text-[11px] font-semibold uppercase tracking-wide text-ink-3">
                   <span>Métrica</span>

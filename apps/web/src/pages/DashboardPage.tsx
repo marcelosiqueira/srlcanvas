@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthProvider";
 import { AppShell } from "../components/AppShell";
@@ -6,7 +6,7 @@ import { AboutSrlCanvasModal } from "../components/AboutSrlCanvasModal";
 import { CanvasComparisonModal } from "../components/CanvasComparisonModal";
 import { EditCanvasWarningModal } from "../components/EditCanvasWarningModal";
 import { ResearchOpinionPanel } from "../components/ResearchOpinionPanel";
-import { listCanvasesByUser, type RemoteCanvas } from "../services/canvasApi";
+import { deleteCanvas, listCanvasesByUser, type RemoteCanvas } from "../services/canvasApi";
 import { useCanvasStore } from "../store/useCanvasStore";
 import { buildCanvasTitle } from "../utils/canvasIdentity";
 import { calculateScoreMetrics, maturityStageFromTotal } from "../utils/score";
@@ -40,7 +40,6 @@ export function DashboardPage() {
   const [isAboutOpen, setIsAboutOpen] = useState(false);
   const [historyEntries, setHistoryEntries] = useState<CanvasHistoryEntry[]>([]);
   const [historyError, setHistoryError] = useState<string | null>(null);
-  const [comparisonTargetId, setComparisonTargetId] = useState<string | null>(null);
   const [rawCanvases, setRawCanvases] = useState<RemoteCanvas[]>([]);
   const [editCanvasId, setEditCanvasId] = useState<string | null>(null);
   const [compareBaseId, setCompareBaseId] = useState<string | null>(null);
@@ -57,28 +56,12 @@ export function DashboardPage() {
         setRawCanvases(canvases);
         const entries = buildCanvasHistoryEntries(canvases);
         setHistoryEntries(entries);
-        setComparisonTargetId((currentTargetId) => {
-          const latestEntry = entries[0];
-          const candidates = latestEntry
-            ? entries
-                .slice(1)
-                .filter((entry) =>
-                  hasMeaningfulComparisonDelta(compareCanvasHistoryEntries(latestEntry, entry))
-                )
-            : [];
-          if (!candidates.length) return null;
-          if (currentTargetId && candidates.some((entry) => entry.id === currentTargetId)) {
-            return currentTargetId;
-          }
-          return candidates[0]?.id ?? null;
-        });
       })
       .catch((error) => {
         if (!isActive) return;
         setHistoryError(error instanceof Error ? error.message : "Falha ao carregar histórico.");
         setHistoryEntries([]);
         setRawCanvases([]);
-        setComparisonTargetId(null);
       });
 
     return () => {
@@ -93,22 +76,6 @@ export function DashboardPage() {
   ).length;
   const currentCanvasTitle = buildCanvasTitle(meta);
   const latestHistoryEntry = historyEntries[0] ?? null;
-  const comparisonCandidates = useMemo(() => {
-    if (!latestHistoryEntry) return [];
-    return historyEntries
-      .slice(1)
-      .filter((entry) =>
-        hasMeaningfulComparisonDelta(compareCanvasHistoryEntries(latestHistoryEntry, entry))
-      );
-  }, [historyEntries, latestHistoryEntry]);
-  const comparisonTargetEntry = useMemo(
-    () => comparisonCandidates.find((entry) => entry.id === comparisonTargetId) ?? null,
-    [comparisonCandidates, comparisonTargetId]
-  );
-  const temporalComparison =
-    latestHistoryEntry && comparisonTargetEntry
-      ? compareCanvasHistoryEntries(latestHistoryEntry, comparisonTargetEntry)
-      : null;
 
   const editCanvas = rawCanvases.find((canvas) => canvas.id === editCanvasId) ?? null;
   const compareBaseEntry = historyEntries.find((entry) => entry.id === compareBaseId) ?? null;
@@ -122,6 +89,17 @@ export function DashboardPage() {
     });
     setEditCanvasId(null);
     navigate("/canvas");
+  };
+
+  const handleDeleteCanvas = async (id: string) => {
+    if (!window.confirm("Excluir esta avaliação? Esta ação não pode ser desfeita.")) return;
+    try {
+      await deleteCanvas(id);
+      setRawCanvases((prev) => prev.filter((canvas) => canvas.id !== id));
+      setHistoryEntries((prev) => prev.filter((entry) => entry.id !== id));
+    } catch (error) {
+      setHistoryError(error instanceof Error ? error.message : "Falha ao excluir avaliação.");
+    }
   };
 
   return (
@@ -263,18 +241,11 @@ export function DashboardPage() {
 
         {/* Histórico e Comparativo Temporal */}
         <section className="rounded-card bg-surface p-5 shadow-sm">
-          <h2 className="text-sm font-semibold text-ink">Histórico e Comparativo Temporal</h2>
-          <div className="mt-2 rounded-lg border border-stroke bg-inset p-3 text-xs text-ink-2">
-            <p className="font-semibold text-ink">Como usar este comparativo</p>
-            <p className="mt-1">
-              A avaliação mais recente é a referência. Em <strong>Comparar com</strong>, selecione
-              uma avaliação anterior do seu histórico para ver a evolução.
-            </p>
-            <p className="mt-1">
-              Delta <strong>positivo</strong> em Total/Scorecard indica melhoria. Em CV, valores
-              <strong> negativos</strong> indicam maior equilíbrio entre blocos.
-            </p>
-          </div>
+          <h2 className="text-sm font-semibold text-ink">Histórico de avaliações</h2>
+          <p className="mt-1 text-xs text-ink-2">
+            Use <strong className="text-ink">Comparar</strong> em qualquer avaliação para confrontar
+            com outra e ver a evolução das métricas.
+          </p>
 
           {!isEnabled && (
             <p className="mt-2 text-sm text-ink-2">
@@ -313,70 +284,6 @@ export function DashboardPage() {
                       {latestHistoryEntry?.filledBlocks ?? 0}/12 blocos preenchidos
                     </p>
                   </div>
-
-                  {comparisonCandidates.length > 0 && (
-                    <div className="rounded-lg border border-stroke bg-inset p-3">
-                      <label className="block text-xs font-medium text-ink-2">
-                        Comparar com
-                        <select
-                          className="mt-1 block w-full rounded-md border border-stroke bg-surface p-2 text-sm text-ink focus:border-brand focus:ring-brand"
-                          value={comparisonTargetId ?? ""}
-                          onChange={(event) => setComparisonTargetId(event.target.value)}
-                        >
-                          {comparisonCandidates.map((entry) => (
-                            <option key={entry.id} value={entry.id}>
-                              {entry.title} (Atualizado {formatDateTime(entry.updatedAt)})
-                            </option>
-                          ))}
-                        </select>
-                      </label>
-
-                      {temporalComparison && comparisonTargetEntry && (
-                        <div className="mt-3 grid grid-cols-1 gap-2 text-xs sm:grid-cols-2">
-                          <p className="text-ink-2">
-                            Delta Total:{" "}
-                            <strong className="text-ink">
-                              {formatSignedNumber(temporalComparison.totalDelta, 0)}
-                            </strong>
-                          </p>
-                          <p className="text-ink-2">
-                            Delta Scorecard:{" "}
-                            <strong className="text-ink">
-                              {formatSignedNumber(temporalComparison.riskScoreDelta, 2)}
-                            </strong>
-                          </p>
-                          <p className="text-ink-2">
-                            Delta CV:{" "}
-                            <strong className="text-ink">
-                              {formatSignedNumber(temporalComparison.cvDelta, 2)}
-                            </strong>
-                          </p>
-                          <p className="text-ink-2">
-                            Delta Blocos Preenchidos:{" "}
-                            <strong className="text-ink">
-                              {formatSignedNumber(temporalComparison.filledBlocksDelta, 0)}
-                            </strong>
-                          </p>
-                          {temporalComparison.maturityVelocity !== null && (
-                            <p className="text-ink-2 sm:col-span-2">
-                              Velocidade de Maturidade:{" "}
-                              <strong className="text-ink">
-                                {formatSignedNumber(temporalComparison.maturityVelocity, 2)} pts/mês
-                              </strong>{" "}
-                              <span className="text-[11px]">
-                                (reaplicação recomendada a cada 3-6 meses)
-                              </span>
-                            </p>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  )}
-                  {historyEntries.length > 1 && comparisonCandidates.length === 0 && (
-                    <p className="text-xs text-ink-2">
-                      Nenhuma avaliação anterior com diferença de métricas para comparar.
-                    </p>
-                  )}
 
                   <div className="space-y-2">
                     {historyEntries.map((entry, index) => {
@@ -427,6 +334,13 @@ export function DashboardPage() {
                                 className="rounded-md border border-stroke px-2 py-1 text-xs font-semibold text-ink-2 hover:bg-surface-2"
                               >
                                 Ver Resultados
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteCanvas(entry.id)}
+                                className="rounded-md border border-red-300 px-2 py-1 text-xs font-semibold text-red-600 transition hover:bg-red-50 dark:border-red-700/50 dark:text-red-300 dark:hover:bg-red-900/20"
+                              >
+                                Excluir
                               </button>
                             </div>
                           </div>
@@ -483,17 +397,6 @@ function formatDateTime(value: string): string {
   const parsed = new Date(value);
   if (Number.isNaN(parsed.getTime())) return value;
   return parsed.toLocaleString("pt-BR");
-}
-
-function hasMeaningfulComparisonDelta(
-  comparison: ReturnType<typeof compareCanvasHistoryEntries>
-): boolean {
-  return (
-    comparison.totalDelta !== 0 ||
-    Math.abs(comparison.riskScoreDelta) > 0.0001 ||
-    Math.abs(comparison.cvDelta) > 0.0001 ||
-    comparison.filledBlocksDelta !== 0
-  );
 }
 
 function formatSignedNumber(value: number, fractionDigits: number): string {
