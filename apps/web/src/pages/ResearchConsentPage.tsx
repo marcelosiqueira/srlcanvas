@@ -124,7 +124,7 @@ export function ResearchConsentPage() {
   };
 
   return (
-    <AppShell title="TCLE — Pesquisa Acadêmica" size="narrow">
+    <AppShell title="TCLE — Pesquisa Acadêmica">
       <div className="flex flex-col gap-[18px]">
         <section className="rounded-card border border-stroke bg-surface p-5 shadow-sm">
           <h2 className="font-display text-base font-bold text-ink">

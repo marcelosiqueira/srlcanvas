@@ -66,7 +66,7 @@ export function NewCanvasPage() {
     "mt-1 block w-full rounded-[10px] border border-stroke bg-inset px-3 py-2.5 text-[14px] text-ink outline-none transition focus:border-brand";
 
   return (
-    <AppShell title="Novo SRL Canvas" size="narrow">
+    <AppShell title="Novo SRL Canvas">
       <section className="rounded-card border border-stroke bg-surface p-5 shadow-sm">
         <h2 className="font-display text-[14.5px] font-bold text-ink">Novo SRL Canvas</h2>
         <p className="mt-1 text-sm text-ink-2">
