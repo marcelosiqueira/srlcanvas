@@ -154,7 +154,7 @@ function RadioGroup<T extends string | number>({
               key={String(option.value)}
               className={`inline-flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-sm transition ${
                 checked
-                  ? "border-primary bg-primary/10 text-ink"
+                  ? "border-brand bg-surface-2 text-ink"
                   : "border-stroke text-ink-2 hover:bg-surface-2"
               }`}
             >
@@ -753,7 +753,7 @@ export function ResearchSurveyPage() {
 
         <section className="rounded-card border border-stroke bg-surface p-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <p className="text-xs font-semibold uppercase tracking-wide text-primary">
+            <p className="text-xs font-semibold uppercase tracking-wide text-brand">
               Etapa {currentStepIndex + 1} de {surveySteps.length}
             </p>
             <p className="text-xs text-ink-2">{progressPercent}% concluído</p>
@@ -766,7 +766,7 @@ export function ResearchSurveyPage() {
             className="mt-2 h-2 w-full overflow-hidden rounded-full bg-inset"
           >
             <div
-              className="h-full rounded-full bg-primary transition-[width] duration-300"
+              className="h-full rounded-full bg-brand transition-[width] duration-300"
               style={{ width: `${progressPercent}%` }}
             />
           </div>
@@ -1063,7 +1063,7 @@ export function ResearchSurveyPage() {
                         key={option.value}
                         className={`inline-flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-sm transition ${
                           checked
-                            ? "border-primary bg-primary/10 text-ink"
+                            ? "border-brand bg-surface-2 text-ink"
                             : "border-stroke text-ink-2 hover:bg-surface-2"
                         }`}
                       >

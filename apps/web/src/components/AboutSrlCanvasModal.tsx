@@ -24,50 +24,43 @@ export function AboutSrlCanvasModal({ isOpen, onClose }: AboutSrlCanvasModalProp
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-40 flex items-end justify-center bg-slate-900/55 p-4 md:items-center">
+    <div
+      className="fixed inset-0 z-40 flex items-end justify-center p-4 md:items-center"
+      style={{ background: "rgba(8,12,22,.5)", backdropFilter: "blur(3px)" }}
+    >
       <div
         ref={dialogRef}
         tabIndex={-1}
         role="dialog"
         aria-modal="true"
         aria-label="Sobre o SRL Canvas"
-        className="max-h-[92vh] w-full max-w-4xl overflow-y-auto rounded-xl bg-card-light shadow-2xl dark:bg-card-dark"
+        className="max-h-[92vh] w-full max-w-4xl overflow-y-auto rounded-modal bg-surface font-sans text-ink shadow-lg"
       >
-        <div className="flex items-center justify-between border-b border-zinc-200/80 p-4 dark:border-zinc-800/80">
-          <h2 className="text-lg font-bold text-text-light-primary dark:text-text-dark-primary">
-            Sobre o SRL Canvas
-          </h2>
+        <div className="flex items-center justify-between border-b border-stroke p-4">
+          <h2 className="font-display text-lg font-bold text-ink">Sobre o SRL Canvas</h2>
           <button
             ref={initialFocusRef}
             type="button"
-            className="rounded-md p-2 text-text-light-secondary hover:bg-zinc-100 dark:text-text-dark-secondary dark:hover:bg-zinc-800"
+            className="flex size-9 items-center justify-center rounded-lg text-ink-2 hover:bg-surface-2"
             onClick={onClose}
             aria-label="Fechar"
           >
-            <span className="material-symbols-outlined">close</span>
+            <span className="material-symbols-outlined" aria-hidden="true">
+              close
+            </span>
           </button>
         </div>
 
         <div className="space-y-4 p-4 md:p-6">
-          <h3 className="text-base font-semibold text-text-light-primary dark:text-text-dark-primary">
-            {ABOUT_SRL_CANVAS.title}
-          </h3>
+          <h3 className="font-display text-base font-bold text-ink">{ABOUT_SRL_CANVAS.title}</h3>
 
-          <p className="text-sm text-text-light-secondary dark:text-text-dark-secondary">
-            {ABOUT_SRL_CANVAS.contextAndGap}
-          </p>
-          <p className="text-sm text-text-light-secondary dark:text-text-dark-secondary">
-            {ABOUT_SRL_CANVAS.purpose}
-          </p>
+          <p className="text-sm text-ink-2">{ABOUT_SRL_CANVAS.contextAndGap}</p>
+          <p className="text-sm text-ink-2">{ABOUT_SRL_CANVAS.purpose}</p>
 
           <section className="space-y-2">
-            <h4 className="text-sm font-semibold text-text-light-primary dark:text-text-dark-primary">
-              {ABOUT_SRL_CANVAS.whoShouldUseTitle}
-            </h4>
-            <p className="text-sm text-text-light-secondary dark:text-text-dark-secondary">
-              {ABOUT_SRL_CANVAS.whoShouldUseIntro}
-            </p>
-            <ul className="list-disc space-y-1 pl-5 text-sm text-text-light-secondary dark:text-text-dark-secondary">
+            <h4 className="text-sm font-semibold text-ink">{ABOUT_SRL_CANVAS.whoShouldUseTitle}</h4>
+            <p className="text-sm text-ink-2">{ABOUT_SRL_CANVAS.whoShouldUseIntro}</p>
+            <ul className="list-disc space-y-1 pl-5 text-sm text-ink-2">
               {ABOUT_SRL_CANVAS.whoShouldUse.map((item) => (
                 <li key={item}>{item}</li>
               ))}
@@ -75,33 +68,25 @@ export function AboutSrlCanvasModal({ isOpen, onClose }: AboutSrlCanvasModalProp
           </section>
 
           <section className="space-y-2">
-            <h4 className="text-sm font-semibold text-text-light-primary dark:text-text-dark-primary">
-              {ABOUT_SRL_CANVAS.propositionTitle}
-            </h4>
-            <ul className="list-disc space-y-1 pl-5 text-sm text-text-light-secondary dark:text-text-dark-secondary">
+            <h4 className="text-sm font-semibold text-ink">{ABOUT_SRL_CANVAS.propositionTitle}</h4>
+            <ul className="list-disc space-y-1 pl-5 text-sm text-ink-2">
               {ABOUT_SRL_CANVAS.propositionItems.map((item) => (
                 <li key={item}>{item}</li>
               ))}
             </ul>
-            <p className="text-sm text-text-light-secondary dark:text-text-dark-secondary">
-              {ABOUT_SRL_CANVAS.propositionSummary}
-            </p>
+            <p className="text-sm text-ink-2">{ABOUT_SRL_CANVAS.propositionSummary}</p>
           </section>
 
-          <section className="space-y-2 rounded-lg border border-zinc-200/80 bg-zinc-50 p-3 dark:border-zinc-800/80 dark:bg-zinc-800/60">
-            <h4 className="text-sm font-semibold text-text-light-primary dark:text-text-dark-primary">
-              {ABOUT_SRL_CANVAS.notTitle}
-            </h4>
-            <p className="text-sm text-text-light-secondary dark:text-text-dark-secondary">
-              {ABOUT_SRL_CANVAS.notDescription}
-            </p>
+          <section className="space-y-2 rounded-card border border-stroke bg-inset p-3">
+            <h4 className="text-sm font-semibold text-ink">{ABOUT_SRL_CANVAS.notTitle}</h4>
+            <p className="text-sm text-ink-2">{ABOUT_SRL_CANVAS.notDescription}</p>
           </section>
         </div>
 
-        <div className="flex justify-end border-t border-zinc-200/80 p-4 dark:border-zinc-800/80">
+        <div className="flex justify-end border-t border-stroke p-4">
           <button
             type="button"
-            className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:brightness-110"
+            className="rounded-[10px] bg-brand px-4 py-2 text-sm font-semibold text-brand-fg transition hover:brightness-110"
             onClick={onClose}
           >
             Fechar
