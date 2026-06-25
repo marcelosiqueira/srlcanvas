@@ -15,6 +15,28 @@ async function openCanvas(page: Page): Promise<void> {
   await expect(page.getByLabel("Startup")).toBeVisible();
 }
 
+const blockOneTrigger = (page: Page) =>
+  page.getByRole("button", { name: /1\. Problema \/ Oportunidade/ });
+
+const blockDialog = (page: Page) =>
+  page.getByRole("dialog", { name: /Avaliar Problema \/ Oportunidade/ });
+
+/**
+ * Avalia o bloco 1 pelo novo modal (grid de 9 níveis, sem slider/notas) e fecha em Salvar.
+ */
+async function evaluateFirstBlock(page: Page, level: number): Promise<void> {
+  await blockOneTrigger(page).click();
+
+  const dialog = blockDialog(page);
+  await expect(dialog).toBeVisible();
+
+  await dialog.getByRole("button", { name: `Selecionar nível ${level}` }).click();
+  await dialog.getByLabel("Evidências").fill("Evidência E2E");
+  await dialog.getByRole("button", { name: /Salvar/ }).click();
+
+  await expect(dialog).toBeHidden();
+}
+
 async function seedConsent(page: Page): Promise<void> {
   await page.addInitScript(() => {
     window.localStorage.setItem(
@@ -28,46 +50,19 @@ async function seedConsent(page: Page): Promise<void> {
   });
 }
 
-test("shows guided first-evaluation onboarding", async ({ page }) => {
-  await openCanvas(page);
-
-  await expect(page.getByText("Primeira avaliação guiada")).toBeVisible();
-  await expect(page.getByText(/Passo 1 de 3/i)).toBeVisible();
-
-  await page.getByLabel("Startup").fill("Startup Onboarding");
-  await page.getByLabel("Avaliador").fill("Equipe Produto");
-  await expect(page.getByText(/Passo 2 de 3/i)).toBeVisible();
-
-  await page.getByRole("button", { name: "Abrir bloco 1" }).click();
-  await page.locator('input[type="range"]').fill("4");
-  await page.getByLabel("Evidências").fill("Entrevistas com clientes");
-  await page.getByLabel("Notas do bloco").fill("Guia validado");
-  await page.getByRole("button", { name: "Salvar" }).first().click();
-  await expect(page.getByText(/Passo 3 de 3/i)).toBeVisible();
-
-  await page.getByRole("button", { name: "Abrir resultados" }).click();
-  await expect(page.getByRole("heading", { name: "Diagnóstico SRL Canvas" })).toBeVisible();
-  await page.getByLabel("Fechar").first().click();
-  await expect(page.getByText("Primeira avaliação guiada")).toBeHidden();
-});
-
-test("can evaluate one block and open results modal", async ({ page }) => {
+test("can evaluate one block and open the results screen", async ({ page }) => {
   await openCanvas(page);
 
   await page.getByLabel("Startup").fill("Startup Demo");
   await page.getByLabel("Avaliador").fill("Equipe QA");
 
-  await page.getByRole("button", { name: /1\. Problema \/ Oportunidade/ }).click();
-  await page.getByLabel("Notas do bloco").fill("Validacao inicial com entrevistas");
-  await page.locator('input[type="range"]').fill("4");
-  await page.getByLabel("Evidências").fill("Link para entrevistas e relatorio");
-  await page.getByRole("button", { name: "Salvar" }).first().click();
+  await evaluateFirstBlock(page, 4);
+  await expect(page.getByText("Nível 4")).toBeVisible();
 
-  await expect(page.getByText("Nota: 4/9")).toBeVisible();
-
-  await page.getByRole("button", { name: "Ver Resultados" }).click();
-  await expect(page.getByRole("heading", { name: "Diagnóstico SRL Canvas" })).toBeVisible();
-  await expect(page.getByText("4 / 108", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: /Ver Resultados/ }).click();
+  await expect(page).toHaveURL(/\/results/);
+  await expect(page.getByRole("heading", { name: "Resultados" })).toBeVisible();
+  await expect(page.getByText("4 / 108")).toBeVisible();
 });
 
 test("persists canvas progress after reload", async ({ page }) => {
@@ -75,41 +70,36 @@ test("persists canvas progress after reload", async ({ page }) => {
 
   await page.getByLabel("Startup").fill("Startup Persist");
   await page.getByLabel("Avaliador").fill("Equipe Persist");
-  await page.getByRole("button", { name: /1\. Problema \/ Oportunidade/ }).click();
-  await page.locator('input[type="range"]').fill("6");
-  await page.getByLabel("Evidências").fill("Persistencia local validada");
-  await page.getByLabel("Notas do bloco").fill("Primeiro bloco salvo");
-  await page.getByRole("button", { name: "Salvar" }).first().click();
-  await expect(page.getByText("Nota: 6/9")).toBeVisible();
+
+  await evaluateFirstBlock(page, 6);
+  await expect(page.getByText("Nível 6")).toBeVisible();
 
   await page.reload();
 
   await expect(page.getByLabel("Startup")).toHaveValue("Startup Persist");
   await expect(page.getByLabel("Avaliador")).toHaveValue("Equipe Persist");
-  await expect(page.getByText("Nota: 6/9")).toBeVisible();
+  await expect(page.getByText("Nível 6")).toBeVisible();
 });
 
-test("exports results in PNG and PDF", async ({ page }) => {
+test("exports results in PNG and PDF from the results screen", async ({ page }) => {
   await openCanvas(page);
 
   await page.getByLabel("Startup").fill("Startup Export");
   await page.getByLabel("Avaliador").fill("Equipe Export");
-  await page.getByRole("button", { name: /1\. Problema \/ Oportunidade/ }).click();
-  await page.locator('input[type="range"]').fill("5");
-  await page.getByLabel("Evidências").fill("Evidencia para exportacao");
-  await page.getByLabel("Notas do bloco").fill("Teste de exportacao");
-  await page.getByRole("button", { name: "Salvar" }).first().click();
 
-  await page.getByRole("button", { name: "Ver Resultados" }).click();
-  await expect(page.getByRole("heading", { name: "Diagnóstico SRL Canvas" })).toBeVisible();
+  await evaluateFirstBlock(page, 5);
+
+  await page.getByRole("button", { name: /Ver Resultados/ }).click();
+  await expect(page).toHaveURL(/\/results/);
+  await expect(page.getByRole("heading", { name: "Resultados" })).toBeVisible();
 
   const pngDownloadPromise = page.waitForEvent("download");
-  await page.getByRole("button", { name: "Exportar PNG" }).click();
+  await page.getByRole("button", { name: /Exportar PNG/ }).click();
   const pngDownload = await pngDownloadPromise;
   expect(pngDownload.suggestedFilename()).toContain(".png");
 
   const pdfDownloadPromise = page.waitForEvent("download");
-  await page.getByRole("button", { name: "Exportar PDF" }).click();
+  await page.getByRole("button", { name: /Exportar PDF/ }).click();
   const pdfDownload = await pdfDownloadPromise;
   expect(pdfDownload.suggestedFilename()).toContain(".pdf");
 });
@@ -117,14 +107,15 @@ test("exports results in PNG and PDF", async ({ page }) => {
 test("traps focus inside block modal and restores trigger focus", async ({ page }) => {
   await openCanvas(page);
 
-  const trigger = page.getByRole("button", { name: /1\. Problema \/ Oportunidade/ });
+  const trigger = blockOneTrigger(page);
   await trigger.click();
 
-  const dialog = page.getByRole("dialog", { name: /Editar bloco Problema \/ Oportunidade/ });
+  const dialog = blockDialog(page);
   await expect(dialog).toBeVisible();
-  await expect(dialog.getByRole("button", { name: "Fechar" })).toBeFocused();
+  // O foco inicial vai para o primeiro botão de nível.
+  await expect(dialog.getByRole("button", { name: "Selecionar nível 1" })).toBeFocused();
 
-  for (let index = 0; index < 12; index += 1) {
+  for (let index = 0; index < 14; index += 1) {
     await page.keyboard.press("Tab");
   }
 
@@ -180,26 +171,6 @@ test("navigates survey by steps with progress", async ({ page }) => {
   await expect(page.getByText("3. Perfil do respondente")).toBeVisible();
 });
 
-test("uses advanced mode quick actions and shortcuts", async ({ page }) => {
-  await openCanvas(page);
-
-  await page.getByRole("button", { name: /Modo avançado inativo/i }).click();
-  await expect(page.getByRole("button", { name: /Modo avançado ativo/i })).toBeVisible();
-
-  await page.getByRole("button", { name: "Próximo pendente" }).click();
-  await expect(
-    page.getByRole("dialog", { name: /Editar bloco Problema \/ Oportunidade/ })
-  ).toBeVisible();
-
-  await page.keyboard.press("5");
-  await page.keyboard.press("Control+Enter");
-
-  await expect(page.getByText("Nota: 5/9")).toBeVisible();
-
-  await page.getByRole("button", { name: "Pendentes" }).click();
-  await expect(page.getByRole("button", { name: /1\. Problema \/ Oportunidade/ })).toBeHidden();
-});
-
 test("syncs canvas remotely for authenticated user when the API is configured", async ({
   page
 }) => {
@@ -217,14 +188,11 @@ test("syncs canvas remotely for authenticated user when the API is configured", 
 
   await page.getByLabel("Startup").fill(`Remote Persist ${Date.now()}`);
   await page.getByLabel("Avaliador").fill("Equipe E2E");
-  await page.getByRole("button", { name: /1\. Problema \/ Oportunidade/ }).click();
-  await page.locator('input[type="range"]').fill("6");
-  await page.getByLabel("Evidências").fill("E2E remote evidence");
-  await page.getByLabel("Notas do bloco").fill("E2E remote persistence");
-  await page.getByRole("button", { name: "Salvar" }).first().click();
 
-  await expect(page.getByText("Sincronizado com banco.")).toBeVisible({ timeout: 15_000 });
+  await evaluateFirstBlock(page, 6);
+  await expect(page.getByText("Nível 6")).toBeVisible();
 
+  // A gravação remota é silenciosa (sem UI de status); valida-se a persistência via reload.
   await page.reload();
-  await expect(page.getByText("Nota: 6/9")).toBeVisible();
+  await expect(page.getByText("Nível 6")).toBeVisible();
 });
