@@ -30,7 +30,7 @@ export function AppShell({ title, children }: AppShellProps) {
   const toggleDarkMode = useCanvasStore((state) => state.toggleDarkMode);
 
   const accountName = user?.name?.trim() || user?.email || "Convidado";
-  const accountSubtitle = "Gratuito";
+  const accountSubtitle = user?.name?.trim() && user?.email ? user.email : null;
   const accountInitials = getInitials(accountName);
 
   const handleLogout = async () => {
@@ -78,7 +78,9 @@ export function AppShell({ title, children }: AppShellProps) {
             </span>
             <div className="min-w-0 leading-tight">
               <p className="truncate text-[13px] font-semibold text-ink">{accountName}</p>
-              <p className="truncate text-[11px] text-ink-3">{accountSubtitle}</p>
+              {accountSubtitle && (
+                <p className="truncate text-[11px] text-ink-3">{accountSubtitle}</p>
+              )}
             </div>
           </NavLink>
         </div>
