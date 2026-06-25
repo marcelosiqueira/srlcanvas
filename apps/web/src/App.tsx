@@ -85,20 +85,14 @@ function App() {
             }
             path="/account"
           />
+          {/* Pesquisa acadêmica: rotas PÚBLICAS — qualquer pessoa pode responder,
+              mesmo sem conta (respostas anônimas). */}
           <Route
-            element={
-              <ProtectedRoute>
-                {surveyEnabled ? <ResearchSurveyPage /> : <Navigate replace to="/canvas" />}
-              </ProtectedRoute>
-            }
+            element={surveyEnabled ? <ResearchSurveyPage /> : <Navigate replace to="/" />}
             path="/survey"
           />
           <Route
-            element={
-              <ProtectedRoute>
-                {surveyEnabled ? <ResearchConsentPage /> : <Navigate replace to="/canvas" />}
-              </ProtectedRoute>
-            }
+            element={surveyEnabled ? <ResearchConsentPage /> : <Navigate replace to="/" />}
             path="/survey/consent"
           />
 

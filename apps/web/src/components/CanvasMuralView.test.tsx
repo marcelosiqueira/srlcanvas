@@ -24,7 +24,7 @@ describe("CanvasMuralView", () => {
   it("chama onSelectBlock ao clicar num card", () => {
     const onSelect = vi.fn();
     render(<CanvasMuralView blockState={emptyState} onSelectBlock={onSelect} />);
-    fireEvent.click(screen.getByText(/Problema \/ Oportunidade/).closest("button")!);
+    fireEvent.click(screen.getByText(/Problema e Oportunidade/).closest("button")!);
     expect(onSelect).toHaveBeenCalledWith(1);
   });
 });

@@ -33,7 +33,7 @@ describe("CanvasListView", () => {
   it("chama onSelectBlock com o id do bloco ao clicar", () => {
     const onSelect = vi.fn();
     render(<CanvasListView blockState={emptyState} onSelectBlock={onSelect} />);
-    fireEvent.click(screen.getByText(/Problema \/ Oportunidade/).closest("button")!);
+    fireEvent.click(screen.getByText(/Problema e Oportunidade/).closest("button")!);
     expect(onSelect).toHaveBeenCalledWith(1);
   });
 });

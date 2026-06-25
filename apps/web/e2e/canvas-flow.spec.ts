@@ -16,10 +16,10 @@ async function openCanvas(page: Page): Promise<void> {
 }
 
 const blockOneTrigger = (page: Page) =>
-  page.getByRole("button", { name: /1\. Problema \/ Oportunidade/ });
+  page.getByRole("button", { name: /1\. Problema e Oportunidade/ });
 
 const blockDialog = (page: Page) =>
-  page.getByRole("dialog", { name: /Avaliar Problema \/ Oportunidade/ });
+  page.getByRole("dialog", { name: /Avaliar Problema e Oportunidade/ });
 
 /**
  * Avalia o bloco 1 pelo novo modal (grid de 9 níveis, sem slider/notas) e fecha em Salvar.

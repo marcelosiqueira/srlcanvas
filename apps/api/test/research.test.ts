@@ -195,13 +195,17 @@ describe("research", () => {
   });
 
   describe("POST /api/research/survey-responses", () => {
-    it("retorna 401 sem token", async () => {
+    it("aceita resposta ANÔNIMA (201) sem token, gravando userId null", async () => {
       const response = await app.inject({
         method: "POST",
         url: "/api/research/survey-responses",
         payload: validSurveyResponse
       });
-      expect(response.statusCode).toBe(401);
+      expect(response.statusCode).toBe(201);
+      const { id } = response.json();
+      const stored = await app.prisma.researchSurveyResponse.findUnique({ where: { id } });
+      expect(stored?.userId).toBeNull();
+      expect(stored?.consentAccepted).toBe(true);
     });
 
     it("cria resposta (201) com userId do token, ignorando userId do body", async () => {

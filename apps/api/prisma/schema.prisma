@@ -57,7 +57,7 @@ model ResearchConsent {
 
 model ResearchSurveyResponse {
   id                  String   @id @default(uuid())
-  userId              String   @map("user_id")
+  userId              String?  @map("user_id")
   consentAccepted     Boolean  @map("consent_accepted")
   consentVersion      String   @map("consent_version")
   age18OrMore         Boolean  @map("age_18_or_more")
@@ -73,7 +73,7 @@ model ResearchSurveyResponse {
   metadata            Json
   createdAt           DateTime @default(now()) @map("created_at")
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([createdAt(sort: Desc)])
