@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthProvider";
 import { AppShell } from "../components/AppShell";
 import { AboutSrlCanvasModal } from "../components/AboutSrlCanvasModal";
+import { CanvasComparisonModal } from "../components/CanvasComparisonModal";
 import { EditCanvasWarningModal } from "../components/EditCanvasWarningModal";
 import { ResearchOpinionPanel } from "../components/ResearchOpinionPanel";
 import { listCanvasesByUser, type RemoteCanvas } from "../services/canvasApi";
@@ -42,6 +43,7 @@ export function DashboardPage() {
   const [comparisonTargetId, setComparisonTargetId] = useState<string | null>(null);
   const [rawCanvases, setRawCanvases] = useState<RemoteCanvas[]>([]);
   const [editCanvasId, setEditCanvasId] = useState<string | null>(null);
+  const [compareBaseId, setCompareBaseId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isEnabled || !user) return;
@@ -109,6 +111,7 @@ export function DashboardPage() {
       : null;
 
   const editCanvas = rawCanvases.find((canvas) => canvas.id === editCanvasId) ?? null;
+  const compareBaseEntry = historyEntries.find((entry) => entry.id === compareBaseId) ?? null;
 
   const confirmEditCanvas = () => {
     if (!editCanvas) return;
@@ -405,6 +408,13 @@ export function DashboardPage() {
                               </button>
                               <button
                                 type="button"
+                                onClick={() => setCompareBaseId(entry.id)}
+                                className="rounded-md border border-stroke px-2 py-1 text-xs font-semibold text-ink-2 hover:bg-surface-2"
+                              >
+                                Comparar
+                              </button>
+                              <button
+                                type="button"
                                 onClick={() =>
                                   navigate("/results", {
                                     state: {
@@ -455,6 +465,14 @@ export function DashboardPage() {
             navigate("/canvas/new");
           }}
           onConfirmEdit={confirmEditCanvas}
+        />
+      )}
+
+      {compareBaseEntry && (
+        <CanvasComparisonModal
+          baseEntry={compareBaseEntry}
+          entries={historyEntries}
+          onClose={() => setCompareBaseId(null)}
         />
       )}
     </AppShell>
