@@ -3,8 +3,9 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthProvider";
 import { AppShell } from "../components/AppShell";
 import { AboutSrlCanvasModal } from "../components/AboutSrlCanvasModal";
+import { EditCanvasWarningModal } from "../components/EditCanvasWarningModal";
 import { ResearchOpinionPanel } from "../components/ResearchOpinionPanel";
-import { listCanvasesByUser } from "../services/canvasApi";
+import { listCanvasesByUser, type RemoteCanvas } from "../services/canvasApi";
 import { useCanvasStore } from "../store/useCanvasStore";
 import { buildCanvasTitle } from "../utils/canvasIdentity";
 import { calculateScoreMetrics, maturityStageFromTotal } from "../utils/score";
@@ -32,13 +33,15 @@ const SRL_DOWNLOADS = [
 ] as const;
 
 export function DashboardPage() {
-  const { meta, blocks } = useCanvasStore();
+  const { meta, blocks, replaceCanvas } = useCanvasStore();
   const { isEnabled, user } = useAuth();
   const navigate = useNavigate();
   const [isAboutOpen, setIsAboutOpen] = useState(false);
   const [historyEntries, setHistoryEntries] = useState<CanvasHistoryEntry[]>([]);
   const [historyError, setHistoryError] = useState<string | null>(null);
   const [comparisonTargetId, setComparisonTargetId] = useState<string | null>(null);
+  const [rawCanvases, setRawCanvases] = useState<RemoteCanvas[]>([]);
+  const [editCanvasId, setEditCanvasId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isEnabled || !user) return;
@@ -49,6 +52,7 @@ export function DashboardPage() {
       .then((canvases) => {
         if (!isActive) return;
         setHistoryError(null);
+        setRawCanvases(canvases);
         const entries = buildCanvasHistoryEntries(canvases);
         setHistoryEntries(entries);
         setComparisonTargetId((currentTargetId) => {
@@ -71,6 +75,7 @@ export function DashboardPage() {
         if (!isActive) return;
         setHistoryError(error instanceof Error ? error.message : "Falha ao carregar histórico.");
         setHistoryEntries([]);
+        setRawCanvases([]);
         setComparisonTargetId(null);
       });
 
@@ -102,6 +107,19 @@ export function DashboardPage() {
     latestHistoryEntry && comparisonTargetEntry
       ? compareCanvasHistoryEntries(latestHistoryEntry, comparisonTargetEntry)
       : null;
+
+  const editCanvas = rawCanvases.find((canvas) => canvas.id === editCanvasId) ?? null;
+
+  const confirmEditCanvas = () => {
+    if (!editCanvas) return;
+    replaceCanvas({
+      meta: editCanvas.meta,
+      blocks: editCanvas.blocks,
+      remoteCanvasId: editCanvas.id
+    });
+    setEditCanvasId(null);
+    navigate("/canvas");
+  };
 
   return (
     <AppShell title="Dashboard">
@@ -377,21 +395,30 @@ export function DashboardPage() {
                                 Estágio: {maturityStageFromTotal(entry.metrics.total)}
                               </p>
                             </div>
-                            <button
-                              type="button"
-                              onClick={() =>
-                                navigate("/results", {
-                                  state: {
-                                    scores: entry.scores,
-                                    projectTitle: entry.title,
-                                    updatedAt: entry.updatedAt
-                                  }
-                                })
-                              }
-                              className="rounded-md border border-stroke px-2 py-1 text-xs font-semibold text-ink-2 hover:bg-surface-2"
-                            >
-                              Ver Resultados
-                            </button>
+                            <div className="flex shrink-0 gap-2">
+                              <button
+                                type="button"
+                                onClick={() => setEditCanvasId(entry.id)}
+                                className="rounded-md border border-stroke px-2 py-1 text-xs font-semibold text-ink-2 hover:bg-surface-2"
+                              >
+                                Editar
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  navigate("/results", {
+                                    state: {
+                                      scores: entry.scores,
+                                      projectTitle: entry.title,
+                                      updatedAt: entry.updatedAt
+                                    }
+                                  })
+                                }
+                                className="rounded-md border border-stroke px-2 py-1 text-xs font-semibold text-ink-2 hover:bg-surface-2"
+                              >
+                                Ver Resultados
+                              </button>
+                            </div>
                           </div>
                           <p className="mt-2 font-mono text-xs text-ink-2">
                             [{entry.metrics.total} / 108] - {entry.filledBlocks}/12 blocos
@@ -418,6 +445,18 @@ export function DashboardPage() {
       </div>
 
       <AboutSrlCanvasModal isOpen={isAboutOpen} onClose={() => setIsAboutOpen(false)} />
+
+      {editCanvas && (
+        <EditCanvasWarningModal
+          canvasTitle={editCanvas.title || buildCanvasTitle(editCanvas.meta)}
+          onCancel={() => setEditCanvasId(null)}
+          onCreateNew={() => {
+            setEditCanvasId(null);
+            navigate("/canvas/new");
+          }}
+          onConfirmEdit={confirmEditCanvas}
+        />
+      )}
     </AppShell>
   );
 }
