@@ -1,14 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { AppShell } from "../components/AppShell";
 import { BlockEditModal } from "../components/BlockEditModal";
 import { CanvasListView } from "../components/CanvasListView";
 import { CanvasMuralView } from "../components/CanvasMuralView";
-import { ResultsModal } from "../components/ResultsModal";
 import { useAuth } from "../auth/AuthProvider";
 import { SRL_BLOCKS, SRL_BLOCKS_BY_ID } from "../data/srlBlocks";
 import { saveCanvas } from "../services/canvasApi";
 import { hasMeaningfulCanvasData, useCanvasStore } from "../store/useCanvasStore";
-import { buildCanvasTitle } from "../utils/canvasIdentity";
 import {
   type CanvasLayout,
   readLayoutPreference,
@@ -19,21 +18,13 @@ import { calculateScoreMetrics } from "../utils/score";
 const MAX_SCORE = 108;
 
 export function CanvasPage() {
+  const navigate = useNavigate();
   const { user, isEnabled } = useAuth();
-  const {
-    meta,
-    blocks,
-    setMeta,
-    updateBlock,
-    resetCanvas,
-    darkMode,
-    remoteCanvasId,
-    setRemoteCanvasId
-  } = useCanvasStore();
+  const { meta, blocks, setMeta, updateBlock, resetCanvas, remoteCanvasId, setRemoteCanvasId } =
+    useCanvasStore();
 
   const [layout, setLayout] = useState<CanvasLayout>(() => readLayoutPreference());
   const [editingBlockId, setEditingBlockId] = useState<number | null>(null);
-  const [isResultsOpen, setIsResultsOpen] = useState(false);
 
   const lastSyncedFingerprintRef = useRef<string | null>(null);
   const initialRemoteCreateInFlightRef = useRef(false);
@@ -186,7 +177,7 @@ export function CanvasPage() {
 
           <button
             type="button"
-            onClick={() => setIsResultsOpen(true)}
+            onClick={() => navigate("/results")}
             className="flex items-center gap-1.5 rounded-lg bg-brand px-4 py-2 text-[14px] font-semibold text-brand-fg"
           >
             <span className="material-symbols-outlined text-base" aria-hidden="true">
@@ -211,17 +202,6 @@ export function CanvasPage() {
           value={blocks[editingBlock.id]}
           onClose={() => setEditingBlockId(null)}
           onSave={(value) => updateBlock(editingBlock.id, value)}
-        />
-      )}
-
-      {isResultsOpen && (
-        <ResultsModal
-          darkMode={darkMode}
-          metrics={metrics}
-          scores={scores}
-          projectTitle={buildCanvasTitle(meta)}
-          updatedAt={new Date().toISOString()}
-          onClose={() => setIsResultsOpen(false)}
         />
       )}
     </AppShell>

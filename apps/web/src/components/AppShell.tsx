@@ -12,7 +12,7 @@ interface AppShellProps {
 const NAV_ITEMS = [
   { to: "/dashboard", label: "Dashboard", icon: "grid_view" },
   { to: "/canvas", label: "Meu Canvas", icon: "view_week" },
-  { to: "/canvas", label: "Resultados", icon: "radar" },
+  { to: "/results", label: "Resultados", icon: "radar" },
   { to: "/account", label: "Minha Conta", icon: "person" }
 ];
 

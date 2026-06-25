@@ -13,6 +13,9 @@ const DashboardPage = lazy(() =>
 const CanvasPage = lazy(() =>
   import("./pages/CanvasPage").then((module) => ({ default: module.CanvasPage }))
 );
+const ResultsPage = lazy(() =>
+  import("./pages/ResultsPage").then((module) => ({ default: module.ResultsPage }))
+);
 const NewCanvasPage = lazy(() =>
   import("./pages/NewCanvasPage").then((module) => ({ default: module.NewCanvasPage }))
 );
@@ -57,6 +60,14 @@ function App() {
               </ProtectedRoute>
             }
             path="/canvas"
+          />
+          <Route
+            element={
+              <ProtectedRoute>
+                <ResultsPage />
+              </ProtectedRoute>
+            }
+            path="/results"
           />
           <Route
             element={
