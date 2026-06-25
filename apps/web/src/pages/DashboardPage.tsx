@@ -105,7 +105,7 @@ export function DashboardPage() {
 
   return (
     <AppShell title="Dashboard">
-      <div className="mx-auto max-w-[1080px] space-y-[18px]">
+      <div className="space-y-[18px]">
         {/* Hero Card */}
         <section className="rounded-hero bg-hero p-6 text-white">
           <p className="text-xs font-semibold uppercase tracking-widest text-white/70">

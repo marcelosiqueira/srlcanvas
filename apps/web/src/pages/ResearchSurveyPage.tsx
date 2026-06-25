@@ -633,8 +633,8 @@ export function ResearchSurveyPage() {
 
   if (consentLoading) {
     return (
-      <AppShell title="Questionário Quantitativo SRL Canvas">
-        <div className="mx-auto flex max-w-[820px] flex-col gap-[18px]">
+      <AppShell title="Questionário Quantitativo SRL Canvas" size="narrow">
+        <div className="flex flex-col gap-[18px]">
           <section className="rounded-card border border-stroke bg-surface p-4 text-sm text-ink-2">
             Carregando status do consentimento (TCLE)...
           </section>
@@ -645,8 +645,8 @@ export function ResearchSurveyPage() {
 
   if (!hasConsent) {
     return (
-      <AppShell title="Questionário Quantitativo SRL Canvas">
-        <div className="mx-auto flex max-w-[820px] flex-col gap-[18px]">
+      <AppShell title="Questionário Quantitativo SRL Canvas" size="narrow">
+        <div className="flex flex-col gap-[18px]">
           <section className="rounded-card border border-amber-200 bg-amber-50 p-4 dark:border-amber-700/40 dark:bg-amber-900/20">
             <h2 className="text-sm font-semibold text-amber-800 dark:text-amber-300">
               Consentimento obrigatório
@@ -681,8 +681,8 @@ export function ResearchSurveyPage() {
 
   if (result) {
     return (
-      <AppShell title="Pesquisa Acadêmica">
-        <div className="mx-auto flex max-w-[820px] flex-col gap-[18px]">
+      <AppShell title="Pesquisa Acadêmica" size="narrow">
+        <div className="flex flex-col gap-[18px]">
           <section className="rounded-card border border-emerald-300/80 bg-emerald-50 p-4 dark:border-emerald-700/70 dark:bg-emerald-900/20">
             <h2 className="text-base font-semibold text-emerald-900 dark:text-emerald-200">
               Obrigado pela sua contribuição
@@ -732,8 +732,8 @@ export function ResearchSurveyPage() {
   }
 
   return (
-    <AppShell title="Questionário Quantitativo SRL Canvas">
-      <div className="mx-auto flex max-w-[820px] flex-col gap-[18px]">
+    <AppShell title="Questionário Quantitativo SRL Canvas" size="narrow">
+      <div className="flex flex-col gap-[18px]">
         <section className="rounded-card border border-stroke bg-surface p-4">
           <h2 className="font-display text-base font-bold text-ink">Antes de começar</h2>
           <p className="mt-2 text-sm text-ink-2">

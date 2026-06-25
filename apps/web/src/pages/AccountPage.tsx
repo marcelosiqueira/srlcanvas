@@ -110,8 +110,8 @@ export function AccountPage() {
       .join("") || "?";
 
   return (
-    <AppShell title="Minha Conta">
-      <div className="mx-auto flex max-w-[680px] flex-col gap-[18px]">
+    <AppShell title="Minha Conta" size="narrow">
+      <div className="flex flex-col gap-[18px]">
         {/* Card: Perfil */}
         <section className="rounded-card border border-stroke bg-surface p-5 shadow-sm">
           <h2 className="font-display text-[15px] font-bold text-ink">Perfil</h2>
