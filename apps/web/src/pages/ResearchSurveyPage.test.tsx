@@ -4,6 +4,21 @@ import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, it } from "vitest";
 import { AuthProvider } from "../auth/AuthProvider";
 import { ResearchSurveyPage } from "./ResearchSurveyPage";
+import {
+  makeInitialResearchSurveyValues,
+  saveResearchSurveyResponse
+} from "../services/researchSurveyApi";
+
+function acceptConsent(): void {
+  window.localStorage.setItem(
+    "srl-research-consent-v1",
+    JSON.stringify({
+      consentVersion: "tcle_v1_2025-11-28",
+      acceptedAt: new Date().toISOString(),
+      revokedAt: null
+    })
+  );
+}
 
 describe("ResearchSurveyPage", () => {
   beforeEach(() => {
@@ -24,14 +39,7 @@ describe("ResearchSurveyPage", () => {
   });
 
   it("shows step progress and advances after valid triage", async () => {
-    window.localStorage.setItem(
-      "srl-research-consent-v1",
-      JSON.stringify({
-        consentVersion: "tcle_v1_2025-11-28",
-        acceptedAt: new Date().toISOString(),
-        revokedAt: null
-      })
-    );
+    acceptConsent();
 
     const user = userEvent.setup();
 
@@ -69,5 +77,30 @@ describe("ResearchSurveyPage", () => {
       const payload = JSON.parse(raw ?? "{}") as { currentStepKey?: string };
       expect(payload.currentStepKey).toBe("profile");
     });
+  });
+
+  it("ao reabrir com resposta já enviada, mostra a tela intermediária", async () => {
+    acceptConsent();
+    const values = makeInitialResearchSurveyValues();
+    values.age18OrMore = "sim";
+    values.actedInEcosystem12Months = "sim";
+    values.viewedSrlMaterial = "sim";
+    await saveResearchSurveyResponse({ userId: null, values, nextPath: "/" });
+
+    const user = userEvent.setup();
+
+    render(
+      <MemoryRouter>
+        <AuthProvider>
+          <ResearchSurveyPage />
+        </AuthProvider>
+      </MemoryRouter>
+    );
+
+    expect(await screen.findByText("Você já respondeu")).toBeInTheDocument();
+
+    // Escolher editar leva ao formulário (Etapa 1).
+    await user.click(screen.getByRole("button", { name: "Editar minhas respostas" }));
+    expect(await screen.findByText("Etapa 1 de 7")).toBeInTheDocument();
   });
 });
