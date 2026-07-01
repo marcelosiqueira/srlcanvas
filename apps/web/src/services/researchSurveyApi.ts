@@ -5,11 +5,12 @@ import {
   SURVEY_DIMENSIONS
 } from "../data/researchSurvey";
 import { RESEARCH_SURVEY_CONFIG } from "../config/researchSurveyConfig";
-import { apiFetch, isApiConfigured } from "../lib/apiClient";
+import { ApiError, apiFetch, isApiConfigured } from "../lib/apiClient";
 import type { Likert5, ResearchSurveyFormValues, YesNoAnswer } from "../types/researchSurvey";
 
 const LOCAL_SURVEY_STORAGE_KEY = "srl-research-survey-responses-v1";
 const LOCAL_SURVEY_DRAFT_STORAGE_PREFIX = "srl-research-survey-draft-v1";
+const LOCAL_SURVEY_SUBMISSION_PREFIX = "srl-research-survey-submission-v1";
 
 interface StoredLocalResponse {
   id: string;
@@ -29,6 +30,48 @@ export interface SaveResearchSurveyResult {
   storage: "remote" | "local";
 }
 
+export interface ExistingResearchSubmission {
+  id: string;
+  submittedAt: string;
+  values: ResearchSurveyFormValues;
+  storage: "remote" | "local";
+}
+
+interface StoredSubmissionPointer {
+  id: string;
+  submittedAt: string;
+}
+
+// Forma remota retornada por GET /research/survey-responses(/mine|/:id):
+// topo em camelCase; objetos internos preservam o snake_case gravado.
+interface RemoteSurveyResponse {
+  id: string;
+  createdAt: string;
+  age18OrMore: boolean | null;
+  actedInEcosystem12m: boolean | null;
+  viewedSrlMaterial: boolean | null;
+  profile: Record<string, unknown>;
+  dimensionAnswers: unknown;
+  scaleFeedback: Record<string, unknown>;
+  susAnswers: unknown;
+  adoptionFeedback: Record<string, unknown>;
+  followUp: Record<string, unknown>;
+}
+
+// Forma comum consumida por mapStoredResponseToFormValues (remoto e local
+// convergem para isto: triagem + objetos internos snake_case).
+interface NormalizedStoredResponse {
+  age18OrMore: boolean | null;
+  actedInEcosystem12m: boolean | null;
+  viewedSrlMaterial: boolean | null;
+  profile: Record<string, unknown>;
+  dimensionAnswers: unknown;
+  scaleFeedback: Record<string, unknown>;
+  susAnswers: unknown;
+  adoptionFeedback: Record<string, unknown>;
+  followUp: Record<string, unknown>;
+}
+
 interface StoredSurveyDraft {
   values: ResearchSurveyFormValues;
   nextPath: string;
@@ -43,8 +86,45 @@ const toBoolean = (value: YesNoAnswer): boolean | null => {
   return null;
 };
 
+const fromBoolean = (value: unknown): YesNoAnswer => {
+  if (value === true) return "sim";
+  if (value === false) return "nao";
+  return "";
+};
+
+const asString = (value: unknown): string => (typeof value === "string" ? value : "");
+
+const asNumber = (value: unknown): number | null =>
+  typeof value === "number" && !Number.isNaN(value) ? value : null;
+
+const asLikert = (value: unknown): Likert5 | null =>
+  typeof value === "number" && value >= 1 && value <= 5 ? (value as Likert5) : null;
+
 const makeSurveyDraftKey = (userId: string | null): string =>
   `${LOCAL_SURVEY_DRAFT_STORAGE_PREFIX}:${userId ?? "guest"}`;
+
+const makeSubmissionKey = (userId: string | null): string =>
+  `${LOCAL_SURVEY_SUBMISSION_PREFIX}:${userId ?? "guest"}`;
+
+function rememberResearchSubmission(userId: string | null, id: string): void {
+  const pointer: StoredSubmissionPointer = { id, submittedAt: new Date().toISOString() };
+  window.localStorage.setItem(makeSubmissionKey(userId), JSON.stringify(pointer));
+}
+
+function readSubmissionPointer(userId: string | null): StoredSubmissionPointer | null {
+  const raw = window.localStorage.getItem(makeSubmissionKey(userId));
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw) as StoredSubmissionPointer;
+  } catch {
+    window.localStorage.removeItem(makeSubmissionKey(userId));
+    return null;
+  }
+}
+
+export function clearResearchSurveySubmission(userId: string | null): void {
+  window.localStorage.removeItem(makeSubmissionKey(userId));
+}
 
 const makeInitialDimensionRatings = (): Record<string, Likert5 | null> =>
   DIMENSION_ASSERTIONS.reduce<Record<string, Likert5 | null>>((acc, assertion) => {
@@ -225,6 +305,24 @@ const saveLocally = (payload: Record<string, unknown>): SaveResearchSurveyResult
   return { id, storage: "local" };
 };
 
+// A API usa camelCase no topo do contrato; os objetos internos (profile,
+// dimension_answers etc.) são opacos e seguem como estão.
+const toApiBody = (payload: ReturnType<typeof buildPayload>) => ({
+  consentAccepted: payload.consent_accepted,
+  consentVersion: payload.consent_version,
+  age18OrMore: payload.age_18_or_more,
+  actedInEcosystem12m: payload.acted_in_ecosystem_12m,
+  viewedSrlMaterial: payload.viewed_srl_material,
+  isEligible: payload.is_eligible,
+  profile: payload.profile,
+  dimensionAnswers: payload.dimension_answers,
+  scaleFeedback: payload.scale_feedback,
+  susAnswers: payload.sus_answers,
+  adoptionFeedback: payload.adoption_feedback,
+  followUp: payload.follow_up,
+  metadata: payload.metadata
+});
+
 export async function saveResearchSurveyResponse(
   input: SaveResearchSurveyInput
 ): Promise<SaveResearchSurveyResult> {
@@ -232,33 +330,223 @@ export async function saveResearchSurveyResponse(
 
   // Com API configurada, envia também respostas ANÔNIMAS (input.userId null);
   // o backend grava userId null. Só cai em local quando não há API.
-  if (!isApiConfigured) {
-    return saveLocally(payload);
+  const result = !isApiConfigured
+    ? saveLocally(payload)
+    : await apiFetch<{ id: string }>("/research/survey-responses", {
+        method: "POST",
+        body: toApiBody(payload)
+      }).then((data): SaveResearchSurveyResult => ({ id: data.id, storage: "remote" }));
+
+  // Ponteiro local para reabrir/editar esta resposta depois (mesmo browser).
+  rememberResearchSubmission(input.userId, result.id);
+  return result;
+}
+
+const updateLocally = (id: string, payload: Record<string, unknown>): SaveResearchSurveyResult => {
+  const current: StoredLocalResponse[] = JSON.parse(
+    window.localStorage.getItem(LOCAL_SURVEY_STORAGE_KEY) ?? "[]"
+  ) as StoredLocalResponse[];
+
+  const index = current.findIndex((entry) => entry.id === id);
+  if (index >= 0) {
+    current[index] = { ...current[index], payload };
+  } else {
+    current.unshift({ id, createdAt: new Date().toISOString(), payload });
   }
 
-  // A API usa camelCase no topo do contrato; os objetos internos (profile,
-  // dimension_answers etc.) são opacos e seguem como estão.
-  const data = await apiFetch<{ id: string }>("/research/survey-responses", {
-    method: "POST",
-    body: {
-      consentAccepted: payload.consent_accepted,
-      consentVersion: payload.consent_version,
-      age18OrMore: payload.age_18_or_more,
-      actedInEcosystem12m: payload.acted_in_ecosystem_12m,
-      viewedSrlMaterial: payload.viewed_srl_material,
-      isEligible: payload.is_eligible,
-      profile: payload.profile,
-      dimensionAnswers: payload.dimension_answers,
-      scaleFeedback: payload.scale_feedback,
-      susAnswers: payload.sus_answers,
-      adoptionFeedback: payload.adoption_feedback,
-      followUp: payload.follow_up,
-      metadata: payload.metadata
+  window.localStorage.setItem(LOCAL_SURVEY_STORAGE_KEY, JSON.stringify(current));
+  return { id, storage: "local" };
+};
+
+export async function updateResearchSurveyResponse(
+  id: string,
+  input: SaveResearchSurveyInput
+): Promise<SaveResearchSurveyResult> {
+  const payload = buildPayload(input);
+
+  const result = !isApiConfigured
+    ? updateLocally(id, payload)
+    : await apiFetch<{ id: string }>(`/research/survey-responses/${id}`, {
+        method: "PUT",
+        body: toApiBody(payload)
+      }).then((data): SaveResearchSurveyResult => ({ id: data.id, storage: "remote" }));
+
+  rememberResearchSubmission(input.userId, result.id);
+  return result;
+}
+
+function mergeDimensionAnswers(
+  base: ResearchSurveyFormValues["dimensionAnswers"],
+  stored: unknown
+): ResearchSurveyFormValues["dimensionAnswers"] {
+  if (!stored || typeof stored !== "object") return base;
+  const source = stored as Record<string, { ratings?: unknown; comment?: unknown }>;
+  const result = { ...base };
+
+  (Object.keys(base) as Array<keyof typeof base>).forEach((key) => {
+    const entry = source[key as string];
+    if (entry && typeof entry === "object") {
+      result[key] = {
+        ratings: { ...base[key].ratings, ...((entry.ratings as object) ?? {}) },
+        comment: typeof entry.comment === "string" ? entry.comment : base[key].comment
+      };
     }
   });
 
+  return result;
+}
+
+function mergeSusAnswers(
+  base: ResearchSurveyFormValues["susAnswers"],
+  stored: unknown
+): ResearchSurveyFormValues["susAnswers"] {
+  if (!stored || typeof stored !== "object") return base;
+  const source = stored as Record<string, unknown>;
+  const result = { ...base };
+
+  Object.keys(result).forEach((key) => {
+    const value = asLikert(source[key]);
+    if (value !== null) result[Number(key)] = value;
+  });
+
+  return result;
+}
+
+export function mapStoredResponseToFormValues(
+  stored: NormalizedStoredResponse
+): ResearchSurveyFormValues {
+  const base = makeInitialResearchSurveyValues();
+  const profile = (stored.profile ?? {}) as Record<string, unknown>;
+  const scale = (stored.scaleFeedback ?? {}) as Record<string, unknown>;
+  const adoption = (stored.adoptionFeedback ?? {}) as Record<string, unknown>;
+  const follow = (stored.followUp ?? {}) as Record<string, unknown>;
+
   return {
-    id: data.id,
-    storage: "remote"
+    ...base,
+    age18OrMore: fromBoolean(stored.age18OrMore),
+    actedInEcosystem12Months: fromBoolean(stored.actedInEcosystem12m),
+    viewedSrlMaterial: fromBoolean(stored.viewedSrlMaterial),
+    primaryRole: asString(profile.primary_role),
+    primaryRoleOther: asString(profile.primary_role_other),
+    experienceYears: asString(profile.experience_years),
+    sector: asString(profile.sector),
+    sectorOther: asString(profile.sector_other),
+    startupStage: asString(profile.startup_stage),
+    locationCountry: asString(profile.location_country),
+    teamSize: asString(profile.team_size),
+    dimensionAnswers: mergeDimensionAnswers(base.dimensionAnswers, stored.dimensionAnswers),
+    scaleClarity: asLikert(scale.clarity_1_9),
+    scaleUtility: asLikert(scale.utility_1_9),
+    preferredScale: asString(scale.preferred_scale),
+    preferredScaleOther: asString(scale.preferred_scale_other),
+    preferredScaleReason: asString(scale.preferred_scale_reason),
+    susAnswers: mergeSusAnswers(base.susAnswers, stored.susAnswers),
+    usageContexts: Array.isArray(adoption.usage_contexts)
+      ? (adoption.usage_contexts as unknown[]).filter(
+          (item): item is string => typeof item === "string"
+        )
+      : [],
+    usageContextOther: asString(adoption.usage_context_other),
+    npsScore: asNumber(adoption.nps_score),
+    acceptableTime: asString(adoption.acceptable_time),
+    adoptionBarriers: asString(adoption.adoption_barriers),
+    suggestedImprovements: asString(adoption.suggested_improvements),
+    wantsFinalVersion: fromBoolean(follow.wants_final_version),
+    acceptsInterview: fromBoolean(follow.accepts_interview),
+    preferredContact: asString(follow.preferred_contact),
+    allowsAnonymousQuotes: fromBoolean(follow.allows_anonymous_quotes)
   };
+}
+
+const normalizeRemote = (data: RemoteSurveyResponse): NormalizedStoredResponse => ({
+  age18OrMore: data.age18OrMore,
+  actedInEcosystem12m: data.actedInEcosystem12m,
+  viewedSrlMaterial: data.viewedSrlMaterial,
+  profile: data.profile,
+  dimensionAnswers: data.dimensionAnswers,
+  scaleFeedback: data.scaleFeedback,
+  susAnswers: data.susAnswers,
+  adoptionFeedback: data.adoptionFeedback,
+  followUp: data.followUp
+});
+
+// O payload local (buildPayload) usa snake_case no topo.
+const normalizeLocal = (payload: Record<string, unknown>): NormalizedStoredResponse => ({
+  age18OrMore: (payload.age_18_or_more as boolean | null) ?? null,
+  actedInEcosystem12m: (payload.acted_in_ecosystem_12m as boolean | null) ?? null,
+  viewedSrlMaterial: (payload.viewed_srl_material as boolean | null) ?? null,
+  profile: (payload.profile as Record<string, unknown>) ?? {},
+  dimensionAnswers: payload.dimension_answers,
+  scaleFeedback: (payload.scale_feedback as Record<string, unknown>) ?? {},
+  susAnswers: payload.sus_answers,
+  adoptionFeedback: (payload.adoption_feedback as Record<string, unknown>) ?? {},
+  followUp: (payload.follow_up as Record<string, unknown>) ?? {}
+});
+
+function loadLocalSubmission(userId: string | null): ExistingResearchSubmission | null {
+  // O ponteiro é a fonte de verdade: sem ponteiro, nada a reabrir.
+  const pointer = readSubmissionPointer(userId);
+  if (!pointer) return null;
+
+  const list: StoredLocalResponse[] = JSON.parse(
+    window.localStorage.getItem(LOCAL_SURVEY_STORAGE_KEY) ?? "[]"
+  ) as StoredLocalResponse[];
+
+  const entry = list.find((item) => item.id === pointer.id);
+  if (!entry) return null;
+
+  return {
+    id: entry.id,
+    submittedAt: entry.createdAt,
+    values: mapStoredResponseToFormValues(normalizeLocal(entry.payload)),
+    storage: "local"
+  };
+}
+
+/**
+ * Resposta JÁ ENVIADA por este participante, para a tela de reabertura.
+ * Logado+API → GET /mine. Anônimo+API → ponteiro local + GET /:id.
+ * Sem API → localStorage. Retorna null quando não há resposta.
+ */
+export async function loadSubmittedResearchResponse(
+  userId: string | null
+): Promise<ExistingResearchSubmission | null> {
+  if (!isApiConfigured) {
+    return loadLocalSubmission(userId);
+  }
+
+  if (userId) {
+    try {
+      const data = await apiFetch<RemoteSurveyResponse>("/research/survey-responses/mine");
+      return {
+        id: data.id,
+        submittedAt: data.createdAt,
+        values: mapStoredResponseToFormValues(normalizeRemote(data)),
+        storage: "remote"
+      };
+    } catch {
+      // 404 = sem resposta; outras falhas tratamos como "nada a reabrir".
+      return null;
+    }
+  }
+
+  // Anônimo: depende do ponteiro guardado neste browser ao enviar.
+  const pointer = readSubmissionPointer(userId);
+  if (!pointer) return null;
+
+  try {
+    const data = await apiFetch<RemoteSurveyResponse>(`/research/survey-responses/${pointer.id}`);
+    return {
+      id: data.id,
+      submittedAt: data.createdAt,
+      values: mapStoredResponseToFormValues(normalizeRemote(data)),
+      storage: "remote"
+    };
+  } catch (error) {
+    // Registro sumiu no servidor: limpa o ponteiro obsoleto e segue como novo.
+    if (error instanceof ApiError && error.status === 404) {
+      clearResearchSurveySubmission(userId);
+    }
+    return null;
+  }
 }

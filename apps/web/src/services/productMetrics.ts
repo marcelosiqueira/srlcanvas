@@ -58,6 +58,8 @@ interface ProductMetricsPayloadMap {
     stepCount: number;
     completionSeconds: number | null;
     storage: "remote" | "local";
+    // true quando o envio atualizou uma resposta existente (edição/refazer).
+    updated: boolean;
   };
   survey_step_abandoned: BaseProductMetricsPayload & {
     stepKey: ProductSurveyStepKey;
@@ -119,7 +121,7 @@ export const PRODUCT_METRICS_EVENT_DICTIONARY: Record<
   },
   survey_completed: {
     description: "Envio concluído da survey acadêmica.",
-    payloadFields: ["sessionId", "eligible", "stepCount", "completionSeconds", "storage"]
+    payloadFields: ["sessionId", "eligible", "stepCount", "completionSeconds", "storage", "updated"]
   },
   survey_step_abandoned: {
     description: "Abandono da survey na etapa corrente.",

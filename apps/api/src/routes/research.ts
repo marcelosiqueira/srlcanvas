@@ -1,7 +1,47 @@
-import type { Prisma } from "@prisma/client";
+import type { Prisma, ResearchSurveyResponse } from "@prisma/client";
 import type { FastifyInstance } from "fastify";
 
 import { createConsentSchema, createSurveyResponseSchema } from "../schemas/research.js";
+
+function serializeSurveyResponse(response: ResearchSurveyResponse) {
+  return {
+    id: response.id,
+    createdAt: response.createdAt.toISOString(),
+    consentAccepted: response.consentAccepted,
+    consentVersion: response.consentVersion,
+    age18OrMore: response.age18OrMore,
+    actedInEcosystem12m: response.actedInEcosystem12m,
+    viewedSrlMaterial: response.viewedSrlMaterial,
+    isEligible: response.isEligible,
+    profile: response.profile,
+    dimensionAnswers: response.dimensionAnswers,
+    scaleFeedback: response.scaleFeedback,
+    susAnswers: response.susAnswers,
+    adoptionFeedback: response.adoptionFeedback,
+    followUp: response.followUp,
+    metadata: response.metadata
+  };
+}
+
+// Campos graváveis de uma resposta (sem tocar userId nem createdAt).
+// Tipo inferido para servir tanto a create quanto a update.
+function surveyResponseData(data: ReturnType<typeof createSurveyResponseSchema.parse>) {
+  return {
+    consentAccepted: data.consentAccepted,
+    consentVersion: data.consentVersion,
+    age18OrMore: data.age18OrMore,
+    actedInEcosystem12m: data.actedInEcosystem12m,
+    viewedSrlMaterial: data.viewedSrlMaterial,
+    isEligible: data.isEligible,
+    profile: data.profile as Prisma.InputJsonValue,
+    dimensionAnswers: data.dimensionAnswers as Prisma.InputJsonValue,
+    scaleFeedback: data.scaleFeedback as Prisma.InputJsonValue,
+    susAnswers: data.susAnswers as Prisma.InputJsonValue,
+    adoptionFeedback: data.adoptionFeedback as Prisma.InputJsonValue,
+    followUp: data.followUp as Prisma.InputJsonValue,
+    metadata: data.metadata as Prisma.InputJsonValue
+  };
+}
 
 export async function researchRoutes(app: FastifyInstance): Promise<void> {
   app.get("/research/consent", { preHandler: app.authenticate }, async (request) => {
@@ -71,22 +111,71 @@ export async function researchRoutes(app: FastifyInstance): Promise<void> {
     const response = await app.prisma.researchSurveyResponse.create({
       data: {
         userId,
-        consentAccepted: data.consentAccepted,
-        consentVersion: data.consentVersion,
-        age18OrMore: data.age18OrMore,
-        actedInEcosystem12m: data.actedInEcosystem12m,
-        viewedSrlMaterial: data.viewedSrlMaterial,
-        isEligible: data.isEligible,
-        profile: data.profile as Prisma.InputJsonValue,
-        dimensionAnswers: data.dimensionAnswers as Prisma.InputJsonValue,
-        scaleFeedback: data.scaleFeedback as Prisma.InputJsonValue,
-        susAnswers: data.susAnswers as Prisma.InputJsonValue,
-        adoptionFeedback: data.adoptionFeedback as Prisma.InputJsonValue,
-        followUp: data.followUp as Prisma.InputJsonValue,
-        metadata: data.metadata as Prisma.InputJsonValue
+        ...surveyResponseData(data)
       }
     });
 
     return reply.code(201).send({ id: response.id });
+  });
+
+  // Resposta mais recente do usuario logado (para reabrir/editar).
+  app.get(
+    "/research/survey-responses/mine",
+    { preHandler: app.authenticate },
+    async (request, reply) => {
+      const response = await app.prisma.researchSurveyResponse.findFirst({
+        where: { userId: request.userId },
+        orderBy: { createdAt: "desc" }
+      });
+
+      if (!response) {
+        return reply.code(404).send({ error: "not_found" });
+      }
+
+      return serializeSurveyResponse(response);
+    }
+  );
+
+  // Resposta ANONIMA pelo id (o UUID funciona como token de capacidade).
+  // Respostas identificadas nao sao expostas aqui — o dono usa /mine.
+  app.get("/research/survey-responses/:id", async (request, reply) => {
+    const { id } = request.params as { id: string };
+
+    const response = await app.prisma.researchSurveyResponse.findUnique({ where: { id } });
+    if (!response || response.userId !== null) {
+      return reply.code(404).send({ error: "not_found" });
+    }
+
+    return serializeSurveyResponse(response);
+  });
+
+  // Atualiza uma resposta existente (mantem um registro por participante).
+  // Identificada => so o dono autenticado; anonima => o id basta.
+  app.put("/research/survey-responses/:id", async (request, reply) => {
+    const { id } = request.params as { id: string };
+
+    let userId: string | null = null;
+    try {
+      await request.jwtVerify();
+      userId = (request.user as { sub: string }).sub;
+    } catch {
+      userId = null;
+    }
+
+    const existing = await app.prisma.researchSurveyResponse.findUnique({ where: { id } });
+    if (!existing) {
+      return reply.code(404).send({ error: "not_found" });
+    }
+    if (existing.userId !== null && existing.userId !== userId) {
+      return reply.code(403).send({ error: "forbidden" });
+    }
+
+    const data = createSurveyResponseSchema.parse(request.body);
+    const response = await app.prisma.researchSurveyResponse.update({
+      where: { id },
+      data: surveyResponseData(data)
+    });
+
+    return reply.send({ id: response.id });
   });
 }

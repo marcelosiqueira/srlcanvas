@@ -253,4 +253,213 @@ describe("research", () => {
       expect(response.json().error).toBe("validation_error");
     });
   });
+
+  describe("GET /api/research/survey-responses/mine", () => {
+    it("retorna 401 sem token", async () => {
+      const response = await app.inject({
+        method: "GET",
+        url: "/api/research/survey-responses/mine"
+      });
+      expect(response.statusCode).toBe(401);
+    });
+
+    it("retorna 404 quando o usuario ainda nao respondeu", async () => {
+      const response = await app.inject({
+        method: "GET",
+        url: "/api/research/survey-responses/mine",
+        headers: authHeaders(userA.token)
+      });
+      expect(response.statusCode).toBe(404);
+    });
+
+    it("retorna a resposta mais recente do usuario", async () => {
+      await app.inject({
+        method: "POST",
+        url: "/api/research/survey-responses",
+        headers: authHeaders(userA.token),
+        payload: { ...validSurveyResponse, profile: { role: "antiga" } }
+      });
+      const second = await app.inject({
+        method: "POST",
+        url: "/api/research/survey-responses",
+        headers: authHeaders(userA.token),
+        payload: { ...validSurveyResponse, profile: { role: "recente" } }
+      });
+      const recentId = second.json().id as string;
+
+      const response = await app.inject({
+        method: "GET",
+        url: "/api/research/survey-responses/mine",
+        headers: authHeaders(userA.token)
+      });
+      expect(response.statusCode).toBe(200);
+      const body = response.json();
+      expect(body.id).toBe(recentId);
+      expect(body.profile).toEqual({ role: "recente" });
+      expect(body.dimensionAnswers).toEqual(validSurveyResponse.dimensionAnswers);
+    });
+
+    it("nao enxerga a resposta de outro usuario", async () => {
+      await app.inject({
+        method: "POST",
+        url: "/api/research/survey-responses",
+        headers: authHeaders(userA.token),
+        payload: validSurveyResponse
+      });
+      const response = await app.inject({
+        method: "GET",
+        url: "/api/research/survey-responses/mine",
+        headers: authHeaders(userB.token)
+      });
+      expect(response.statusCode).toBe(404);
+    });
+  });
+
+  describe("GET /api/research/survey-responses/:id", () => {
+    it("retorna resposta ANONIMA pelo id (token de capacidade)", async () => {
+      const created = await app.inject({
+        method: "POST",
+        url: "/api/research/survey-responses",
+        payload: { ...validSurveyResponse, profile: { role: "anon" } }
+      });
+      const id = created.json().id as string;
+
+      const response = await app.inject({
+        method: "GET",
+        url: `/api/research/survey-responses/${id}`
+      });
+      expect(response.statusCode).toBe(200);
+      expect(response.json().profile).toEqual({ role: "anon" });
+    });
+
+    it("retorna 404 para resposta IDENTIFICADA (nao vaza por id)", async () => {
+      const created = await app.inject({
+        method: "POST",
+        url: "/api/research/survey-responses",
+        headers: authHeaders(userA.token),
+        payload: validSurveyResponse
+      });
+      const id = created.json().id as string;
+
+      const response = await app.inject({
+        method: "GET",
+        url: `/api/research/survey-responses/${id}`
+      });
+      expect(response.statusCode).toBe(404);
+    });
+
+    it("retorna 404 para id inexistente", async () => {
+      const response = await app.inject({
+        method: "GET",
+        url: "/api/research/survey-responses/00000000-0000-0000-0000-000000000000"
+      });
+      expect(response.statusCode).toBe(404);
+    });
+  });
+
+  describe("PUT /api/research/survey-responses/:id", () => {
+    it("atualiza resposta ANONIMA pelo id, sem token", async () => {
+      const created = await app.inject({
+        method: "POST",
+        url: "/api/research/survey-responses",
+        payload: { ...validSurveyResponse, profile: { role: "v1" } }
+      });
+      const id = created.json().id as string;
+
+      const update = await app.inject({
+        method: "PUT",
+        url: `/api/research/survey-responses/${id}`,
+        payload: { ...validSurveyResponse, profile: { role: "v2" } }
+      });
+      expect(update.statusCode).toBe(200);
+      expect(update.json().id).toBe(id);
+
+      const stored = await app.prisma.researchSurveyResponse.findUnique({ where: { id } });
+      expect(stored?.profile).toEqual({ role: "v2" });
+      expect(stored?.userId).toBeNull();
+    });
+
+    it("dono autenticado atualiza a propria resposta", async () => {
+      const created = await app.inject({
+        method: "POST",
+        url: "/api/research/survey-responses",
+        headers: authHeaders(userA.token),
+        payload: { ...validSurveyResponse, profile: { role: "v1" } }
+      });
+      const id = created.json().id as string;
+
+      const update = await app.inject({
+        method: "PUT",
+        url: `/api/research/survey-responses/${id}`,
+        headers: authHeaders(userA.token),
+        payload: { ...validSurveyResponse, profile: { role: "v2" } }
+      });
+      expect(update.statusCode).toBe(200);
+
+      const stored = await app.prisma.researchSurveyResponse.findUnique({ where: { id } });
+      expect(stored?.profile).toEqual({ role: "v2" });
+      expect(stored?.userId).toBe(userA.userId);
+    });
+
+    it("retorna 403 quando outro usuario tenta atualizar resposta identificada", async () => {
+      const created = await app.inject({
+        method: "POST",
+        url: "/api/research/survey-responses",
+        headers: authHeaders(userA.token),
+        payload: validSurveyResponse
+      });
+      const id = created.json().id as string;
+
+      const update = await app.inject({
+        method: "PUT",
+        url: `/api/research/survey-responses/${id}`,
+        headers: authHeaders(userB.token),
+        payload: validSurveyResponse
+      });
+      expect(update.statusCode).toBe(403);
+    });
+
+    it("retorna 403 quando anonimo tenta atualizar resposta identificada", async () => {
+      const created = await app.inject({
+        method: "POST",
+        url: "/api/research/survey-responses",
+        headers: authHeaders(userA.token),
+        payload: validSurveyResponse
+      });
+      const id = created.json().id as string;
+
+      const update = await app.inject({
+        method: "PUT",
+        url: `/api/research/survey-responses/${id}`,
+        payload: validSurveyResponse
+      });
+      expect(update.statusCode).toBe(403);
+    });
+
+    it("retorna 404 para id inexistente", async () => {
+      const update = await app.inject({
+        method: "PUT",
+        url: "/api/research/survey-responses/00000000-0000-0000-0000-000000000000",
+        payload: validSurveyResponse
+      });
+      expect(update.statusCode).toBe(404);
+    });
+
+    it("retorna 400 para body invalido", async () => {
+      const created = await app.inject({
+        method: "POST",
+        url: "/api/research/survey-responses",
+        payload: validSurveyResponse
+      });
+      const id = created.json().id as string;
+
+      const update = await app.inject({
+        method: "PUT",
+        url: `/api/research/survey-responses/${id}`,
+        payload: { ...validSurveyResponse, consentAccepted: false }
+      });
+      expect(update.statusCode).toBe(400);
+      expect(update.json().error).toBe("validation_error");
+    });
+  });
 });

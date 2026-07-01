@@ -20,11 +20,14 @@ import {
 } from "../data/researchSurvey";
 import {
   clearResearchSurveyDraft,
+  type ExistingResearchSubmission,
   loadResearchSurveyDraft,
+  loadSubmittedResearchResponse,
   makeInitialResearchSurveyValues,
   saveResearchSurveyDraft,
   saveResearchSurveyResponse,
-  type SaveResearchSurveyResult
+  type SaveResearchSurveyResult,
+  updateResearchSurveyResponse
 } from "../services/researchSurveyApi";
 import { getResearchConsentStatus } from "../services/researchConsentApi";
 import { createProductMetricsSessionId, trackProductMetricEvent } from "../services/productMetrics";
@@ -224,6 +227,11 @@ export function ResearchSurveyPage() {
   const [hasConsent, setHasConsent] = useState(false);
   const [consentError, setConsentError] = useState<string | null>(null);
   const [isDraftHydrated, setIsDraftHydrated] = useState(false);
+  const [submissionChecked, setSubmissionChecked] = useState(false);
+  const [existingSubmission, setExistingSubmission] = useState<ExistingResearchSubmission | null>(
+    null
+  );
+  const [interstitialChoiceMade, setInterstitialChoiceMade] = useState(false);
   const [draftSavedAt, setDraftSavedAt] = useState<string | null>(null);
   const [startedAtIso, setStartedAtIso] = useState<string>(() => new Date().toISOString());
   const [completedDurationLabel, setCompletedDurationLabel] = useState<string | null>(null);
@@ -274,6 +282,33 @@ export function ResearchSurveyPage() {
     }
 
     setIsDraftHydrated(true);
+  }, [surveyEnabled, user?.id]);
+
+  // Detecta resposta já enviada por este participante (para a tela de reabertura).
+  useEffect(() => {
+    if (!surveyEnabled) {
+      setSubmissionChecked(true);
+      return;
+    }
+
+    let alive = true;
+    setSubmissionChecked(false);
+    setInterstitialChoiceMade(false);
+
+    void loadSubmittedResearchResponse(user?.id ?? null)
+      .then((submission) => {
+        if (alive) setExistingSubmission(submission);
+      })
+      .catch(() => {
+        // Falha ao consultar não deve travar a pesquisa: segue como resposta nova.
+      })
+      .finally(() => {
+        if (alive) setSubmissionChecked(true);
+      });
+
+    return () => {
+      alive = false;
+    };
   }, [surveyEnabled, user?.id]);
 
   useEffect(() => {
@@ -539,24 +574,37 @@ export function ResearchSurveyPage() {
     setIsSubmitting(true);
 
     try {
-      const saved = await saveResearchSurveyResponse({
+      const input = {
         userId: user?.id ?? null,
         values,
         nextPath,
         startedAtIso
-      });
+      };
+      // Já existe resposta deste participante => atualiza o mesmo registro
+      // (um registro por participante, sempre a versão mais recente).
+      const saved = existingSubmission
+        ? await updateResearchSurveyResponse(existingSubmission.id, input)
+        : await saveResearchSurveyResponse(input);
       const completionSeconds = getDurationInSeconds(startedAtIso);
       trackProductMetricEvent("survey_completed", {
         sessionId: surveySessionIdRef.current,
         eligible: isEligible,
         stepCount: surveySteps.length,
         completionSeconds,
-        storage: saved.storage
+        storage: saved.storage,
+        updated: Boolean(existingSubmission)
       });
       surveyCompletedTrackedRef.current = true;
       setCompletedDurationLabel(formatDurationLabel(startedAtIso));
       clearResearchSurveyDraft(user?.id ?? null);
       setDraftSavedAt(null);
+      // Aponta para o registro salvo para que um próximo envio também atualize.
+      setExistingSubmission({
+        id: saved.id,
+        submittedAt: new Date().toISOString(),
+        values,
+        storage: saved.storage
+      });
       setResult(saved);
     } catch (error) {
       setSubmitError(error instanceof Error ? error.message : "Falha ao enviar pesquisa.");
@@ -679,6 +727,104 @@ export function ResearchSurveyPage() {
     );
   }
 
+  if (!submissionChecked) {
+    return (
+      <ResearchShell title="Questionário Quantitativo SRL Canvas">
+        <div className="flex flex-col gap-[18px]">
+          <section className="rounded-card border border-stroke bg-surface p-4 text-sm text-ink-2">
+            Verificando se você já respondeu...
+          </section>
+        </div>
+      </ResearchShell>
+    );
+  }
+
+  if (existingSubmission && !interstitialChoiceMade && !result) {
+    const submittedAtLabel = (() => {
+      const date = new Date(existingSubmission.submittedAt);
+      return Number.isNaN(date.getTime())
+        ? null
+        : date.toLocaleString("pt-BR", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit"
+          });
+    })();
+
+    const chooseEdit = () => {
+      setValues(existingSubmission.values);
+      setStartedAtIso(new Date().toISOString());
+      setCurrentStepKey("triage");
+      setErrors([]);
+      setSubmitError(null);
+      setInterstitialChoiceMade(true);
+    };
+
+    const chooseRestart = () => {
+      if (
+        !window.confirm(
+          "Isso vai descartar suas respostas anteriores quando você enviar. Deseja recomeçar do zero?"
+        )
+      ) {
+        return;
+      }
+      clearResearchSurveyDraft(user?.id ?? null);
+      setValues(makeInitialResearchSurveyValues());
+      setDraftSavedAt(null);
+      setStartedAtIso(new Date().toISOString());
+      setCurrentStepKey("triage");
+      setErrors([]);
+      setSubmitError(null);
+      setInterstitialChoiceMade(true);
+    };
+
+    return (
+      <ResearchShell title="Questionário Quantitativo SRL Canvas">
+        <div className="flex flex-col gap-[18px]">
+          <section className="rounded-card border border-stroke bg-surface p-4">
+            <h2 className="font-display text-base font-bold text-ink">Você já respondeu</h2>
+            <p className="mt-2 text-sm text-ink-2">
+              Encontramos uma resposta sua
+              {submittedAtLabel ? (
+                <>
+                  {" "}
+                  enviada em <strong>{submittedAtLabel}</strong>
+                </>
+              ) : null}
+              . Você pode revisar e ajustar o que já respondeu ou recomeçar do zero — em ambos os
+              casos, a sua resposta anterior será substituída por esta nova versão.
+            </p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={chooseEdit}
+                className="rounded-[10px] bg-brand px-4 py-2 text-sm font-semibold text-brand-fg hover:brightness-110"
+              >
+                Editar minhas respostas
+              </button>
+              <button
+                type="button"
+                onClick={chooseRestart}
+                className="rounded-[10px] border border-stroke px-4 py-2 text-sm font-semibold text-ink-2 hover:bg-surface-2"
+              >
+                Responder do zero
+              </button>
+              <button
+                type="button"
+                onClick={() => navigate(nextPath)}
+                className="rounded-[10px] border border-stroke px-4 py-2 text-sm font-semibold text-ink-2 hover:bg-surface-2"
+              >
+                Voltar
+              </button>
+            </div>
+          </section>
+        </div>
+      </ResearchShell>
+    );
+  }
+
   if (result) {
     return (
       <ResearchShell title="Pesquisa Acadêmica">
@@ -712,7 +858,13 @@ export function ResearchSurveyPage() {
                 onClick={() => {
                   clearResearchSurveyDraft(user?.id ?? null);
                   setResult(null);
-                  setValues(makeInitialResearchSurveyValues());
+                  // Recarrega a resposta enviada para revisão (atualiza o mesmo registro).
+                  setValues(
+                    existingSubmission
+                      ? existingSubmission.values
+                      : makeInitialResearchSurveyValues()
+                  );
+                  setInterstitialChoiceMade(true);
                   setDraftSavedAt(null);
                   setCompletedDurationLabel(null);
                   setStartedAtIso(new Date().toISOString());
@@ -722,7 +874,7 @@ export function ResearchSurveyPage() {
                 }}
                 className="rounded-[10px] border border-stroke px-4 py-2 text-sm font-semibold text-ink-2 hover:bg-surface-2"
               >
-                Enviar nova resposta
+                Editar minha resposta
               </button>
             </div>
           </section>
