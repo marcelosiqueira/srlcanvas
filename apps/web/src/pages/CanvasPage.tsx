@@ -5,7 +5,7 @@ import { BlockEditModal } from "../components/BlockEditModal";
 import { CanvasListView } from "../components/CanvasListView";
 import { CanvasMuralView } from "../components/CanvasMuralView";
 import { useAuth } from "../auth/AuthProvider";
-import { SRL_BLOCKS, SRL_BLOCKS_BY_ID } from "../data/srlBlocks";
+import { SRL_BLOCKS_BY_ID } from "../data/srlBlocks";
 import { useRemoteCanvasSync } from "../hooks/useRemoteCanvasSync";
 import { useCanvasStore } from "../store/useCanvasStore";
 import {
@@ -13,9 +13,13 @@ import {
   readLayoutPreference,
   writeLayoutPreference
 } from "../utils/layoutPreference";
-import { calculateScoreMetrics } from "../utils/score";
-
-const MAX_SCORE = 108;
+import {
+  assessmentPointsLabel,
+  assessmentStatusLabel,
+  scoresFromBlocks,
+  summarizeAssessment,
+  TOTAL_BLOCKS
+} from "../utils/score";
 
 export function CanvasPage() {
   const navigate = useNavigate();
@@ -25,12 +29,10 @@ export function CanvasPage() {
   const [layout, setLayout] = useState<CanvasLayout>(() => readLayoutPreference());
   const [editingBlockId, setEditingBlockId] = useState<number | null>(null);
 
-  const scores = useMemo(() => SRL_BLOCKS.map((block) => blocks[block.id]?.score ?? 0), [blocks]);
-  const metrics = useMemo(() => calculateScoreMetrics(scores), [scores]);
+  const summary = useMemo(() => summarizeAssessment(scoresFromBlocks(blocks)), [blocks]);
   const userId = user?.id ?? null;
 
   const editingBlock = editingBlockId ? SRL_BLOCKS_BY_ID[editingBlockId] : null;
-  const completionLabel = `[ ${metrics.total} / ${MAX_SCORE} ]`;
 
   // Auto-save remoto: apenas ATUALIZA um registro existente; a criação é
   // explícita no "Novo SRL Canvas". Sem remoteCanvasId, não grava.
@@ -94,14 +96,17 @@ export function CanvasPage() {
             </label>
           </div>
 
-          <div className="mt-4 flex items-center gap-3 rounded-[10px] bg-inset px-4 py-3">
-            <span className="text-[12px] font-semibold text-ink-2">Total</span>
-            <span className="font-mono text-[12px] text-ink">{completionLabel}</span>
-            <span className="h-2.5 flex-1 overflow-hidden rounded-full bg-surface-2">
+          <div className="mt-4 flex flex-wrap items-center gap-3 rounded-[10px] bg-inset px-4 py-3">
+            <span className="text-[12px] font-semibold text-ink-2">
+              {assessmentStatusLabel(summary)}
+            </span>
+            <span className="font-mono text-[12px] text-ink">{assessmentPointsLabel(summary)}</span>
+            {/* Progresso de preenchimento (blocos respondidos), não de maturidade */}
+            <span className="h-2.5 min-w-[80px] flex-1 overflow-hidden rounded-full bg-surface-2">
               <span
                 className="block h-full rounded-full transition-all"
                 style={{
-                  width: `${Math.min(100, metrics.completion)}%`,
+                  width: `${(summary.answeredCount / TOTAL_BLOCKS) * 100}%`,
                   background: "linear-gradient(90deg, var(--teal), #4FE0CE)"
                 }}
               />

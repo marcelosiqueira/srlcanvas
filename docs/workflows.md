@@ -46,9 +46,10 @@
 1. Acessar `Dashboard`.
 2. Confirmar usuario autenticado com a API ativa.
 3. Visualizar secao `Historico e Comparativo Temporal`.
-4. Revisar avaliacao mais recente (total, scorecard, CV, blocos preenchidos).
+4. Revisar avaliacao mais recente (situacao `X/12 blocos`; total, scorecard e CV apenas se completa).
 5. Selecionar avaliacao anterior no campo `Comparar com`.
-6. Analisar deltas de evolucao (Total, Scorecard, CV, Blocos preenchidos).
+6. Analisar deltas de evolucao (Blocos respondidos sempre; Total, Scorecard, CV e velocidade apenas
+   quando ambas as avaliacoes estao completas — caso contrario, exibidos como `Incompleta`/`—`).
 7. Opcional: abrir `Ver Resultados` de qualquer item do historico para detalhamento.
 
 ## 1.4 Workflow: Medicao de Produto (P1.4)
@@ -92,9 +93,11 @@
 ## 4. Workflow: Correcao de Formula de Score
 
 1. Confirmar regra no `PRD.md`.
-2. Alterar `apps/web/src/utils/score.ts`.
-3. Verificar consumo em `apps/web/src/App.tsx` e `apps/web/src/components/ResultsModal.tsx`.
-4. Validar com cenarios de teste rapido (notas baixas, mistas, altas).
+2. Alterar `apps/web/src/utils/score.ts` (fonte unica de completude e calculo).
+3. Verificar consumo em `CanvasPage`, `DashboardPage`, `ResultsPage`, `ResultsAnalysis`,
+   `CanvasComparisonModal`, `MaturityRadar` e `utils/canvasHistory.ts`.
+4. Validar com cenarios de teste (canvas vazio, parcial, completo com todas as notas 1, completo com
+   uma nota 9 e onze notas 1 → scorecard ≈ -6,53).
 5. Rodar `pnpm check`.
 
 ## 5. Workflow: Evolucao de UX (Modais e Jornadas)

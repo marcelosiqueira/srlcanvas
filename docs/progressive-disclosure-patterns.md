@@ -5,12 +5,12 @@ Padroes para organizar conteudo complexo sem sobrecarregar usuario ou IA.
 ## 1. Camadas de Informacao (UI)
 
 1. Camada 1 - Resumo rapido:
-   - lista de blocos + status de nota.
-   - total e progresso.
+   - lista de blocos + status de nota (`Pendente` distinto de `Nivel 1`).
+   - progresso `X/12 blocos`; `Pontos registrados` enquanto incompleta, total apenas com 12/12.
 2. Camada 2 - Detalhe acionavel:
    - modal do bloco com objetivo, perguntas-chave e nivel.
 3. Camada 3 - Analise aprofundada:
-   - radar, scorecard e exportacao.
+   - radar (pendentes marcados como tal), scorecard experimental (somente 12/12) e exportacao.
 
 ### 1.2 Canvas (Modo Avancado Opcional)
 

@@ -4,6 +4,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { ResultsPage } from "./ResultsPage";
 import { AuthProvider } from "../auth/AuthProvider";
 import { useCanvasStore } from "../store/useCanvasStore";
+import { SRL_BLOCKS } from "../data/srlBlocks";
 
 vi.mock("react-chartjs-2", () => ({ Radar: () => <div data-testid="radar" /> }));
 
@@ -49,5 +50,30 @@ describe("ResultsPage", () => {
     expect(screen.getByText(/Atualizado/i)).toBeInTheDocument();
     // as linhas de nota não são botões no modo snapshot
     expect(screen.getByText("P1").closest("button")).toBeNull();
+  });
+
+  it("canvas vazio: 12 pendências, sem estágio nem scorecard", () => {
+    renderPage();
+    expect(screen.getAllByText("Avaliação incompleta — 0/12 blocos").length).toBeGreaterThan(0);
+    expect(screen.queryByText("Estágio")).not.toBeInTheDocument();
+    expect(screen.queryByText(/Ideação/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Scorecard/)).not.toBeInTheDocument();
+    expect(screen.getAllByText("Pendente")).toHaveLength(12);
+  });
+
+  it("distingue nota 1 explícita de bloco pendente e soma apenas notas atribuídas", () => {
+    useCanvasStore.getState().updateBlock(SRL_BLOCKS[0].id, { score: 1 });
+    renderPage();
+    expect(screen.getByText("Pontos registrados: 1")).toBeInTheDocument();
+    expect(screen.getByText("1/9")).toBeInTheDocument();
+    expect(screen.getAllByText("Pendente")).toHaveLength(11);
+  });
+
+  it("snapshot completo mostra total e scorecard experimental", () => {
+    const scores = [9, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
+    renderPage([{ pathname: "/results", state: { scores, projectTitle: "Completa" } }]);
+    expect(screen.getByText("Total: 20 / 108")).toBeInTheDocument();
+    expect(screen.getByText("Scorecard (experimental)")).toBeInTheDocument();
+    expect(screen.queryByText("Estágio")).not.toBeInTheDocument();
   });
 });

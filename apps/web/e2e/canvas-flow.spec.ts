@@ -62,7 +62,7 @@ test("can evaluate one block and open the results screen", async ({ page }) => {
   await page.getByRole("button", { name: /Ver Resultados/ }).click();
   await expect(page).toHaveURL(/\/results/);
   await expect(page.getByRole("heading", { name: "Resultados" })).toBeVisible();
-  await expect(page.getByText("4 / 108")).toBeVisible();
+  await expect(page.getByText("Pontos registrados: 4")).toBeVisible();
 });
 
 test("persists canvas progress after reload", async ({ page }) => {

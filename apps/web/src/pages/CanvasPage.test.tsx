@@ -5,6 +5,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import { CanvasPage } from "./CanvasPage";
 import { AuthProvider } from "../auth/AuthProvider";
 import { useCanvasStore } from "../store/useCanvasStore";
+import { SRL_BLOCKS } from "../data/srlBlocks";
 
 function renderPage() {
   return render(
@@ -52,5 +53,36 @@ describe("CanvasPage", () => {
     expect(within(dialog).getByText(/P1 ·/)).toBeInTheDocument();
     fireEvent.click(within(dialog).getByRole("button", { name: "Cancelar" }));
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
+  it("canvas vazio mostra avaliação incompleta e pontos registrados, sem total /108", () => {
+    renderPage();
+    expect(screen.getByText("Avaliação incompleta — 0/12 blocos")).toBeInTheDocument();
+    expect(screen.getByText("Pontos registrados: 0")).toBeInTheDocument();
+    expect(screen.queryByText(/\/ 108/)).not.toBeInTheDocument();
+  });
+
+  it("cancelar o modal após escolher um nível não persiste a nota", () => {
+    renderPage();
+    fireEvent.click(screen.getByText(/Problema e Oportunidade/).closest("button")!);
+    const dialog = screen.getByRole("dialog");
+    fireEvent.click(within(dialog).getByRole("button", { name: "Selecionar nível 7" }));
+    fireEvent.click(within(dialog).getByRole("button", { name: "Cancelar" }));
+
+    const firstBlockId = SRL_BLOCKS[0].id;
+    expect(useCanvasStore.getState().blocks[firstBlockId].score).toBeNull();
+    expect(screen.getByText("Pontos registrados: 0")).toBeInTheDocument();
+  });
+
+  it("salvar persiste a nota e atualiza os pontos registrados", () => {
+    renderPage();
+    fireEvent.click(screen.getByText(/Problema e Oportunidade/).closest("button")!);
+    const dialog = screen.getByRole("dialog");
+    fireEvent.click(within(dialog).getByRole("button", { name: "Selecionar nível 1" }));
+    fireEvent.click(within(dialog).getByRole("button", { name: /Salvar/ }));
+
+    expect(useCanvasStore.getState().blocks[SRL_BLOCKS[0].id].score).toBe(1);
+    expect(screen.getByText("Avaliação incompleta — 1/12 blocos")).toBeInTheDocument();
+    expect(screen.getByText("Pontos registrados: 1")).toBeInTheDocument();
   });
 });

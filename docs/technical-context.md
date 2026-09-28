@@ -37,11 +37,15 @@ facilitando continuidade entre sessoes e justificativa tecnica para avaliacao ac
 
 ## 4. Regras de Dominio Criticas
 
-- Score total: soma das 12 notas (max 108).
-- Media: total / 12.
-- Desvio-padrao: populacional.
-- CV: desvio / media; se media = 0, CV = 0.
-- Scorecard: `total * (1 - cv)`.
+- Regras centralizadas em `apps/web/src/utils/score.ts` (`summarizeAssessment`, `scoresFromBlocks`,
+  `radarDisplayPoints`, rotulos de status); telas, comparativos e exportacoes nao recalculam por conta propria.
+- Bloco pendente = `score: null`; nunca convertido para 0 ou 1 em calculo ou persistencia.
+- Avaliacao incompleta: apenas `Pontos registrados` (soma das notas atribuidas) e `X/12 blocos`.
+- Avaliacao completa (12/12): total (max 108), media = total / 12, desvio-padrao populacional,
+  CV = desvio / media, scorecard = `total * (1 - cv)` sem piso em zero (valores negativos preservados).
+- Radar: pendentes desenhados no nivel 1 somente na camada visual (`radarDisplayPoints`), com marcador
+  proprio, legenda, tooltip e lista acessivel exibindo `Pendente`.
+- Estagios por cortes 35/59/83/101: suspensos (fundamentacao pendente).
 - Regra metodologica: nota > 3 deve ter evidencia minima.
 
 ## 5. Estado de Qualidade
@@ -83,6 +87,9 @@ facilitando continuidade entre sessoes e justificativa tecnica para avaliacao ac
 - Status: aprovado.
 - Decisao: manter formula `total * (1 - cv)` como regra central.
 - Motivo: penalizar desequilibrio entre blocos mantendo comparabilidade.
+- Atualizacao (2026-09-28): removido o piso `Math.max(0, ...)` para alinhar a implementacao a secao 8.6.2
+  da dissertacao; scorecard rotulado como experimental e calculado apenas com 12 blocos respondidos
+  (ver ADR-019).
 
 ### ADR-004 - Onboarding guiado orientado por progresso
 
@@ -178,6 +185,7 @@ facilitando continuidade entre sessoes e justificativa tecnica para avaliacao ac
   Ajuste de UX (2026-03-11): exportacao de resultados no `ResultsModal` (PNG/PDF) passa a incluir
   identificacao do projeto no topo do artefato (titulo do canvas, carimbo `(Atualizado ...)` e
   `Estagio`) para facilitar compartilhamento e leitura de contexto fora da plataforma.
+  Atualizacao (2026-09-28): `Estagio` removido das telas e exportacoes (ver ADR-019).
 - Motivo: aumentar protecao contra regressao em CI/local sem tornar o pipeline dependente de credenciais
   externas em todos os ambientes.
 - Atualizacao (2026-06): Supabase substituido pela API propria; o gating do cenario remoto passou a usar
@@ -218,6 +226,22 @@ facilitando continuidade entre sessoes e justificativa tecnica para avaliacao ac
   atual pelo metadata do Auth; ao salvar, sincronizar apenas metadata (`name`) do usuario autenticado.
 - Motivo: permitir manutencao de identificacao da conta apos cadastro, mantendo consistencia entre
   perfil exibido no app e dados de autenticacao.
+
+### ADR-019 - Avaliacoes parciais sem confundir ausencia de resposta com baixa maturidade
+
+- Status: aprovado.
+- Decisao: blocos nao respondidos permanecem `null` e sao exibidos como `Pendente`. Enquanto houver
+  pendencias, canvas, dashboard, resultados, comparativos e exportacoes mostram
+  `Avaliacao incompleta — X/12 blocos` e `Pontos registrados`, sem total /108, percentual, estagio ou
+  scorecard. Com 12/12, exibem total e scorecard experimental (formula da secao 8.6.2, negativos
+  preservados e explicados). Comparativos so calculam deltas de total/CV/scorecard/velocidade entre
+  avaliacoes completas. Classificacao por cortes 35/59/83/101 suspensa. Modal de bloco passa a editar
+  um rascunho, persistido apenas em `Salvar`.
+- Motivo: antes, blocos vazios entravam como 0 no total, media e CV, e um canvas vazio era classificado
+  como `Ideacao`; selecionar um nivel salvava a nota mesmo quando o usuario cancelava o modal.
+- Compatibilidade: nenhuma migracao de dados; notas e evidencias armazenadas sao lidas como estao.
+  `ScoreMetrics.completion` e `CanvasTemporalComparison.completionDelta` foram removidos (nao eram
+  exibidos).
 
 ## 8. Rastreabilidade de Escopo
 

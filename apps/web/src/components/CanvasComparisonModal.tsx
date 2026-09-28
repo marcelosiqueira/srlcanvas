@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { SRL_BLOCKS } from "../data/srlBlocks";
 import { useDialogA11y } from "../hooks/useDialogA11y";
 import { useCanvasStore } from "../store/useCanvasStore";
-import { maturityStageFromTotal } from "../utils/score";
+import { formatBlockScore, SCORECARD_EXPERIMENTAL_NOTE, TOTAL_BLOCKS } from "../utils/score";
 import { compareCanvasHistoryEntries, type CanvasHistoryEntry } from "../utils/canvasHistory";
 import { MaturityRadar } from "./MaturityRadar";
 
@@ -20,6 +20,16 @@ const formatDateTime = (value: string): string => {
 
 const signed = (value: number, digits: number): string =>
   `${value > 0 ? "+" : ""}${value.toFixed(digits)}`;
+
+const INCOMPLETE = "Incompleta";
+const NOT_COMPARABLE = "—";
+
+/** Valor consolidado só existe em avaliações completas. */
+const metricOrIncomplete = (value: number | undefined, digits: number): string =>
+  value === undefined ? INCOMPLETE : value.toFixed(digits);
+
+const signedOrDash = (value: number | null, digits: number): string =>
+  value === null ? NOT_COMPARABLE : signed(value, digits);
 
 const deltaClass = (value: number): string =>
   value > 0
@@ -49,32 +59,36 @@ export function CanvasComparisonModal({ baseEntry, entries, onClose }: CanvasCom
     return () => window.removeEventListener("keydown", onEsc);
   }, [onClose]);
 
+  const baseMetrics = baseEntry.summary.metrics;
+  const compareMetrics = compareEntry?.summary.metrics ?? null;
+  const bothComplete = Boolean(baseMetrics && compareMetrics);
+
   const metricRows =
     compareEntry && comparison
       ? [
           {
-            label: "Pontuação total",
-            base: `${baseEntry.metrics.total}`,
-            compare: `${compareEntry.metrics.total}`,
-            delta: signed(comparison.totalDelta, 0)
+            label: "Blocos respondidos",
+            base: `${baseEntry.summary.answeredCount}/${TOTAL_BLOCKS}`,
+            compare: `${compareEntry.summary.answeredCount}/${TOTAL_BLOCKS}`,
+            delta: signed(comparison.answeredBlocksDelta, 0)
           },
           {
-            label: "Scorecard de Risco",
-            base: baseEntry.metrics.riskScore.toFixed(2),
-            compare: compareEntry.metrics.riskScore.toFixed(2),
-            delta: signed(comparison.riskScoreDelta, 2)
+            label: "Pontuação total",
+            base: metricOrIncomplete(baseMetrics?.total, 0),
+            compare: metricOrIncomplete(compareMetrics?.total, 0),
+            delta: signedOrDash(comparison.totalDelta, 0)
+          },
+          {
+            label: "Scorecard (experimental)",
+            base: metricOrIncomplete(baseMetrics?.riskScore, 2),
+            compare: metricOrIncomplete(compareMetrics?.riskScore, 2),
+            delta: signedOrDash(comparison.riskScoreDelta, 2)
           },
           {
             label: "Coef. de Variação",
-            base: baseEntry.metrics.cv.toFixed(2),
-            compare: compareEntry.metrics.cv.toFixed(2),
-            delta: signed(comparison.cvDelta, 2)
-          },
-          {
-            label: "Blocos preenchidos",
-            base: `${baseEntry.filledBlocks}/12`,
-            compare: `${compareEntry.filledBlocks}/12`,
-            delta: signed(comparison.filledBlocksDelta, 0)
+            base: metricOrIncomplete(baseMetrics?.cv, 2),
+            compare: metricOrIncomplete(compareMetrics?.cv, 2),
+            delta: signedOrDash(comparison.cvDelta, 2)
           }
         ]
       : [];
@@ -174,17 +188,13 @@ export function CanvasComparisonModal({ baseEntry, entries, onClose }: CanvasCom
                     </span>
                   </div>
                 ))}
-                <div className="grid grid-cols-[1.4fr_1fr_1fr_0.8fr] items-center gap-2 px-3 py-1 text-[13px]">
-                  <span className="text-ink-2">Estágio</span>
-                  <span className="text-right text-ink">
-                    {maturityStageFromTotal(baseEntry.metrics.total)}
-                  </span>
-                  <span className="text-right text-ink-2">
-                    {maturityStageFromTotal(compareEntry.metrics.total)}
-                  </span>
-                  <span className="text-right text-ink-3">—</span>
-                </div>
               </div>
+
+              <p className="mt-3 text-[12px] text-ink-3">
+                {bothComplete
+                  ? SCORECARD_EXPERIMENTAL_NOTE
+                  : "Total, CV e scorecard são comparados apenas entre avaliações completas (12/12 blocos)."}
+              </p>
 
               {comparison.maturityVelocity !== null && (
                 <p className="mt-3 text-[12px] text-ink-2">
@@ -204,9 +214,10 @@ export function CanvasComparisonModal({ baseEntry, entries, onClose }: CanvasCom
                   .sort((a, b) => a.number - b.number)
                   .map((block) => {
                     const index = SRL_BLOCKS.indexOf(block);
-                    const baseScore = baseEntry.scores[index] ?? 0;
-                    const compareScore = compareEntry.scores[index] ?? 0;
-                    const diff = baseScore - compareScore;
+                    const baseScore = baseEntry.scores[index] ?? null;
+                    const compareScore = compareEntry.scores[index] ?? null;
+                    const diff =
+                      baseScore !== null && compareScore !== null ? baseScore - compareScore : null;
                     return (
                       <div
                         key={block.id}
@@ -215,10 +226,18 @@ export function CanvasComparisonModal({ baseEntry, entries, onClose }: CanvasCom
                         <span className="truncate text-ink">
                           P{block.number} · {block.shortLabel}
                         </span>
-                        <span className="text-right font-mono text-ink">{baseScore}/9</span>
-                        <span className="text-right font-mono text-ink-2">{compareScore}/9</span>
-                        <span className={`text-right font-mono font-semibold ${deltaClass(diff)}`}>
-                          {signed(diff, 0)}
+                        <span className="text-right font-mono text-ink">
+                          {formatBlockScore(baseScore)}
+                        </span>
+                        <span className="text-right font-mono text-ink-2">
+                          {formatBlockScore(compareScore)}
+                        </span>
+                        <span
+                          className={`text-right font-mono font-semibold ${
+                            diff === null ? "text-ink-3" : deltaClass(diff)
+                          }`}
+                        >
+                          {signedOrDash(diff, 0)}
                         </span>
                       </div>
                     );

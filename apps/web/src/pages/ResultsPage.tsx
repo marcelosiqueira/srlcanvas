@@ -7,10 +7,19 @@ import { ResultsAnalysis } from "../components/ResultsAnalysis";
 import { GROUP_BY_KEY, GROUPS, SRL_BLOCKS, SRL_BLOCKS_BY_ID } from "../data/srlBlocks";
 import { useCanvasStore } from "../store/useCanvasStore";
 import { buildCanvasTitle } from "../utils/canvasIdentity";
-import { calculateScoreMetrics, maturityStageFromTotal } from "../utils/score";
+import {
+  assessmentPointsLabel,
+  assessmentStatusLabel,
+  formatBlockScore,
+  isAnsweredScore,
+  scoresFromBlocks,
+  summarizeAssessment,
+  type BlockScore
+} from "../utils/score";
 
 interface ResultsSnapshotState {
-  scores?: number[];
+  /** Alinhado a SRL_BLOCKS; null = bloco pendente. */
+  scores?: BlockScore[];
   projectTitle?: string;
   updatedAt?: string | null;
 }
@@ -23,11 +32,17 @@ export function ResultsPage() {
   const [editingBlockId, setEditingBlockId] = useState<number | null>(null);
 
   const isLive = !snapshot?.scores;
-  const scores = useMemo(
-    () => snapshot?.scores ?? SRL_BLOCKS.map((block) => blocks[block.id]?.score ?? 0),
+  const scores = useMemo<BlockScore[]>(
+    () =>
+      snapshot?.scores
+        ? SRL_BLOCKS.map((_, index) => {
+            const value = snapshot.scores?.[index];
+            return isAnsweredScore(value) ? value : null;
+          })
+        : scoresFromBlocks(blocks),
     [snapshot, blocks]
   );
-  const metrics = useMemo(() => calculateScoreMetrics(scores), [scores]);
+  const summary = useMemo(() => summarizeAssessment(scores), [scores]);
   const projectTitle = snapshot?.projectTitle ?? buildCanvasTitle(meta);
   const updatedLabel = snapshot?.updatedAt ? formatDateTime(snapshot.updatedAt) : null;
   const editingBlock = editingBlockId ? SRL_BLOCKS_BY_ID[editingBlockId] : null;
@@ -49,7 +64,9 @@ export function ResultsPage() {
               <h2 className="text-[11px] font-semibold uppercase tracking-wide text-ink-3">
                 Perfil de Maturidade
               </h2>
-              <span className="font-mono text-[12px] text-ink-2">{metrics.total}/108</span>
+              <span className="font-mono text-[12px] text-ink-2">
+                {assessmentPointsLabel(summary)}
+              </span>
             </div>
             <MaturityRadar scores={scores} darkMode={darkMode} className="mt-3 h-[360px] w-full" />
             <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1">
@@ -68,8 +85,11 @@ export function ResultsPage() {
           {/* Coluna direita */}
           <div className="flex flex-col gap-[18px]">
             <div className="grid grid-cols-2 gap-[18px]">
-              <MiniCard label="Estágio" value={maturityStageFromTotal(metrics.total)} />
-              <MiniCard label="Coef. Variação" value={metrics.cv.toFixed(2)} />
+              <MiniCard label="Situação" value={assessmentStatusLabel(summary)} />
+              <MiniCard
+                label="Coef. Variação"
+                value={summary.metrics ? summary.metrics.cv.toFixed(2) : "—"}
+              />
             </div>
 
             <section className="rounded-card border border-stroke bg-surface p-5 shadow-sm">
@@ -79,7 +99,7 @@ export function ResultsPage() {
                   .sort((a, b) => a.number - b.number)
                   .map((block) => {
                     const group = GROUP_BY_KEY[block.group];
-                    const score = scores[SRL_BLOCKS.indexOf(block)] ?? 0;
+                    const score = scores[SRL_BLOCKS.indexOf(block)] ?? null;
                     const Row = isLive ? "button" : "div";
                     return (
                       <li key={block.id}>
@@ -98,17 +118,27 @@ export function ResultsPage() {
                           <span className="w-24 shrink-0 truncate text-[13px] text-ink">
                             {block.shortLabel}
                           </span>
-                          <span className="h-1.5 flex-1 overflow-hidden rounded-full bg-inset">
-                            <span
-                              className="block h-full rounded-full"
-                              style={{
-                                width: `${(score / 9) * 100}%`,
-                                backgroundColor: group.color
-                              }}
-                            />
+                          <span
+                            className={`h-1.5 flex-1 overflow-hidden rounded-full ${
+                              score === null ? "border border-dashed border-stroke" : "bg-inset"
+                            }`}
+                          >
+                            {score !== null && (
+                              <span
+                                className="block h-full rounded-full"
+                                style={{
+                                  width: `${(score / 9) * 100}%`,
+                                  backgroundColor: group.color
+                                }}
+                              />
+                            )}
                           </span>
-                          <span className="w-10 shrink-0 text-right font-mono text-[12px] text-ink-2">
-                            {score}/9
+                          <span
+                            className={`w-16 shrink-0 text-right font-mono text-[12px] ${
+                              score === null ? "italic text-ink-3" : "text-ink-2"
+                            }`}
+                          >
+                            {formatBlockScore(score)}
                           </span>
                         </Row>
                       </li>
@@ -121,7 +151,7 @@ export function ResultsPage() {
 
         <ResultsAnalysis
           scores={scores}
-          metrics={metrics}
+          summary={summary}
           darkMode={darkMode}
           captureRef={captureRef}
         />
