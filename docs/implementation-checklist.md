@@ -92,6 +92,11 @@ com rastreabilidade entre requisito, implementacao, validacao e evidencia academ
   - Criterio de pronto: canvas vazio sem estagio/scorecard; parcial exibe apenas pontos registrados; completo com uma nota 9 e onze notas 1 exibe scorecard ≈ -6,53; cancelar o modal nao persiste.
   - Pendente: fundamentacao dos cortes de estagio; exportacao PDF ainda comprime conteudo longo em uma pagina; historico ainda ordena por `updated_at` e compara entradas consecutivas sem agrupar por startup.
 
+- [x] P0.6 Auto-save remoto sem perda ao navegar (ADR-020)
+  - Escopo: sincronizacao montada no `App`; alteracao pendente enviada ao navegar, trocar de canvas ou fechar a aba.
+  - Evidencias: `apps/web/src/components/RemoteCanvasSync.tsx`, `apps/web/src/hooks/useRemoteCanvasSync.ts` (+ testes); cenario E2E remoto reescrito para validar o historico vindo do servidor.
+  - Criterio de pronto: E2E remoto falha no codigo anterior e passa com a correcao.
+
 ## 5. Critério de Pronto por Item
 
 1. Escopo implementado conforme PRD/workflow.

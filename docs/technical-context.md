@@ -243,6 +243,21 @@ facilitando continuidade entre sessoes e justificativa tecnica para avaliacao ac
   `ScoreMetrics.completion` e `CanvasTemporalComparison.completionDelta` foram removidos (nao eram
   exibidos).
 
+### ADR-020 - Auto-save remoto global e sem descarte de alteracoes pendentes
+
+- Status: aprovado.
+- Decisao: `useRemoteCanvasSync` passa a ser montado uma unica vez no `App`
+  (`components/RemoteCanvasSync.tsx`), e nao mais dentro de `CanvasPage`. A gravacao continua com
+  debounce de 800 ms e so atualiza registros existentes, mas a alteracao pendente e enviada
+  imediatamente ao trocar de canvas/usuario (no id anterior), ao desmontar e em
+  `pagehide`/`visibilitychange=hidden` (com `fetch` `keepalive`).
+- Motivo: o hook vivia apenas na tela do Canvas e o cleanup cancelava o timer; ao salvar o ultimo
+  bloco e ir para Resultados em menos de 800 ms, ou ao editar notas pela tela de Resultados, a
+  alteracao nao chegava ao servidor, deixando historico, comparativo e `Editar` desatualizados.
+- Validacao: testes unitarios do hook e de `RemoteCanvasSync`; E2E remoto passa a criar o canvas pelo
+  `Novo SRL Canvas`, sair logo apos salvar, editar em Resultados e conferir o historico vindo do
+  servidor (antes o cenario validava apenas o reload local).
+
 ## 8. Rastreabilidade de Escopo
 
 Para cada melhoria implementada, registrar:

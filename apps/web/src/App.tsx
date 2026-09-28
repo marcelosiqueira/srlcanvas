@@ -1,6 +1,7 @@
 import { lazy, Suspense } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { ProtectedRoute } from "./auth/ProtectedRoute";
+import { RemoteCanvasSync } from "./components/RemoteCanvasSync";
 import { RESEARCH_SURVEY_CONFIG } from "./config/researchSurveyConfig";
 import { useCanvasStore } from "./store/useCanvasStore";
 
@@ -41,6 +42,7 @@ function App() {
 
   return (
     <div className={darkMode ? "dark" : ""}>
+      <RemoteCanvasSync />
       <Suspense fallback={<RouteLoadingFallback />}>
         <Routes>
           <Route element={<LandingPage />} path="/" />

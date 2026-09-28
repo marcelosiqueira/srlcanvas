@@ -181,18 +181,32 @@ test("syncs canvas remotely for authenticated user when the API is configured", 
   await page.getByLabel("Email").fill(process.env.E2E_REMOTE_EMAIL!);
   await page.getByLabel("Senha").fill(process.env.E2E_REMOTE_PASSWORD!);
   await page.getByRole("button", { name: "Entrar" }).click();
-
   await expect(page).toHaveURL(/\/dashboard/);
-  await page.getByRole("link", { name: "Abrir Meu SRL Canvas" }).click();
-  await expect(page).toHaveURL(/\/canvas/);
 
-  await page.getByLabel("Startup").fill(`Remote Persist ${Date.now()}`);
-  await page.getByLabel("Avaliador").fill("Equipe E2E");
+  // Cria o registro remoto explicitamente (o auto-save só atualiza registros existentes).
+  const startup = `Remote Persist ${Date.now()}`;
+  await page.goto("/canvas/new");
+  await page.getByPlaceholder("Nome da Startup").fill(startup);
+  await page.getByPlaceholder("Nome do Avaliador").fill("Equipe E2E");
+  await page.getByRole("button", { name: "Criar Canvas" }).click();
+  await page.waitForURL((url) => url.pathname !== "/canvas/new");
+  if (new URL(page.url()).pathname !== "/canvas") await page.goto("/canvas"); // pula o TCLE
 
+  // Sai para Resultados logo após salvar: a gravação pendente não pode ser descartada.
   await evaluateFirstBlock(page, 6);
-  await expect(page.getByText("Nível 6")).toBeVisible();
+  await page.getByRole("button", { name: /Ver Resultados/ }).click();
+  await expect(page).toHaveURL(/\/results/);
 
-  // A gravação remota é silenciosa (sem UI de status); valida-se a persistência via reload.
-  await page.reload();
-  await expect(page.getByText("Nível 6")).toBeVisible();
+  // Edita pela tela de Resultados e sai imediatamente.
+  await page.getByText("P1", { exact: true }).click();
+  const dialog = blockDialog(page);
+  await dialog.getByRole("button", { name: "Selecionar nível 8" }).click();
+  await dialog.getByRole("button", { name: /Salvar/ }).click();
+  await expect(dialog).toBeHidden();
+  await page.goto("/dashboard");
+
+  // O histórico vem do servidor: deve refletir a última nota (8), não a anterior.
+  const entry = page.locator("article", { hasText: startup });
+  await expect(entry.getByText("Avaliação incompleta — 1/12 blocos")).toBeVisible();
+  await expect(entry.getByText("Pontos registrados: 8")).toBeVisible();
 });

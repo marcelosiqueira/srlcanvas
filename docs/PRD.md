@@ -59,7 +59,7 @@ Falta uma ferramenta simples e estruturada que force evidencias e destaque deseq
 17. Organizar o questionario academico em etapas navegaveis com indicador de progresso e rascunho persistente da etapa atual.
 18. Permitir governanca do questionario academico via configuracao (`enabled` e `activeVersion`) sem alterar o instrumento aprovado.
 19. Disponibilizar modo avancado opcional no canvas com atalhos e acoes rapidas para reduzir cliques em avaliacoes recorrentes.
-20. Para usuario autenticado com a API habilitada, sincronizar canvas remoto automaticamente durante a edicao, sem etapa manual de confirmacao na dashboard.
+20. Para usuario autenticado com a API habilitada, sincronizar canvas remoto automaticamente durante a edicao, sem etapa manual de confirmacao na dashboard. A sincronizacao vale para edicoes feitas em qualquer tela (Canvas ou Resultados) e nenhuma alteracao pendente e descartada ao navegar, trocar de canvas ou fechar a aba.
 21. Exibir historico remoto de aplicacoes na dashboard e permitir comparativo temporal basico da avaliacao mais recente contra uma avaliacao anterior (delta de blocos respondidos sempre; delta de total, scorecard, CV e velocidade de maturidade apenas quando ambas as avaliacoes estao completas).
 22. Instrumentar eventos essenciais de produto (inicio, conclusao e abandono por etapa) sem dados sensiveis, com relatorio agregado minimo disponivel para iteracao.
 23. No cadastro autenticado, coletar `nome`, `email` e `senha`, salvando o nome no metadata da conta em `name` para identificacao basica do usuario.

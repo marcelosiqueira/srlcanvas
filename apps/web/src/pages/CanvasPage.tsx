@@ -4,9 +4,7 @@ import { AppShell } from "../components/AppShell";
 import { BlockEditModal } from "../components/BlockEditModal";
 import { CanvasListView } from "../components/CanvasListView";
 import { CanvasMuralView } from "../components/CanvasMuralView";
-import { useAuth } from "../auth/AuthProvider";
 import { SRL_BLOCKS_BY_ID } from "../data/srlBlocks";
-import { useRemoteCanvasSync } from "../hooks/useRemoteCanvasSync";
 import { useCanvasStore } from "../store/useCanvasStore";
 import {
   type CanvasLayout,
@@ -23,20 +21,14 @@ import {
 
 export function CanvasPage() {
   const navigate = useNavigate();
-  const { user, isEnabled } = useAuth();
-  const { meta, blocks, setMeta, updateBlock, resetCanvas, remoteCanvasId } = useCanvasStore();
+  const { meta, blocks, setMeta, updateBlock, resetCanvas } = useCanvasStore();
 
   const [layout, setLayout] = useState<CanvasLayout>(() => readLayoutPreference());
   const [editingBlockId, setEditingBlockId] = useState<number | null>(null);
 
   const summary = useMemo(() => summarizeAssessment(scoresFromBlocks(blocks)), [blocks]);
-  const userId = user?.id ?? null;
 
   const editingBlock = editingBlockId ? SRL_BLOCKS_BY_ID[editingBlockId] : null;
-
-  // Auto-save remoto: apenas ATUALIZA um registro existente; a criação é
-  // explícita no "Novo SRL Canvas". Sem remoteCanvasId, não grava.
-  useRemoteCanvasSync({ enabled: isEnabled, userId, meta, blocks, remoteCanvasId });
 
   const changeLayout = (next: CanvasLayout) => {
     setLayout(next);

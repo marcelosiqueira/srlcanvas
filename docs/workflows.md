@@ -12,7 +12,7 @@
 8. Repetir ate os 12 blocos.
 9. Abrir `Ver Resultados`.
 10. Exportar PNG/PDF (opcional).
-11. Quando autenticado com a API ativa, sincronizacao remota acontece automaticamente em background.
+11. Quando autenticado com a API ativa, sincronizacao remota acontece automaticamente em background, em qualquer tela; alteracoes pendentes sao enviadas ao navegar, trocar de canvas ou fechar a aba.
 
 ## 1.1 Workflow: Entrada no App (Publico -> Auth)
 
