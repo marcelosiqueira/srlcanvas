@@ -33,12 +33,6 @@ export function BlockEditModal({ block, value, onClose, onSave }: BlockEditModal
   );
   const nextDescription = score && score < 9 ? block.levels[score]?.description : null;
 
-  const applyLevel = (level: number) => {
-    setScore(level);
-    // aplica imediatamente, preservando notes/evidence atuais
-    onSave({ score: level, notes: value.notes, evidence });
-  };
-
   const save = () => {
     onSave({ score, notes: value.notes, evidence: evidence.trim() });
     onClose();
@@ -104,10 +98,12 @@ export function BlockEditModal({ block, value, onClose, onSave }: BlockEditModal
           <div className="mt-5 flex items-center justify-between">
             <p className="text-[13px] font-semibold text-ink">Nível de maturidade</p>
             <span
-              className="rounded-full px-3 py-1 text-[12px] font-semibold text-white"
-              style={{ backgroundColor: group.color }}
+              className={`rounded-full px-3 py-1 text-[12px] font-semibold ${
+                score === null ? "border border-dashed border-stroke text-ink-2" : "text-white"
+              }`}
+              style={score === null ? undefined : { backgroundColor: group.color }}
             >
-              Nível {score ?? 0}/9
+              {score === null ? "Pendente" : `Nível ${score}/9`}
             </span>
           </div>
 
@@ -128,7 +124,7 @@ export function BlockEditModal({ block, value, onClose, onSave }: BlockEditModal
                   type="button"
                   aria-label={`Selecionar nível ${level}`}
                   aria-pressed={isSelected}
-                  onClick={() => applyLevel(level)}
+                  onClick={() => setScore(level)}
                   className={`flex h-10 items-center justify-center rounded-lg font-display text-[14px] font-bold ${
                     buttonStyle ? "" : "border border-stroke bg-inset text-ink-2"
                   }`}

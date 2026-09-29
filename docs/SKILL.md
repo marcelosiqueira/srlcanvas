@@ -24,7 +24,8 @@ Padronizar como agentes de IA colaboram neste projeto, com foco em qualidade, ra
    - `media = total / 12`
    - `desvio-padrao populacional`
    - `cv = desvio / media`
-   - `scorecard = total * (1 - cv)`
+   - `scorecard = total * (1 - cv)` (sem piso; negativos preservados)
+   - metricas consolidadas apenas com os 12 blocos respondidos; pendente = `null`, nunca 0 ou 1
 3. Manter compatibilidade com modo claro/escuro.
 4. Evitar regressao de UX mobile e desktop.
 5. Persistencia nao pode perder dados existentes sem migracao explicita.
@@ -43,8 +44,8 @@ Padronizar como agentes de IA colaboram neste projeto, com foco em qualidade, ra
 - `apps/web/src/store/useCanvasStore.ts`: estado global e persistencia.
 - `apps/web/src/data/srlBlocks.ts`: definicoes dos 12 blocos e niveis.
 - `apps/web/src/components/BlockEditModal.tsx`: edicao de notas/evidencias.
-- `apps/web/src/components/ResultsModal.tsx`: radar, scorecard, exportacao.
-- `apps/web/src/utils/score.ts`: formulas de score.
+- `apps/web/src/pages/ResultsPage.tsx` + `apps/web/src/components/ResultsAnalysis.tsx`: radar, scorecard, exportacao.
+- `apps/web/src/utils/score.ts`: formulas de score e regras de completude (fonte unica).
 - `apps/api/src/server.ts`: bootstrap da API e endpoint de healthcheck.
 
 ## Change Guardrails

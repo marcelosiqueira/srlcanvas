@@ -16,6 +16,8 @@ interface SaveCanvasInput {
   title?: string;
   meta: CanvasMeta;
   blocks: Record<number, CanvasBlockState>;
+  /** Mantém a requisição viva ao fechar/esconder a aba (fetch keepalive). */
+  keepalive?: boolean;
 }
 
 // O parâmetro userId é mantido por compatibilidade de assinatura com os
@@ -41,7 +43,8 @@ export async function saveCanvas(input: SaveCanvasInput): Promise<RemoteCanvas> 
       title: input.title?.trim() || buildCanvasTitle(input.meta),
       meta: input.meta,
       blocks: input.blocks
-    }
+    },
+    keepalive: input.keepalive
   });
 
   return data.canvas;

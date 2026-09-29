@@ -13,12 +13,13 @@ const emptyState = SRL_BLOCKS.reduce<
 }, {});
 
 describe("CanvasMuralView", () => {
-  it("renderiza 12 cards com contador n/9", () => {
+  it("renderiza 12 cards e distingue nota 1 explícita de bloco pendente", () => {
     const withScore = { ...emptyState, 1: { score: 1, notes: "", evidence: "" } };
     render(<CanvasMuralView blockState={withScore} onSelectBlock={() => {}} />);
     expect(screen.getAllByRole("button")).toHaveLength(SRL_BLOCKS.length);
     expect(screen.getByText("1/9")).toBeInTheDocument();
-    expect(screen.getAllByText("0/9").length).toBe(SRL_BLOCKS.length - 1);
+    expect(screen.getAllByText("Pendente").length).toBe(SRL_BLOCKS.length - 1);
+    expect(screen.queryByText("0/9")).not.toBeInTheDocument();
   });
 
   it("chama onSelectBlock ao clicar num card", () => {

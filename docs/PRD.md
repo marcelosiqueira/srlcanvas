@@ -44,10 +44,10 @@ Falta uma ferramenta simples e estruturada que force evidencias e destaque deseq
 2. Avaliar 12 blocos com nota de 1 a 9.
 3. Registrar notas descritivas por bloco.
 4. Registrar evidencias por bloco.
-5. Exibir status por bloco (`Pendente` ou `Nota: x/9`).
-6. Calcular total (0 a 108) em tempo real.
-7. Exibir radar com as 12 dimensoes.
-8. Exibir scorecard: total, media, desvio-padrao, CV, score final.
+5. Exibir status por bloco (`Pendente` ou `Nota: x/9`), distinguindo visualmente bloco pendente de nota 1 atribuida.
+6. Enquanto houver bloco pendente, exibir `Avaliacao incompleta — X/12 blocos` e `Pontos registrados` (soma apenas das notas atribuidas), sem apresenta-la como pontuacao final, percentual de maturidade ou estagio. O total (12 a 108) so e exibido com os 12 blocos respondidos.
+7. Exibir radar com as 12 dimensoes. Durante o preenchimento, blocos pendentes sao desenhados na posicao do nivel 1 apenas para fins visuais, com marcador distinto e a legenda "Blocos pendentes sao representados visualmente no nivel 1; isso nao constitui uma nota atribuida"; tooltip e alternativa textual acessivel exibem `Pendente`.
+8. Com os 12 blocos respondidos, exibir total, media, desvio-padrao, CV e scorecard (rotulado como experimental, sem interpretacao de probabilidade de sucesso ou fracasso). Com blocos pendentes, nao calcular o scorecard consolidado.
 9. Exportar resultados em PNG e PDF.
 10. Resetar canvas atual sob confirmacao.
 11. Persistir dados no `localStorage` com isolamento por escopo (`guest` e por `user_id` autenticado).
@@ -59,11 +59,12 @@ Falta uma ferramenta simples e estruturada que force evidencias e destaque deseq
 17. Organizar o questionario academico em etapas navegaveis com indicador de progresso e rascunho persistente da etapa atual.
 18. Permitir governanca do questionario academico via configuracao (`enabled` e `activeVersion`) sem alterar o instrumento aprovado.
 19. Disponibilizar modo avancado opcional no canvas com atalhos e acoes rapidas para reduzir cliques em avaliacoes recorrentes.
-20. Para usuario autenticado com a API habilitada, sincronizar canvas remoto automaticamente durante a edicao, sem etapa manual de confirmacao na dashboard.
-21. Exibir historico remoto de aplicacoes na dashboard e permitir comparativo temporal basico da avaliacao mais recente contra uma avaliacao anterior (delta de total, scorecard, CV e blocos preenchidos).
+20. Para usuario autenticado com a API habilitada, sincronizar canvas remoto automaticamente durante a edicao, sem etapa manual de confirmacao na dashboard. A sincronizacao vale para edicoes feitas em qualquer tela (Canvas ou Resultados) e nenhuma alteracao pendente e descartada ao navegar, trocar de canvas ou fechar a aba.
+21. Exibir historico remoto de aplicacoes na dashboard e permitir comparativo temporal basico da avaliacao mais recente contra uma avaliacao anterior (delta de blocos respondidos sempre; delta de total, scorecard, CV e velocidade de maturidade apenas quando ambas as avaliacoes estao completas).
 22. Instrumentar eventos essenciais de produto (inicio, conclusao e abandono por etapa) sem dados sensiveis, com relatorio agregado minimo disponivel para iteracao.
 23. No cadastro autenticado, coletar `nome`, `email` e `senha`, salvando o nome no metadata da conta em `name` para identificacao basica do usuario.
 24. Em `Minha Conta`, permitir editar `nome` e sincronizar alteracao no metadata da conta autenticada em `name`.
+25. No modal do bloco, selecionar um nivel altera apenas o rascunho; nota e evidencia sao persistidas juntas somente em `Salvar`. `Cancelar`, `Escape` e clique no fundo descartam as alteracoes do modal.
 
 ## 8. Requisitos Nao Funcionais
 
@@ -77,11 +78,14 @@ Falta uma ferramenta simples e estruturada que force evidencias e destaque deseq
 
 ## 9. Regras de Negocio
 
-- Nota por bloco: inteiro de 1 a 9.
+- Nota por bloco: inteiro de 1 a 9, ou `null` quando o bloco esta pendente. Bloco pendente nunca recebe nota 1 automaticamente.
+- Avaliacao completa: 12 blocos com nota atribuida. Total, media, desvio-padrao, CV e scorecard sao calculados apenas para avaliacoes completas.
 - Data de avaliacao: formato canonico `yyyy-mm-dd` no armazenamento e apresentacao localizada na interface.
 - Total maximo: 108.
-- Scorecard: `Total * (1 - CV)`.
-- CV: `Desvio-padrao / Media`; quando media = 0, CV = 0.
+- Scorecard (experimental; dissertacao, secao 8.6.2): `Total * (1 - CV)`, sem piso em zero.
+- CV: desvio-padrao populacional das 12 notas / media das 12 notas.
+- Scorecard negativo e preservado: indica que a penalizacao por dispersao (`Total * CV`) supera a pontuacao total nessa formula. Mesmo com os 12 blocos respondidos, o CV pode ser maior que 1 (ex.: uma nota 9 e onze notas 1 → scorecard ≈ -6,53).
+- Classificacao automatica em estagios pelos cortes 35/59/83/101: suspensa ate que sua fundamentacao metodologica esteja registrada.
 - Recomendacao metodologica: notas > 3 devem ter evidencia minima registrada.
 - Ao autenticar no servidor, rascunho local legado (pre-auth) deve ser associado ao primeiro usuario logado e removido do escopo `guest`.
 - Fluxo da survey academica deve permitir continuidade por etapa sem perda de resposta ja preenchida.
@@ -104,7 +108,8 @@ Fluxo de entrada:
 ## 11. Criterios de Aceite (MVP)
 
 - Usuario consegue concluir avaliacao completa dos 12 blocos sem erro.
-- Scorecard reage imediatamente a alteracoes de nota.
+- Pontos registrados, radar e scorecard (quando completo) refletem a nota assim que ela e salva no modal.
+- Avaliacao incompleta nunca exibe total /108, scorecard ou estagio.
 - Refresh da pagina mantem estado salvo.
 - Exportacoes geram arquivos validos.
 

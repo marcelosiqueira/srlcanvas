@@ -58,5 +58,4 @@ export interface ScoreMetrics {
   stdDev: number;
   cv: number;
   riskScore: number;
-  completion: number;
 }

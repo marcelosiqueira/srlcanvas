@@ -86,6 +86,17 @@ com rastreabilidade entre requisito, implementacao, validacao e evidencia academ
   - Evidencias: `docs/dissertation-evidence-package.md` com versoes congeladas do instrumento (survey/TCLE + fingerprint), consolidacao de metricas (produto + pesquisa), SQL base de extracao e trilha ADR para banca.
   - Criterio de pronto: material pronto para banca com rastreabilidade tecnica.
 
+- [x] P0.5 Avaliacoes parciais e integridade da edicao (ADR-019)
+  - Escopo: separar ausencia de resposta de baixa maturidade em canvas, dashboard, resultados, comparativos e exportacoes; scorecard experimental apenas com 12/12 e sem piso; suspender estagios 35/59/83/101; modal de bloco com rascunho persistido so em `Salvar`.
+  - Evidencias: regras centralizadas em `apps/web/src/utils/score.ts`; testes em `score.test.ts`, `canvasHistory.test.ts`, `MaturityRadar.test.tsx`, `BlockEditModal.test.tsx`, `ResultsAnalysis.test.tsx`, `CanvasComparisonModal.test.tsx`, `CanvasMuralView.test.tsx`, `CanvasPage.test.tsx`, `DashboardPage.test.tsx`, `ResultsPage.test.tsx`; E2E ajustado para `Pontos registrados`.
+  - Criterio de pronto: canvas vazio sem estagio/scorecard; parcial exibe apenas pontos registrados; completo com uma nota 9 e onze notas 1 exibe scorecard ≈ -6,53; cancelar o modal nao persiste.
+  - Pendente: fundamentacao dos cortes de estagio; exportacao PDF ainda comprime conteudo longo em uma pagina; historico ainda ordena por `updated_at` e compara entradas consecutivas sem agrupar por startup.
+
+- [x] P0.6 Auto-save remoto sem perda ao navegar (ADR-020)
+  - Escopo: sincronizacao montada no `App`; alteracao pendente enviada ao navegar, trocar de canvas ou fechar a aba.
+  - Evidencias: `apps/web/src/components/RemoteCanvasSync.tsx`, `apps/web/src/hooks/useRemoteCanvasSync.ts` (+ testes); cenario E2E remoto reescrito para validar o historico vindo do servidor.
+  - Criterio de pronto: E2E remoto falha no codigo anterior e passa com a correcao.
+
 ## 5. Critério de Pronto por Item
 
 1. Escopo implementado conforme PRD/workflow.

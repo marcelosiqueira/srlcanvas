@@ -15,9 +15,11 @@ const MAX_LEVELS_ABOVE_REFERENCE = 2;
  * Protocolo de Interdependência (guia, seção 7): a nota de um bloco não deve
  * exceder em mais de 2 níveis a média dos blocos pontuados do seu agrupamento
  * e do agrupamento Fundação (I). `scores` é alinhado à ordem de SRL_BLOCKS;
- * 0 = bloco sem nota (ignorado como referência e nunca alertado).
+ * null (ou 0) = bloco sem nota (ignorado como referência e nunca alertado).
  */
-export function detectInterdependencyAlerts(scores: number[]): InterdependencyAlert[] {
+export function detectInterdependencyAlerts(
+  scores: ReadonlyArray<number | null>
+): InterdependencyAlert[] {
   const alerts: InterdependencyAlert[] = [];
 
   SRL_BLOCKS.forEach((block, index) => {

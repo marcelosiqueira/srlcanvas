@@ -9,14 +9,19 @@ import { ResearchOpinionPanel } from "../components/ResearchOpinionPanel";
 import { deleteCanvas, listCanvasesByUser, type RemoteCanvas } from "../services/canvasApi";
 import { useCanvasStore } from "../store/useCanvasStore";
 import { buildCanvasTitle } from "../utils/canvasIdentity";
-import { calculateScoreMetrics, maturityStageFromTotal } from "../utils/score";
+import { ScorecardNotes } from "../components/ScorecardNotes";
+import {
+  assessmentPointsLabel,
+  assessmentStatusLabel,
+  scoresFromBlocks,
+  summarizeAssessment,
+  TOTAL_BLOCKS
+} from "../utils/score";
 import {
   buildCanvasHistoryEntries,
-  buildScoresFromBlocks,
   compareCanvasHistoryEntries,
   type CanvasHistoryEntry
 } from "../utils/canvasHistory";
-import { SRL_BLOCKS } from "../data/srlBlocks";
 
 const SRL_DOWNLOADS = [
   {
@@ -69,11 +74,8 @@ export function DashboardPage() {
     };
   }, [isEnabled, user]);
 
-  const currentScores = buildScoresFromBlocks(blocks);
-  const metrics = calculateScoreMetrics(currentScores);
-  const filledBlocks = SRL_BLOCKS.filter(
-    (block) => typeof blocks[block.id]?.score === "number"
-  ).length;
+  const summary = summarizeAssessment(scoresFromBlocks(blocks));
+  const { metrics } = summary;
   const currentCanvasTitle = buildCanvasTitle(meta);
 
   const editCanvas = rawCanvases.find((canvas) => canvas.id === editCanvasId) ?? null;
@@ -115,21 +117,20 @@ export function DashboardPage() {
           <div className="mt-3 flex items-center gap-2">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-white">
               <span className="size-2 rounded-full bg-teal" />
-              Estágio: {maturityStageFromTotal(metrics.total)}
+              {assessmentStatusLabel(summary)}
             </span>
           </div>
           <div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-white/14">
             <div
               className="h-full rounded-full"
               style={{
-                width: `${metrics.completion}%`,
+                // progresso de preenchimento (blocos respondidos), não de maturidade
+                width: `${(summary.answeredCount / TOTAL_BLOCKS) * 100}%`,
                 background: "linear-gradient(90deg,var(--teal),#4FE0CE)"
               }}
             />
           </div>
-          <p className="mt-2 font-mono text-xs text-white/70">
-            [{metrics.total} / 108] — {filledBlocks}/12 blocos
-          </p>
+          <p className="mt-2 font-mono text-xs text-white/70">{assessmentPointsLabel(summary)}</p>
           <button
             type="button"
             onClick={() => navigate("/results")}
@@ -142,16 +143,26 @@ export function DashboardPage() {
         {/* 3 Metric Cards */}
         <div className="grid grid-cols-1 gap-[18px] sm:grid-cols-3">
           <div className="rounded-card bg-surface p-4 shadow-sm">
-            <p className="text-xs font-semibold text-ink-2">Scorecard de Risco</p>
-            <p className="mt-1 text-3xl font-bold text-teal">{metrics.riskScore.toFixed(2)}</p>
+            <p className="text-xs font-semibold text-ink-2">Scorecard (experimental)</p>
+            <p className="mt-1 text-3xl font-bold text-teal">
+              {metrics ? metrics.riskScore.toFixed(2) : "—"}
+            </p>
+            <ScorecardNotes
+              riskScore={metrics?.riskScore ?? null}
+              className="mt-2 text-[11px] text-ink-3"
+            />
           </div>
           <div className="rounded-card bg-surface p-4 shadow-sm">
             <p className="text-xs font-semibold text-ink-2">Coeficiente de Variação</p>
-            <p className="mt-1 text-3xl font-bold text-ink">{metrics.cv.toFixed(2)}</p>
+            <p className="mt-1 text-3xl font-bold text-ink">
+              {metrics ? metrics.cv.toFixed(2) : "—"}
+            </p>
           </div>
           <div className="rounded-card bg-surface p-4 shadow-sm">
             <p className="text-xs font-semibold text-ink-2">Progresso</p>
-            <p className="mt-1 text-3xl font-bold text-ink">{filledBlocks}/12</p>
+            <p className="mt-1 text-3xl font-bold text-ink">
+              {summary.answeredCount}/{TOTAL_BLOCKS}
+            </p>
           </div>
         </div>
 
@@ -230,7 +241,7 @@ export function DashboardPage() {
                                 {entry.title} (Atualizado {formatDateTime(entry.updatedAt)})
                               </p>
                               <p className="text-xs text-ink-2">
-                                Estágio: {maturityStageFromTotal(entry.metrics.total)}
+                                {assessmentStatusLabel(entry.summary)}
                               </p>
                             </div>
                             <div className="flex shrink-0 gap-2">
@@ -273,9 +284,9 @@ export function DashboardPage() {
                             </div>
                           </div>
                           <p className="mt-2 font-mono text-xs text-ink-2">
-                            [{entry.metrics.total} / 108] - {entry.filledBlocks}/12 blocos
-                            preenchidos | Scorecard: {entry.metrics.riskScore.toFixed(2)} | CV:{" "}
-                            {entry.metrics.cv.toFixed(2)}
+                            {assessmentPointsLabel(entry.summary)}
+                            {entry.summary.metrics &&
+                              ` | Scorecard (experimental): ${entry.summary.metrics.riskScore.toFixed(2)} | CV: ${entry.summary.metrics.cv.toFixed(2)}`}
                           </p>
                           {scoreDelta !== null && (
                             <p className="mt-1 text-xs text-ink-2">

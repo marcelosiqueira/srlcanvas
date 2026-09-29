@@ -1,12 +1,19 @@
 import { type RefObject, useMemo, useRef, useState } from "react";
 import { SRL_BLOCKS } from "../data/srlBlocks";
-import type { ScoreMetrics } from "../types";
 import { detectInterdependencyAlerts } from "../utils/interdependency";
 import { detectRadarPatterns } from "../utils/radarPatterns";
+import {
+  assessmentStatusLabel,
+  MAX_TOTAL_SCORE,
+  type AssessmentSummary,
+  type BlockScore
+} from "../utils/score";
+import { ScorecardNotes } from "./ScorecardNotes";
 
 interface ResultsAnalysisProps {
-  scores: number[];
-  metrics: ScoreMetrics;
+  /** Alinhado a SRL_BLOCKS; null = bloco pendente. */
+  scores: BlockScore[];
+  summary: AssessmentSummary;
   darkMode: boolean;
   /** Elemento a capturar no export (radar+conteúdo). Se ausente, captura a própria seção. */
   captureRef?: RefObject<HTMLElement>;
@@ -18,18 +25,19 @@ const format = (value: number, digits = 2): string =>
     maximumFractionDigits: digits
   }).format(value);
 
-export function ResultsAnalysis({ scores, metrics, darkMode, captureRef }: ResultsAnalysisProps) {
+export function ResultsAnalysis({ scores, summary, darkMode, captureRef }: ResultsAnalysisProps) {
+  const { metrics } = summary;
   const [isExporting, setIsExporting] = useState(false);
   const sectionRef = useRef<HTMLDivElement>(null);
 
   const interpretiveResults = useMemo(
     () =>
       SRL_BLOCKS.map((block, index) => {
-        const score = scores[index] ?? 0;
-        const summary = block.interpretiveSummary;
+        const score = scores[index] ?? null;
+        const interpretive = block.interpretiveSummary;
         const selectedLevel = block.levels.find((item) => item.level === score) ?? null;
 
-        if (!summary || score < 1) {
+        if (!interpretive || score === null) {
           return {
             blockId: block.id,
             blockNumber: block.number,
@@ -41,7 +49,8 @@ export function ResultsAnalysis({ scores, metrics, darkMode, captureRef }: Resul
         }
 
         const band =
-          summary.bands.find((item) => score >= item.minLevel && score <= item.maxLevel) ?? null;
+          interpretive.bands.find((item) => score >= item.minLevel && score <= item.maxLevel) ??
+          null;
 
         return {
           blockId: block.id,
@@ -110,33 +119,55 @@ export function ResultsAnalysis({ scores, metrics, darkMode, captureRef }: Resul
 
   return (
     <div ref={sectionRef} className="space-y-5">
-      {/* Cards de métrica */}
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
-        <div className="rounded-card border border-stroke bg-inset p-3">
-          <p className="text-xs text-ink-3">Pontuação Total</p>
-          <p className="text-lg font-bold text-ink">{metrics.total} / 108</p>
-        </div>
-        <div className="rounded-card border border-stroke bg-inset p-3">
-          <p className="text-xs text-ink-3">Média</p>
-          <p className="text-lg font-bold text-ink">{format(metrics.mean)}</p>
-        </div>
-        <div className="rounded-card border border-stroke bg-inset p-3">
-          <p className="text-xs text-ink-3">Desvio-padrão</p>
-          <p className="text-lg font-bold text-ink">{format(metrics.stdDev)}</p>
-        </div>
-        <div className="rounded-card border border-stroke bg-inset p-3">
-          <p className="text-xs text-ink-3">Coeficiente de Variação</p>
-          <p className="text-lg font-bold text-ink">{format(metrics.cv)}</p>
-        </div>
-        <div className="rounded-card border border-stroke bg-surface-2 p-3">
-          <p className="text-xs text-ink-3">Scorecard de Risco</p>
-          <p className="text-lg font-bold text-teal">{format(metrics.riskScore)}</p>
-        </div>
-      </div>
+      {/* Cards de métrica: consolidados apenas com os 12 blocos respondidos */}
+      {metrics ? (
+        <>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
+            <div className="rounded-card border border-stroke bg-inset p-3">
+              <p className="text-xs text-ink-3">Pontuação Total</p>
+              <p className="text-lg font-bold text-ink">
+                {metrics.total} / {MAX_TOTAL_SCORE}
+              </p>
+            </div>
+            <div className="rounded-card border border-stroke bg-inset p-3">
+              <p className="text-xs text-ink-3">Média</p>
+              <p className="text-lg font-bold text-ink">{format(metrics.mean)}</p>
+            </div>
+            <div className="rounded-card border border-stroke bg-inset p-3">
+              <p className="text-xs text-ink-3">Desvio-padrão</p>
+              <p className="text-lg font-bold text-ink">{format(metrics.stdDev)}</p>
+            </div>
+            <div className="rounded-card border border-stroke bg-inset p-3">
+              <p className="text-xs text-ink-3">Coeficiente de Variação</p>
+              <p className="text-lg font-bold text-ink">{format(metrics.cv)}</p>
+            </div>
+            <div className="rounded-card border border-stroke bg-surface-2 p-3">
+              <p className="text-xs text-ink-3">Scorecard (experimental)</p>
+              <p className="text-lg font-bold text-teal">{format(metrics.riskScore)}</p>
+            </div>
+          </div>
 
-      <p className="text-xs text-ink-3">
-        Fórmula: Scorecard = Pontuação Total x (1 - Coeficiente de Variação).
-      </p>
+          <p className="text-xs text-ink-3">
+            Fórmula: Scorecard = Pontuação Total x (1 - Coeficiente de Variação), com CV =
+            desvio-padrão populacional / média das 12 notas.
+          </p>
+          <ScorecardNotes riskScore={metrics.riskScore} />
+        </>
+      ) : (
+        <>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div className="rounded-card border border-dashed border-stroke bg-inset p-3">
+              <p className="text-xs text-ink-3">Situação</p>
+              <p className="text-lg font-bold text-ink">{assessmentStatusLabel(summary)}</p>
+            </div>
+            <div className="rounded-card border border-dashed border-stroke bg-inset p-3">
+              <p className="text-xs text-ink-3">Pontos registrados</p>
+              <p className="text-lg font-bold text-ink">{summary.registeredPoints}</p>
+            </div>
+          </div>
+          <ScorecardNotes riskScore={null} />
+        </>
+      )}
 
       {/* Padrões Comuns de Leitura do Radar */}
       <div className="space-y-2">
@@ -194,8 +225,14 @@ export function ResultsAnalysis({ scores, metrics, darkMode, captureRef }: Resul
                 <p className="text-sm font-semibold text-ink">
                   {item.blockNumber}. {item.blockName}
                 </p>
-                <span className="rounded-full bg-teal/10 px-2.5 py-1 text-xs font-semibold text-teal">
-                  Nota: {item.score > 0 ? `${item.score}/9` : "Pendente"}
+                <span
+                  className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
+                    item.score === null
+                      ? "border border-dashed border-stroke text-ink-3"
+                      : "bg-teal/10 text-teal"
+                  }`}
+                >
+                  Nota: {item.score === null ? "Pendente" : `${item.score}/9`}
                 </span>
               </div>
 

@@ -1,8 +1,12 @@
-import { SRL_BLOCKS } from "../data/srlBlocks";
-import type { CanvasBlockState, CanvasMeta, ScoreMetrics } from "../types";
+import type { CanvasBlockState, CanvasMeta } from "../types";
 import { normalizeCanvasDate } from "./canvasMeta";
 import { buildCanvasTitle } from "./canvasIdentity";
-import { calculateScoreMetrics } from "./score";
+import {
+  scoresFromBlocks,
+  summarizeAssessment,
+  type AssessmentSummary,
+  type BlockScore
+} from "./score";
 
 export interface CanvasHistoryInput {
   id: string;
@@ -19,17 +23,17 @@ export interface CanvasHistoryEntry {
   updatedAt: string;
   evaluatedAt: string | null;
   timelineTimestamp: number;
-  scores: number[];
-  metrics: ScoreMetrics;
-  filledBlocks: number;
+  /** Alinhado a SRL_BLOCKS; null = bloco pendente. */
+  scores: BlockScore[];
+  summary: AssessmentSummary;
 }
 
+/** Deltas consolidados são null quando alguma das avaliações está incompleta. */
 export interface CanvasTemporalComparison {
-  totalDelta: number;
-  riskScoreDelta: number;
-  cvDelta: number;
-  completionDelta: number;
-  filledBlocksDelta: number;
+  totalDelta: number | null;
+  riskScoreDelta: number | null;
+  cvDelta: number | null;
+  answeredBlocksDelta: number;
   /** Pontos de maturidade por mês (guia, seção 5.3); null se o intervalo for menor que 1 dia. */
   maturityVelocity: number | null;
 }
@@ -56,26 +60,11 @@ const buildHistorySignature = (entry: CanvasHistoryEntry): string => {
   return `${startup}|${evaluator}|${evaluatedAt}|${scores}`;
 };
 
-export function buildScoresFromBlocks(
-  blocks: Record<number, { score: number | null } | undefined>
-): number[] {
-  return SRL_BLOCKS.map((block) => {
-    const value = blocks[block.id]?.score;
-    return typeof value === "number" ? value : 0;
-  });
-}
-
-export function countFilledBlocks(
-  blocks: Record<number, { score: number | null } | undefined>
-): number {
-  return SRL_BLOCKS.filter((block) => typeof blocks[block.id]?.score === "number").length;
-}
-
 export function buildCanvasHistoryEntries(canvases: CanvasHistoryInput[]): CanvasHistoryEntry[] {
   const ordered = canvases
     .map((canvas) => {
       const evaluatedAt = normalizeCanvasDate(canvas.meta.date);
-      const scores = buildScoresFromBlocks(canvas.blocks);
+      const scores = scoresFromBlocks(canvas.blocks);
       return {
         id: canvas.id,
         title: buildCanvasTitle(canvas.meta),
@@ -84,8 +73,7 @@ export function buildCanvasHistoryEntries(canvases: CanvasHistoryInput[]): Canva
         evaluatedAt,
         timelineTimestamp: toTimelineTimestamp(canvas.meta.date, canvas.updated_at),
         scores,
-        metrics: calculateScoreMetrics(scores),
-        filledBlocks: countFilledBlocks(canvas.blocks)
+        summary: summarizeAssessment(scores)
       };
     })
     .sort((a, b) => b.timelineTimestamp - a.timelineTimestamp);
@@ -103,19 +91,32 @@ const MS_PER_DAY = 86_400_000;
 const DAYS_PER_MONTH = 30.44;
 
 export function compareCanvasHistoryEntries(
-  current: Pick<CanvasHistoryEntry, "metrics" | "filledBlocks" | "timelineTimestamp">,
-  previous: Pick<CanvasHistoryEntry, "metrics" | "filledBlocks" | "timelineTimestamp">
+  current: Pick<CanvasHistoryEntry, "summary" | "timelineTimestamp">,
+  previous: Pick<CanvasHistoryEntry, "summary" | "timelineTimestamp">
 ): CanvasTemporalComparison {
-  const totalDelta = current.metrics.total - previous.metrics.total;
+  const answeredBlocksDelta = current.summary.answeredCount - previous.summary.answeredCount;
+  const currentMetrics = current.summary.metrics;
+  const previousMetrics = previous.summary.metrics;
+
+  if (!currentMetrics || !previousMetrics) {
+    return {
+      totalDelta: null,
+      riskScoreDelta: null,
+      cvDelta: null,
+      answeredBlocksDelta,
+      maturityVelocity: null
+    };
+  }
+
+  const totalDelta = currentMetrics.total - previousMetrics.total;
   const elapsedDays = (current.timelineTimestamp - previous.timelineTimestamp) / MS_PER_DAY;
   const maturityVelocity = elapsedDays >= 1 ? totalDelta / (elapsedDays / DAYS_PER_MONTH) : null;
 
   return {
     totalDelta,
-    riskScoreDelta: current.metrics.riskScore - previous.metrics.riskScore,
-    cvDelta: current.metrics.cv - previous.metrics.cv,
-    completionDelta: current.metrics.completion - previous.metrics.completion,
-    filledBlocksDelta: current.filledBlocks - previous.filledBlocks,
+    riskScoreDelta: currentMetrics.riskScore - previousMetrics.riskScore,
+    cvDelta: currentMetrics.cv - previousMetrics.cv,
+    answeredBlocksDelta,
     maturityVelocity
   };
 }

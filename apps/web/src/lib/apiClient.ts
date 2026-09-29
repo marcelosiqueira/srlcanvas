@@ -49,6 +49,8 @@ interface ApiFetchOptions {
   body?: unknown;
   /** Defina como false para requisições sem Bearer token (login/registro). */
   auth?: boolean;
+  /** Permite concluir a requisição mesmo se a página for fechada. */
+  keepalive?: boolean;
 }
 
 function extractErrorMessage(payload: unknown): string {
@@ -80,7 +82,8 @@ export async function apiFetch<T>(path: string, opts: ApiFetchOptions = {}): Pro
     response = await fetch(`${API_URL}${path}`, {
       method: opts.method ?? "GET",
       headers,
-      body: opts.body !== undefined ? JSON.stringify(opts.body) : undefined
+      body: opts.body !== undefined ? JSON.stringify(opts.body) : undefined,
+      ...(opts.keepalive ? { keepalive: true } : {})
     });
   } catch {
     throw new ApiError(0, "network_error");

@@ -14,7 +14,7 @@ const WEAK_MEAN = 3;
 const STRONG_MEAN = 6;
 const EXTREME_GAP = 4;
 
-const scoredByGroup = (scores: number[], group: GroupKey): number[] =>
+const scoredByGroup = (scores: ReadonlyArray<number | null>, group: GroupKey): number[] =>
   SRL_BLOCKS.flatMap((block, index) => {
     const score = scores[index] ?? 0;
     return block.group === group && score >= 1 ? [score] : [];
@@ -23,7 +23,7 @@ const scoredByGroup = (scores: number[], group: GroupKey): number[] =>
 const mean = (values: number[]): number =>
   values.reduce((sum, value) => sum + value, 0) / values.length;
 
-export function detectRadarPatterns(scores: number[]): RadarPattern[] {
+export function detectRadarPatterns(scores: ReadonlyArray<number | null>): RadarPattern[] {
   const fundacao = scoredByGroup(scores, "fundacao");
   const produtoMercado = scoredByGroup(scores, "produtoMercado");
   const escala = scoredByGroup(scores, "escala");
