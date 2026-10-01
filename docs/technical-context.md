@@ -258,6 +258,18 @@ facilitando continuidade entre sessoes e justificativa tecnica para avaliacao ac
   `Novo SRL Canvas`, sair logo apos salvar, editar em Resultados e conferir o historico vindo do
   servidor (antes o cenario validava apenas o reload local).
 
+### ADR-021 - Textos dos blocos alinhados ao modelo manual v1.1
+
+- Status: aprovado.
+- Decisao: perguntas-chave e descricoes dos 9 niveis de cada bloco em `apps/web/src/data/srlBlocks.ts`
+  passam a ser identicas ao modelo manual (`public/downloads/srl-canvas-modelo-manual.pdf`,
+  versao 1.1, outubro de 2026). O teste `srlBlocks.modelo.test.ts` guarda o texto oficial e falha em
+  qualquer divergencia.
+- Motivo: o PDF foi revisado (ex.: P6 e P9 com nova pergunta, P1 nivel 4 "entrevistas registradas",
+  P12 nivel 7 sem "stock option") e a plataforma ainda exibia o texto anterior.
+- Compatibilidade: notas armazenadas guardam apenas o numero do nivel; nenhuma migracao necessaria.
+  `evidence`, `exampleTips` e resumos interpretativos nao constam do PDF e nao foram alterados.
+
 ## 8. Rastreabilidade de Escopo
 
 Para cada melhoria implementada, registrar:
