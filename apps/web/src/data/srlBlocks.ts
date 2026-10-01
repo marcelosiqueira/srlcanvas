@@ -184,7 +184,7 @@ export const SRL_BLOCKS: CanvasBlockDefinition[] = [
       'Validar se a startup compreende profundamente o "trabalho" que o cliente está tentando realizar.',
     questions: [
       "A dor do cliente é clara e real?",
-      'Há validação externa ou dados concretos que comprovem o "trabalho" (JTBD) [3] que o cliente deseja realizar?'
+      'Há validação externa ou dados que comprovem o "trabalho" (JTBD)?'
     ],
     exampleTips: [
       "Testes: Use Jobs-to-be-Done e Mapas de Empatia para encontrar a verdadeira causa da dor.",
@@ -201,12 +201,12 @@ export const SRL_BLOCKS: CanvasBlockDefinition[] = [
         evidence: "Anotações internas ou hipóteses em documentos, apresentações ou planos iniciais."
       },
       {
-        description: "Identificação qualitativa do problema com observações ou hipóteses.",
+        description: "Identificação qualitativa com observações.",
         evidence:
           "Relatos informais de conversas com clientes, sem roteiro estruturado ou registro sistemático."
       },
       {
-        description: "Realização de entrevistas ou conversas com público-alvo.",
+        description: "Realização de entrevistas registradas com público-alvo.",
         evidence:
           "Transcrições, gravações ou notas estruturadas de entrevistas com clientes/usuários."
       },
@@ -219,12 +219,12 @@ export const SRL_BLOCKS: CanvasBlockDefinition[] = [
         evidence: "Mapas de dor, Job Stories ou síntese estruturada das evidências coletadas."
       },
       {
-        description: "Validação quantitativa do problema com dados ou pesquisas.",
+        description: "Validação quantitativa com dados ou pesquisas.",
         evidence:
           "Pesquisa de satisfação (NPS/CSAT) ou survey quantitativo com amostra mínima relevante."
       },
       {
-        description: "Evidência ampla de que o problema é real e relevante no mercado.",
+        description: "Evidência ampla de que o problema é real e relevante.",
         evidence:
           "Dados de uso (analytics, logs, métricas de comportamento) demonstrando recorrência da dor ou do JTBD."
       },
@@ -248,7 +248,7 @@ export const SRL_BLOCKS: CanvasBlockDefinition[] = [
     objective: "Entender se a solução proposta resolve claramente o problema identificado.",
     questions: [
       "A solução atende diretamente à dor validada?",
-      "A proposta de valor é clara e percebida como valiosa pelo cliente?"
+      "A proposta de valor é clara e percebida como valiosa?"
     ],
     exampleTips: [
       "Validação: Utilize o Value Proposition Canvas para garantir o alinhamento problema-solução.",
@@ -265,7 +265,7 @@ export const SRL_BLOCKS: CanvasBlockDefinition[] = [
         evidence: "Não há alinhamento entre problema e solução no Value Proposition Canvas."
       },
       {
-        description: "Descrição clara da proposta, mas ainda sem feedback real.",
+        description: "Descrição clara da proposta, mas sem feedback real.",
         evidence: "Landing page com descrição clara."
       },
       {
@@ -285,11 +285,11 @@ export const SRL_BLOCKS: CanvasBlockDefinition[] = [
         evidence: "Métricas de engajamento inicial (DAU/MAU)."
       },
       {
-        description: "Retenção de usuários, percepção clara de valor.",
+        description: "Retenção de usuários e percepção clara de valor.",
         evidence: "Taxa de Retenção inicial."
       },
       {
-        description: "Proposta única, difícil de substituir, com alto NPS ou fidelização.",
+        description: "Proposta única, difícil de substituir, com alto NPS.",
         evidence: "NPS alto e churn baixo."
       }
     ])
@@ -308,7 +308,7 @@ export const SRL_BLOCKS: CanvasBlockDefinition[] = [
       "Avaliar a maturidade da solução técnica e sua capacidade de entregar a proposta de valor.",
     questions: [
       "O produto/tecnologia é robusto e escalável?",
-      "O processo de desenvolvimento é ágil e orientado a feedback?"
+      "O desenvolvimento é ágil e orientado a feedback?"
     ],
     exampleTips: [
       "Infra: Considere a infraestrutura técnica necessária para escala (Cloud, APIs, Segurança).",
@@ -349,7 +349,7 @@ export const SRL_BLOCKS: CanvasBlockDefinition[] = [
         evidence: "Métricas de uptime e performance."
       },
       {
-        description: "Produto pronto para escala massiva e integração com parceiros.",
+        description: "Pronto para escala massiva e integração com parceiros.",
         evidence: "APIs documentadas e acordos de parceria técnica."
       }
     ])
@@ -422,8 +422,8 @@ export const SRL_BLOCKS: CanvasBlockDefinition[] = [
     color: "blue",
     objective: "Avaliar a capacidade da equipe de executar a visão da startup.",
     questions: [
-      "A equipe é complementar e possui as habilidades necessárias?",
-      "A cultura da equipe é forte e alinhada com a visão?"
+      "A equipe é complementar e tem as competências necessárias?",
+      "A cultura é forte e alinhada com a visão?"
     ],
     exampleTips: [
       "Complementaridade: Mapeie as habilidades da equipe e identifique as lacunas a serem preenchidas.",
@@ -460,7 +460,7 @@ export const SRL_BLOCKS: CanvasBlockDefinition[] = [
         evidence: "Descrições de cargos e responsabilidades."
       },
       {
-        description: "Equipe de alta performance, com autonomia e responsabilidade.",
+        description: "Equipe de alta performance, com autonomia.",
         evidence: "OKRs individuais e de equipe."
       },
       {
@@ -482,7 +482,7 @@ export const SRL_BLOCKS: CanvasBlockDefinition[] = [
     objective:
       "Avaliar a capacidade da startup de entregar valor de forma consistente e eficiente.",
     questions: [
-      "Os processos internos são eficientes e escaláveis?",
+      "Os processos são documentados e otimizados?",
       "A execução é ágil e orientada a dados?"
     ],
     exampleTips: [
@@ -516,12 +516,11 @@ export const SRL_BLOCKS: CanvasBlockDefinition[] = [
         evidence: "Relatórios de automação de processos."
       },
       {
-        description: "Execução orientada a dados, com ciclos de feedback rápidos.",
+        description: "Execução orientada a dados, com feedback rápido.",
         evidence: "Dashboards de métricas operacionais."
       },
       {
-        description:
-          "Operação escalável, com capacidade de atender a um grande volume de clientes.",
+        description: "Operação escalável para grande volume de clientes.",
         evidence: "Testes de estresse da operação."
       },
       {
@@ -544,7 +543,7 @@ export const SRL_BLOCKS: CanvasBlockDefinition[] = [
       "Avaliar a capacidade da solução gerar adoção, retenção, recomendação, expansão ou crescimento replicável.",
     note: "Em startups SaaS ou digitais, este bloco pode ser analisado pela ótica de Product-Led Growth. Em outros modelos, deve ser interpretado como capacidade de adoção, ativação, recorrência, recomendação, expansão ou replicabilidade da solução.",
     questions: [
-      "A solução possui mecanismos claros de adoção, retenção ou recomendação?",
+      "Há mecanismos claros de adoção, retenção ou recomendação?",
       "O processo de entrada, ativação ou uso inicial é simples, eficiente e replicável?"
     ],
     exampleTips: [
@@ -586,7 +585,7 @@ export const SRL_BLOCKS: CanvasBlockDefinition[] = [
     objective: "Avaliar a capacidade da startup de alcançar e adquirir clientes de forma eficaz.",
     questions: [
       "Os canais de marketing são eficientes e escaláveis?",
-      "A mensagem de marketing é clara e ressoa com o público-alvo?"
+      "A mensagem é clara e ressoa com o público-alvo?"
     ],
     exampleTips: [
       "Canais: Teste diferentes canais de marketing (mídia paga, orgânico, referência) para encontrar os mais eficientes.",
@@ -645,7 +644,7 @@ export const SRL_BLOCKS: CanvasBlockDefinition[] = [
     objective: "Validar a forma como a startup captura valor e gera receita.",
     questions: [
       "O modelo de receita é claro e validado?",
-      "Os unit economics (LTV/CAC) são saudáveis?"
+      "A precificação reflete o valor percebido pelo cliente?"
     ],
     exampleTips: [
       "Precificação: Teste diferentes modelos de precificação (assinatura, transacional, freemium) para encontrar o ideal.",
@@ -678,7 +677,7 @@ export const SRL_BLOCKS: CanvasBlockDefinition[] = [
         evidence: "Planilha de cálculo de LTV e CAC."
       },
       {
-        description: "LTV > 3x CAC.",
+        description: "LTV maior que 3x CAC.",
         evidence: "Relatório de unit economics."
       },
       {
@@ -686,7 +685,7 @@ export const SRL_BLOCKS: CanvasBlockDefinition[] = [
         evidence: "Projeção de receita com base em dados."
       },
       {
-        description: "Múltiplas fontes de receita ou modelo de negócio inovador.",
+        description: "Múltiplas fontes de receita ou modelo inovador.",
         evidence: "Diversificação de fontes de receita."
       }
     ])
@@ -702,10 +701,7 @@ export const SRL_BLOCKS: CanvasBlockDefinition[] = [
     icon: "account_balance",
     color: "orange",
     objective: "Verificar a capacidade de manter operação com fôlego financeiro.",
-    questions: [
-      "Você tem um runway previsível?",
-      "Os unit economics (LTV e CAC) são analisados e saudáveis?"
-    ],
+    questions: ["Existe um runway previsível?", "Os unit economics (LTV e CAC) são saudáveis?"],
     exampleTips: [
       "Gestão: Mantenha um Controle de Fluxo de Caixa detalhado e mensalmente atualizado.",
       "Projeção: Calcule o Runway (fôlego em meses antes do dinheiro acabar) e o Burn Rate (taxa de queima de caixa).",
@@ -804,7 +800,7 @@ export const SRL_BLOCKS: CanvasBlockDefinition[] = [
         evidence: "Análise SWOT ou Competitive Landscape."
       },
       {
-        description: "Visão inspiradora, executável e com potencial de impacto massivo.",
+        description: "Visão inspiradora, executável, com impacto massivo.",
         evidence: "Pitch deck de captação de Série A."
       }
     ])
@@ -822,7 +818,7 @@ export const SRL_BLOCKS: CanvasBlockDefinition[] = [
     objective: "Garantir que o negócio está legalmente protegido e tem estrutura para escalar.",
     questions: [
       "O negócio está legalmente protegido (PI, contratos)?",
-      "Existe uma estrutura de governança (conselho, vesting) para a escala?"
+      "Há estrutura de governança para escalar (por exemplo, conselho ou vesting)?"
     ],
     exampleTips: [
       "Legal: Formalize o Acordo de Fundadores e o Vesting o mais cedo possível para evitar problemas futuros.",
@@ -855,7 +851,7 @@ export const SRL_BLOCKS: CanvasBlockDefinition[] = [
         evidence: "Política de privacidade."
       },
       {
-        description: "Acordo de vesting e stock option formalizado.",
+        description: "Acordo de vesting formalizado.",
         evidence: "Contrato de vesting."
       },
       {
@@ -863,7 +859,7 @@ export const SRL_BLOCKS: CanvasBlockDefinition[] = [
         evidence: "Atas de reuniões de conselho."
       },
       {
-        description: "Governança robusta, proteção legal completa e compliance auditado.",
+        description: "Governança robusta, proteção legal e compliance auditado.",
         evidence: "Due diligence legal e financeira."
       }
     ])
