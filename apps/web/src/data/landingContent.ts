@@ -155,12 +155,12 @@ export const LANDING_PREPARATION = [
   }
 ] as const;
 
-/** Vídeo de apresentação (95 s). Arquivos em public/video; roteiro em docs/landing-roteiro-video.md. */
+/** Vídeo de apresentação (77 s). Arquivos em public/video; roteiro em docs/landing-roteiro-video.md. */
 export const LANDING_VIDEO = {
   src: "/video/srl-canvas-apresentacao.mp4",
-  poster: "/video/srl-canvas-apresentacao-poster.jpg",
+  poster: "/video/srl-canvas-apresentacao-poster.webp",
   captions: "/video/srl-canvas-apresentacao.pt-BR.vtt",
-  duration: "1min35"
+  duration: "1min17"
 } as const;
 
 /** Transcrição da narração, na ordem das cenas (mantenha igual ao áudio publicado). */

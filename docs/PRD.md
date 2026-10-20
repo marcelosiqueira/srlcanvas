@@ -56,7 +56,7 @@ Falta uma ferramenta simples e estruturada que force evidencias e destaque deseq
     - Layout atual (out/2026): hero com radar ilustrativo, demonstracao com 3 cenarios ficticios e explorador das 12 dimensoes, 3 passos, publicos, metodologia (com acesso ao "Sobre o Projeto"), FAQ e CTA final.
     - "Iniciar diagnostico" abre uma preparacao de 3 passos antes de `/auth/signup` (sem coleta de dados); com auth desabilitado vai direto para `/canvas`.
     - Radares e leituras da landing sao exemplos educativos ficticios; nomes das dimensoes vem de `SRL_BLOCKS`. Conteudo em `apps/web/src/data/landingContent.ts`; estilos escopados em `.lp` (`apps/web/src/pages/LandingPage.css`).
-    - Fontes e limites das afirmacoes da landing: `docs/landing-conteudo-e-fontes.md`. Secao de video publicada (out/2026): video de 95 s em `apps/web/public/video/` (MP4 H.264, poster, legendas WebVTT pt-BR), com `<video controls preload="metadata">` sem autoplay e transcricao expansivel (`LANDING_VIDEO_TRANSCRIPT`). Roteiro final e projeto-fonte em `docs/landing-roteiro-video.md`.
+    - Fontes e limites das afirmacoes da landing: `docs/landing-conteudo-e-fontes.md`. Secao de video publicada (out/2026): video de 77 s em `apps/web/public/video/` (MP4 H.264, poster WebP, legendas WebVTT pt-BR), com `<video controls preload="metadata">` sem autoplay e transcricao expansivel (`LANDING_VIDEO_TRANSCRIPT`). Roteiro final e projeto-fonte em `docs/landing-roteiro-video.md`.
 14. Disponibilizar logout rapido no header das telas autenticadas, com redirecionamento para `/`.
 15. Exigir TCLE antes do questionario academico e permitir revogacao de consentimento.
 16. Salvar resposta de pesquisa no servidor (quando habilitado) ou localStorage (modo local).
