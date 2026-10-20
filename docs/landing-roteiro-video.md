@@ -1,20 +1,20 @@
 # SRL Canvas — vídeo de apresentação da landing page
 
-**Status:** produzido e publicado na landing (out/2026). Duração: 95 s. Voz sintética pt-BR (HeyGen, "Ana Carvalho — Friendly"), trilha instrumental discreta sob a voz, legendas pt-BR.
+**Status:** produzido e publicado na landing (out/2026). Duração: 77 s (render de 96 s acelerado para 1,25× no ffmpeg, com tom preservado). Voz sintética pt-BR (HeyGen, "Ana Carvalho — Friendly"), trilha instrumental discreta sob a voz, legendas pt-BR.
 
 ## Arquivos publicados (`apps/web/public/video/`)
 
-| Arquivo                              | Uso                                                                    |
-| ------------------------------------ | ---------------------------------------------------------------------- |
-| `srl-canvas-apresentacao.mp4`        | Vídeo da LP, sem legenda na imagem (H.264/AAC, 1920×1080, `faststart`) |
-| `srl-canvas-apresentacao.pt-BR.vtt`  | Legendas WebVTT carregadas via `<track>`                               |
-| `srl-canvas-apresentacao-poster.jpg` | Capa exibida antes do play                                             |
+| Arquivo                               | Uso                                                                    |
+| ------------------------------------- | ---------------------------------------------------------------------- |
+| `srl-canvas-apresentacao.mp4`         | Vídeo da LP, sem legenda na imagem (H.264/AAC, 1920×1080, `faststart`) |
+| `srl-canvas-apresentacao.pt-BR.vtt`   | Legendas WebVTT carregadas via `<track>`                               |
+| `srl-canvas-apresentacao-poster.webp` | Capa exibida antes do play                                             |
 
 A transcrição exibida na página fica em `LANDING_VIDEO_TRANSCRIPT` (`apps/web/src/data/landingContent.ts`) e deve acompanhar o áudio publicado.
 
 ## Projeto-fonte
 
-Projeto HyperFrames fora deste repositório: `../videos/srl-canvas-lp/` (`STORYBOARD.md`, `SCRIPT.md`, `compositions/`). Renders completos em `renders/`, incluindo `video-legendado.mp4` (legendas na imagem, para redes sociais).
+Projeto HyperFrames fora deste repositório: `../videos/srl-canvas-lp/` (`STORYBOARD.md`, `SCRIPT.md`, `compositions/`). Renders completos em `renders/`, incluindo `video-legendado-1.25x.mp4` (legendas na imagem, para redes sociais) e `video-lp-1.25x.mp4`; os arquivos sem sufixo são o render 1× de 96 s.
 
 ## Roteiro final (11 cenas)
 

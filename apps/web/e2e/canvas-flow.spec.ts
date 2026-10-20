@@ -7,12 +7,14 @@ const hasRemoteAuthEnv = Boolean(
 async function openCanvas(page: Page): Promise<void> {
   await page.goto("/");
 
+  // A landing é carregada sob demanda; isVisible() não espera, então aguarda o hero antes.
+  await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
   const openAppLink = page.getByRole("link", { name: "Abrir app" });
   if (await openAppLink.isVisible()) {
     await openAppLink.click();
   }
 
-  await expect(page.getByLabel("Startup")).toBeVisible();
+  await expect(page.getByLabel("Startup", { exact: true })).toBeVisible();
 }
 
 const blockOneTrigger = (page: Page) =>
